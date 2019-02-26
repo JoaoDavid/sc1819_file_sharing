@@ -30,12 +30,12 @@ public class TestMain {
 		for(String ola : vetorTest) {
 			System.out.println(ola);
 		}*/
-		accM.storeMsg("joca", "fernando", "ola fernando mekie?");
+		/*accM.storeMsg("joca", "fernando", "ola fernando mekie?");
 		accM.storeMsg("miguelito", "fernando", "easy peasy lemon squezy");
 		ArrayList<String> batata =  accM.collectMsg("fernando");
 		for(String ola : batata) {
 			System.out.println(ola);
-		}
+		}*/
 	}
 
 }
