@@ -13,6 +13,10 @@ public class Message implements Serializable{
 	private String errMsg;//only used for error op code
 	//private boolean opSucc;//used only for returning the operation result
 	private OpCode opCode;
+	
+	private ArrayList<String> param;
+	private ArrayList<Byte[]> paramBytes;
+	
 	private ArrayList<String> inbox;
 	
 	public Message (OpCode opCode) {
