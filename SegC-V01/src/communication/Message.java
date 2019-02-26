@@ -1,8 +1,14 @@
 package communication;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Message {
+public class Message implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	private String errMsg;//only used for error op code
 	//private boolean opSucc;//used only for returning the operation result

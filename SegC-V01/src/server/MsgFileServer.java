@@ -1,5 +1,6 @@
 package server;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -102,6 +103,7 @@ public class MsgFileServer{
 					try {
 						while(true) {
 							Message msg = (Message) inStream.readObject();
+							ByteArrayInputStream a = new ByteArrayInputStream((byte[]) inStream.readObject());
 							if(OpCode.END_CONNECTION == msg.getOpCode()) {
 								break;
 							}
