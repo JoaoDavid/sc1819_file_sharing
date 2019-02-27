@@ -86,7 +86,6 @@ public class MsgFileServer{
 
 		public void run(){
 			try {
-				boolean isReady = true;
 				ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
@@ -108,19 +107,19 @@ public class MsgFileServer{
 					outStream.writeObject(new Boolean(true));//envia true para o cliente a confirmar conecao
 					
 					try {
-						while(isReady) {
+						while(true) {
 							Object obj = inStream.readObject();
 							
 							if(obj == null || !(obj instanceof Message)) {
-								isReady = false;
+								break;
 							}
 							Message msg = (Message) obj;
 							
-							if(!isReady || OpCode.END_CONNECTION == msg.getOpCode()) {
-								isReady = false;
+							if(OpCode.END_CONNECTION == msg.getOpCode()) {
+								break;
 							}else {
 								//processar msg
-								Skel.invoke(msg);
+								Skel.invoke(msg,accM);
 							}
 						}
 					} catch (ClassNotFoundException e) {

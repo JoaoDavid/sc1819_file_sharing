@@ -41,14 +41,12 @@ public class MsgFile {
 			Client client = new Client(args[1], passwd, hostPort[0], port);
 			if(client.connect()) {
 				logger.log(Level.INFO,"Connected to the server");
+				//Process command lines
 				parser(client);
 			}else{
 				logger.log(Level.INFO,"Login failed");
 			}
-			
-			//Process command lines
-			parser(client);
-			
+
 			client.disconnect();
 			logger.log(Level.INFO,"Client Disconnected");
 			sc.close();

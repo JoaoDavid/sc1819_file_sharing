@@ -7,22 +7,34 @@ public class Message implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
-	private String errMsg;//only used for error op code
-	//private boolean opSucc;//used only for returning the operation result
-	private OpCode opCode;
-	
+	private OpCode opCode;//operation code
+	private OpCode[] arrCodeParam;//used for used operations that require different opcodes for every argument
+	private String strParam;//used to send a string as message
+	//private boolean opSucc;//used only for returning the operation result	
+	private String[] arrStrParam;	
 	private ArrayList<String> param;
 	private ArrayList<Byte[]> paramBytes;
 	
+	public Message(OpCode[] arrCodeParam) {
+		super();
+		this.arrCodeParam = arrCodeParam;
+	}
+
 	private ArrayList<String> inbox;
 	
+	public Message(OpCode opCode, String[] arrStrParam) {
+		super();
+		this.opCode = opCode;
+		this.arrStrParam = arrStrParam;
+	}
+
 	public Message (OpCode opCode) {
 		this.opCode = opCode;
 	}
-	
-	public Message (OpCode opCode, String errMsg) {
+
+	public Message (OpCode opCode, String strParam) {
 		this.opCode = opCode;
-		this.errMsg = errMsg;
+		this.strParam = strParam;
 	}
 	
 	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes) {
@@ -40,10 +52,10 @@ public class Message implements Serializable{
 		this.inbox = inbox;
 	}
 
-	public Message(String errMsg, OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes,
+	public Message(String strParam, OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes,
 			ArrayList<String> inbox) {
 		super();
-		this.errMsg = errMsg;
+		this.strParam = strParam;
 		this.opCode = opCode;
 		this.param = param;
 		this.paramBytes = paramBytes;
@@ -54,8 +66,12 @@ public class Message implements Serializable{
 		return this.opCode;
 	}
 	
-	public String getErrMsg() {
-		return this.errMsg;
+	public String getStrParam() {
+		return this.strParam;
+	}
+	
+	public String[] getArrStrParam() {
+		return this.arrStrParam;
 	}
 
 	public ArrayList<String> getParam() {

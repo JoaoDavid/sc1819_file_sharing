@@ -87,6 +87,10 @@ public class Manager {
 		return res;
 	}
 	
+	public boolean deleteFile(String fileName) {
+		return false;//fazer
+	}
+	
 	public String[] listUsers() { //users	
 		File user = new File("users");
 		String[] res = user.list();		
