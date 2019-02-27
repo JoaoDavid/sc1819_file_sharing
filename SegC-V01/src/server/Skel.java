@@ -62,17 +62,30 @@ public class Skel {
         	String[] usersTrust = msg.getArrStrParam();
         	arrOpRes = new OpCode[usersTrust.length];
         	for(int i = 0; i < usersTrust.length; i++) {
-        		boolean deleted = svM.trusted(msg.getStrParam(), usersTrust[i]);
+        		/*boolean deleted = svM.trusted(msg.getStrParam(), usersTrust[i]);
         		if(deleted) {
         			arrOpRes[i] = OpCode.OP_SUCCESSFUL;
         		}else {
         			arrOpRes[i] = OpCode.OP_ERROR;
-        		}
+        		}*/
+        		arrOpRes[i] = svM.trusted(msg.getStrParam(), usersTrust[i]);
         	}
         	response = new Message(arrOpRes);
             break;
         case UNTRUST_USERS: //untrusted <untrustedUserIDs>
         	System.out.println("UNTRUST_USERS");
+        	String[] usersUntrust = msg.getArrStrParam();
+        	arrOpRes = new OpCode[usersUntrust.length];
+        	for(int i = 0; i < usersUntrust.length; i++) {
+        		/*boolean deleted = svM.trusted(msg.getStrParam(), usersUntrust[i]);
+        		if(deleted) {
+        			arrOpRes[i] = OpCode.OP_SUCCESSFUL;
+        		}else {
+        			arrOpRes[i] = OpCode.OP_ERROR;
+        		}*/
+        		arrOpRes[i] = svM.untrusted(msg.getStrParam(), usersUntrust[i]);
+        	}
+        	response = new Message(arrOpRes);
             break;
         case DOWNLOAD_FILE: //download <userID> <file>
         	System.out.println("DOWNLOAD_FILE");

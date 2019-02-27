@@ -3,6 +3,8 @@ package tests;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import server.Manager;
 
@@ -19,9 +21,7 @@ public class TestMain {
 		System.out.println(accM.login("rita", "alface"));
 		System.out.println(accM.login("ana", "alface"));
 		
-		for(String ola : accM.listUsers()) {
-			System.out.println(ola);
-		}
+		
 		System.out.println(accM.trusted("fernando", "rita"));
 		System.out.println(accM.isRegistered("fernando"));*/
 		/*
@@ -36,6 +36,17 @@ public class TestMain {
 		for(String ola : batata) {
 			System.out.println(ola);
 		}*/
+		for(String ola : accM.listFiles("fernando")) {
+			System.out.println(ola);
+		}
+		String palavra = "ola";
+		Pattern p = Pattern.compile("[a-z]");
+		Matcher m = p.matcher(palavra);
+		if (m.find()) {
+			System.out.println(palavra + " matches");
+		}else {
+			System.out.println(palavra + " DOES NOT match");
+		}
 	}
 
 }

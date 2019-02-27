@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import communication.Message;
+
 public class Client {
 
 	private static final String CLASS_NAME = Client.class.getName();
@@ -28,6 +30,10 @@ public class Client {
 		this.host = host;
 		this.port = port;
 		this.isConnected = false;
+	}
+	
+	public String getUsername() {
+		return this.username;
 	}
 
 
@@ -72,6 +78,11 @@ public class Client {
 	
 	public boolean isConnected() {
 		return isConnected;
+	}
+	
+	public Message sendMsg(Message msgSent) {
+		return null;
+		//depois de enviar msgSent deve receber a resposta o server e devolver para o msgFile
 	}
 
 }

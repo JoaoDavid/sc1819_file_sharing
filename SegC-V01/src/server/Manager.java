@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import communication.OpCode;
+
 public class Manager {
 
 	private static final String CLASS_NAME = Manager.class.getName();
@@ -101,7 +103,7 @@ public class Manager {
 		return Arrays.asList(listUsers()).contains(user);
 	}
 	
-	public boolean trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
+	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
 		File trustedFile = new File("users" + File.separator + localUser + File.separator + "trusted.txt");
 		BufferedReader br;
 		try {
@@ -110,7 +112,8 @@ public class Manager {
 			while ((st = br.readLine()) != null) {
 				if(st.equals(trustedUserID)) {
 					br.close();
-					return false;
+					//return false;
+					return OpCode.ERR_ALREADY_EXISTS;
 				}
 			}
 			br.close();
@@ -118,7 +121,8 @@ public class Manager {
 			fileWriter.write(trustedUserID + System.getProperty("line.separator"));
 			System.out.println("escreveu");
 			fileWriter.close();
-			return true;
+			return OpCode.OP_SUCCESSFUL;
+			//return true;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -126,11 +130,12 @@ public class Manager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		//return false;
+		return OpCode.OP_ERROR;
 	}
 
-	public boolean untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
-		return false;
+	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
+		return OpCode.OP_ERROR;
 	}
 	
 	public boolean sendFile(String fromUser, String nameFile) {//download <userID> <file>
