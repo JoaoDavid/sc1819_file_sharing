@@ -8,10 +8,7 @@ public class Skel {
 	//msg != null
 	public static void invoke(Message msg, Manager svM) { //alterar no fim para retornar uma message que depois
 								//e enviada no ciclo do msgFileServer
-		/*STORE_FILES, LIST_FILES, REMOVE_FILES, USERS, TRUST_USERS, 
-	UNTRUST_USERS, DOWNLOAD_FILE, SEND_MSG, SHOW_MSG, 
-	END_CONNECTION,
-	OP_ERROR, OP_SUCCESSFUL*/
+
 		Message response;
 		String[] arrStrRes;
 		OpCode[] arrOpRes;

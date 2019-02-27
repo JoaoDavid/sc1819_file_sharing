@@ -1,5 +1,6 @@
 package client;
 
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,11 +78,11 @@ public class MsgFile {
 			switch (parsedInput[0]) {
 	            case "store": //store <files>
 	            	System.out.println("store");
-	            	for(int i = 1; i < parsedInput.length; i++) {
-	            		System.out.println(parsedInput[i]);
-	            		//send parsedInput[i]
-	            		//print result for parsedInput[i] if added or not
-	            	}
+	            	/*
+	            	 * 
+	            	 * falta fazer, arranjar maneira de enviar os ficheiros
+	            	 * dentro do messages
+	            	 */
 	                break;
 	            case "list":
 	            	if(parsedInput.length == 1) {
@@ -94,11 +95,14 @@ public class MsgFile {
 	            	}
 	                break;
 	            case "remove": //remove <files>
-	            	System.out.println("remove");
-	            	for(int i = 1; i < parsedInput.length; i++) {
-	            		System.out.println(parsedInput[i]);
-	            		//send parsedInput[i]
-	            		//print result for parsedInput[i] if removed or not
+	            	if(parsedInput.length > 1) {
+	            		System.out.println("remove");
+	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
+	            		msgSent = new Message(OpCode.REMOVE_FILES,arrSent);
+		            	//send message method
+		            	msgResponse = client.sendMsg(msgSent);
+	            	}else {
+	            		incompleteCommand();
 	            	}
 	                break;
 	            case "users":
@@ -113,64 +117,80 @@ public class MsgFile {
 
 	                break;
 	            case "trusted": //trusted <trustedUserIDs>
-	            	System.out.println("trusted");
-	            	for(int i = 1; i < parsedInput.length; i++) {
-	            		System.out.println(parsedInput[i]);
-	            		//send parsedInput[i]
-	            		//print result for parsedInput[i] if trusted or not
+	            	if(parsedInput.length > 1) {
+	            		System.out.println("trusted");
+	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
+	            		msgSent = new Message(OpCode.TRUST_USERS,arrSent);
+		            	//send message method
+		            	msgResponse = client.sendMsg(msgSent);
+	            	}else {
+	            		incompleteCommand();
 	            	}
 	                break;
 	            case "untrusted": //untrusted <untrustedUserIDs>
-	            	System.out.println("untrusted");
-	            	for(int i = 1; i < parsedInput.length; i++) {
-	            		System.out.println(parsedInput[i]);
-	            		//send parsedInput[i]
-	            		//print result for parsedInput[i] if untrusted or not
+	            	if(parsedInput.length > 1) {
+	            		System.out.println("untrusted");
+	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
+	            		msgSent = new Message(OpCode.UNTRUST_USERS,arrSent);
+		            	//send message method
+		            	msgResponse = client.sendMsg(msgSent);
+	            	}else {
+	            		incompleteCommand();
 	            	}
 	                break;
 	            case "download": //download <userID> <file>
 	            	System.out.println("download");
 	            	if(parsedInput.length == 3) {
-	            		String user = parsedInput[1];
-	            		String nameFile = parsedInput[2];
+	            		String[] arrSent = new String[2];
+	            		arrSent[0] = parsedInput[1];//users name account that has the file
+	            		arrSent[1] = parsedInput[2];//name of the file
 	            		//download file
+	            		msgSent = new Message(OpCode.DOWNLOAD_FILE, arrSent);
+	            		msgResponse = client.sendMsg(msgSent);
 	            	}else {
-	            		
+	            		incompleteCommand();
 	            	}
 	                break;
 	            case "msg": //msg <userID> <msg>
 	            	System.out.println("msg");
 	            	if(parsedInput.length >= 3) {
 	            		String userReceiver = parsedInput[1];
-	            		/*StringBuilder msgBuilder = new StringBuilder();
-	            		for(int i = 2; i < parsedInput.length; i++) {
-		            		msgBuilder.append(parsedInput[i] + " ");
-		            	}
-	            		String msg = msgBuilder.toString();*/
 	            		String msg = rawInput.substring(3+2+userReceiver.length());
 	            		//send message
 	            		System.out.println("destino:" + userReceiver + " msg:" + msg);
 	            		String[] arrSent = new String[3];
-	            		arrSent[0] = client.getUsername();
-	            		arrSent[1] = userReceiver;
-	            		arrSent[2] = msg;
+	            		arrSent[0] = client.getUsername();//sender
+	            		arrSent[1] = userReceiver;//receiver
+	            		arrSent[2] = msg;//text message
 	            		msgSent = new Message(OpCode.SEND_MSG, arrSent);
+	            		msgResponse = client.sendMsg(msgSent);
 	            	}else {
-	            		
+	            		incompleteCommand();
 	            	}
-
 	                break;
 	            case "collect":
-	            	System.out.println("collect");
-
+	            	if(parsedInput.length == 1) {
+	            		System.out.println("collect");
+		            	msgSent = new Message(OpCode.SHOW_MSG);
+		            	//send message method
+		            	msgResponse = client.sendMsg(msgSent);
+	            	}else {
+	            		incompleteCommand();
+	            	}
 	                break;
 	            case "help":
 	            	System.out.println("help");
 
 	                break;
 	            case "exit":
-	            	client.disconnect();
-	            	onLoop = false;
+	            	if(parsedInput.length == 1) {
+	            		System.out.println("exit");
+		            	msgSent = new Message(OpCode.END_CONNECTION);
+		            	client.disconnect();
+		            	onLoop = false;
+	            	}else {
+	            		incompleteCommand();
+	            	}
 	                break;
 	            default:
 	            	System.out.println("Command is not recognized");

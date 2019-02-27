@@ -10,33 +10,32 @@ public class Message implements Serializable{
 	private OpCode opCode;//operation code
 	private OpCode[] arrCodeParam;//used for used operations that require different opcodes for every argument
 	private String strParam;//used to send a string as message
-	//private boolean opSucc;//used only for returning the operation result	
 	private String[] arrStrParam;	
 	private ArrayList<String> param;
 	private ArrayList<Byte[]> paramBytes;
+	private ArrayList<String> inbox;
+	
+	
+	public Message (OpCode opCode) {
+		this.opCode = opCode;
+	}
 	
 	public Message(OpCode[] arrCodeParam) {
 		super();
 		this.arrCodeParam = arrCodeParam;
 	}
-
-	private ArrayList<String> inbox;
 	
-	public Message(OpCode opCode, String[] arrStrParam) {
-		super();
-		this.opCode = opCode;
-		this.arrStrParam = arrStrParam;
-	}
-
-	public Message (OpCode opCode) {
-		this.opCode = opCode;
-	}
-
 	public Message (OpCode opCode, String strParam) {
 		this.opCode = opCode;
 		this.strParam = strParam;
 	}
 	
+	public Message(OpCode opCode, String[] arrStrParam) {
+		super();
+		this.opCode = opCode;
+		this.arrStrParam = arrStrParam;
+	}	
+
 	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes) {
 		super();
 		this.opCode = opCode;
