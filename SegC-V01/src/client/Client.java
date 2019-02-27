@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Client {
-	
+
+	private static final String CLASS_NAME = Client.class.getName();
+	private final static Logger logger = Logger.getLogger(CLASS_NAME);
+
 	private String username;
 	private String password;
 	private String host;
@@ -15,52 +19,59 @@ public class Client {
 	private Socket echoSocket;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
-	
-	
+	private boolean isConnected;
+
+
 	public Client(String username, String password, String host, int port) {
 		this.username = username;
 		this.password = password;
 		this.host = host;
 		this.port = port;
+		this.isConnected = false;
 	}
 
-	
+
 	public boolean connect() {
-		//System.out.println(host + " " + port);
+		//logger.log(Level.CONFIG, host + " " + port);
 		try {
 			echoSocket = new Socket(host, port);
 			in = new ObjectInputStream(echoSocket.getInputStream());
 			out = new ObjectOutputStream(echoSocket.getOutputStream());
+			logger.log(Level.CONFIG, "Connecting the user: " + username);
 			out.writeObject(username);
 			out.writeObject(password);
-			boolean fromServer = (boolean) in.readObject();
-			return fromServer;
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			isConnected = (Boolean) in.readObject();
+			
+			return isConnected;
+		} catch ( IOException | ClassNotFoundException e) {
+			logger.log(Level.SEVERE, "Error to Connect the Client", e);
 		}
-		
+
 		return false;
 	}
 	
 	public boolean disconnect() {
 		try {
-			out.close();
-			in.close();
-			echoSocket.close();
+			if(out != null) {
+				out.close();
+			}
+			if(in != null) {
+				in.close();
+			}
+			if(echoSocket != null) {
+				echoSocket.close();
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Error to close Socket/Streams", e);
 			return false;
 		}
-		return true;		
+		return true;
 	}
+
+
 	
+	public boolean isConnected() {
+		return isConnected;
+	}
 
 }

@@ -5,9 +5,6 @@ import java.util.ArrayList;
 
 public class Message implements Serializable{
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	
 	private String errMsg;//only used for error op code
@@ -28,6 +25,31 @@ public class Message implements Serializable{
 		this.errMsg = errMsg;
 	}
 	
+	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes) {
+		super();
+		this.opCode = opCode;
+		this.param = param;
+		this.paramBytes = paramBytes;
+	}
+	
+	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes, ArrayList<String> inbox) {
+		super();
+		this.opCode = opCode;
+		this.param = param;
+		this.paramBytes = paramBytes;
+		this.inbox = inbox;
+	}
+
+	public Message(String errMsg, OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes,
+			ArrayList<String> inbox) {
+		super();
+		this.errMsg = errMsg;
+		this.opCode = opCode;
+		this.param = param;
+		this.paramBytes = paramBytes;
+		this.inbox = inbox;
+	}
+
 	public OpCode getOpCode() {
 		return this.opCode;
 	}
@@ -35,4 +57,17 @@ public class Message implements Serializable{
 	public String getErrMsg() {
 		return this.errMsg;
 	}
+
+	public ArrayList<String> getParam() {
+		return param;
+	}
+
+	public ArrayList<Byte[]> getParamBytes() {
+		return paramBytes;
+	}
+
+	public ArrayList<String> getInbox() {
+		return inbox;
+	}
+	
 }

@@ -1,11 +1,12 @@
 package server;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import communication.Message;
 import communication.OpCode;
@@ -13,51 +14,63 @@ import communication.OpCode;
 //Servidor MsgFileServer
 
 public class MsgFileServer{
-	
-	
+
+	private static final String CLASS_NAME = MsgFileServer.class.getName();
+	private final static Logger logger = Logger.getLogger(CLASS_NAME);
+
 	private Manager accM = new Manager("usersInfo.txt");
 
 	public static void main(String[] args) {
 		if(args.length == 1) {
 			int port;
 			try {
-			   port = Integer.parseInt(args[0]);
+				port = Integer.parseInt(args[0]);
 			}
 			catch (NumberFormatException e){
-			   System.out.print("Server failed: Invalid port");
-			   return;
+				logger.log(Level.SEVERE, "Server failed: Invalid port");
+				return;
 			}
-			System.out.println("Initializing server on port: " + args[0]);
+			logger.log(Level.INFO,"Initializing server on port: " + args[0]);
 			MsgFileServer server = new MsgFileServer();
 			server.startServer(port);
 		}else {
-			System.out.print("Server failed: <port> is the only argument required");
+			logger.log(Level.SEVERE, "Server failed: <port> is the only argument required");
 		}
-		
 	}
 
 	public void startServer (int port){
 		ServerSocket sSoc = null;
-        
+		boolean isReady = true;
+
 		try {
 			sSoc = new ServerSocket(port);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
+			isReady = false;
 			System.exit(-1);
 		}
-         
-		while(true) {
+
+		while(isReady) {
 			try {
 				Socket inSoc = sSoc.accept();
+				logger.log(Level.INFO, "Client connecting...");
 				ServerThread newServerThread = new ServerThread(inSoc);
 				newServerThread.start();
-		    }
-		    catch (IOException e) {
-		        e.printStackTrace();
-		    }
-		    
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+
 		}
-		//sSoc.close();
+
+		if(sSoc != null) {
+			try {
+				sSoc.close();
+			} catch (IOException e) {
+				logger.log(Level.CONFIG, "Can not close the Socket Server");
+			}
+		}
+
 	}
 
 
@@ -68,50 +81,48 @@ public class MsgFileServer{
 
 		ServerThread(Socket inSoc) {
 			socket = inSoc;
-			System.out.println("thread do server para cada cliente");
+			logger.log(Level.CONFIG, "Thread created by server");
 		}
- 
+
 		public void run(){
 			try {
+				boolean isReady = true;
 				ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
 				String user = null;
 				String passwd = null;
-			
+
 				try {
 					user = (String)inStream.readObject();
 					passwd = (String)inStream.readObject();
-					System.out.println("thread: depois de receber a password e o user");//remover
-					System.out.println("username:" + user + " password: " + passwd);//remover
 				}catch (ClassNotFoundException e1) {
-					e1.printStackTrace();
 					outStream.close();
 					inStream.close();
-	 			
-					socket.close();
-					System.out.println("Erro autenticacao");
+					logger.log(Level.SEVERE ,"Erro autenticacao", e1);
 					return;
 				}
- 			
-				//TODO: refazer
-				//este codigo apenas exemplifica a comunicacao entre o cliente e o servidor
-				//nao faz qualquer tipo de autenticacao
+
 				if (accM.login(user, passwd)){
-					System.out.println(user + " Logged in");
+					logger.log(Level.INFO, "Client connected, " + user + " logged in");
 					outStream.writeObject(new Boolean(true));//envia true para o cliente a confirmar conecao
+					
 					try {
-						while(true) {
-							Message msg = (Message) inStream.readObject();
-							ByteArrayInputStream a = new ByteArrayInputStream((byte[]) inStream.readObject());
-							if(OpCode.END_CONNECTION == msg.getOpCode()) {
-								break;
-							}
-							//processar msg
-							Skel.invoke(msg);
+						while(isReady) {
+							Object obj = inStream.readObject();
 							
+							if(obj == null || !(obj instanceof Message)) {
+								isReady = false;
+							}
+							Message msg = (Message) obj;
+							
+							if(!isReady || OpCode.END_CONNECTION == msg.getOpCode()) {
+								isReady = false;
+							}else {
+								//processar msg
+								Skel.invoke(msg);
+							}
 						}
-						
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();//rever esta excecao
@@ -124,7 +135,7 @@ public class MsgFileServer{
 
 				outStream.close();
 				inStream.close();
- 			
+
 				socket.close();
 
 			} catch (IOException e) {

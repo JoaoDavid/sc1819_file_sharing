@@ -8,10 +8,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Manager {
 
-
+	private static final String CLASS_NAME = Manager.class.getName();
+	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 
 	private File usersFile;
 
@@ -20,13 +23,12 @@ public class Manager {
 		try {
 			usersFile.createNewFile();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "ERROR to open the file " , e);
 		}
 	}
 
 	public boolean createAccount(String username, String password) {
-		System.out.println("Creating account");
+		logger.log(Level.INFO, "Creating account");
 		try {
 			FileWriter fileWriter = new FileWriter(usersFile,true);
 			String newLine = System.getProperty("line.separator");
@@ -43,9 +45,7 @@ public class Manager {
 			userMsg.createNewFile();
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("Error creating account");
+			logger.log(Level.SEVERE, "Error creating account", e);
 		}
 		return false;
 	}
