@@ -18,7 +18,7 @@ public class MsgFileServer{
 	private static final String CLASS_NAME = MsgFileServer.class.getName();
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 
-	private Manager accM = new Manager("usersInfo.txt");
+	private Manager accM = Manager.getInstance();
 
 	public static void main(String[] args) {
 		if(args.length == 1) {

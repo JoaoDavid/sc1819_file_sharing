@@ -20,13 +20,26 @@ public class Manager {
 
 	private File usersFile;
 
-	public Manager(String accountFilePath) {
-		usersFile = new File(accountFilePath);
-		try {
-			usersFile.createNewFile();
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "ERROR to open the file " , e);
+
+	private static Manager INSTANCE;
+
+	private Manager() {
+		usersFile = new File(ServerConst.FILE_USERS_PASSWORDS);
+		if(!usersFile.exists()) {
+			try {
+				usersFile.getParentFile().mkdirs();
+				usersFile.createNewFile();
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "ERROR to open the file " , e);
+			}
 		}
+	}
+
+	public static Manager getInstance() {
+		if(INSTANCE == null) {
+			INSTANCE = new Manager();
+		}
+		return INSTANCE;
 	}
 
 	public boolean createAccount(String username, String password) {
@@ -36,13 +49,16 @@ public class Manager {
 			String newLine = System.getProperty("line.separator");
 			fileWriter.write(username + ":" + password + newLine);
 			fileWriter.close();
-			File userFiles = new File("users" + File.separator + username + File.separator + "files");
+			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FOLDER_FILES);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
-			File userTrusted = new File("users" + File.separator + username + File.separator + "trusted.txt");
+			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
-			File userMsg = new File("users" + File.separator + username + File.separator + "msg.txt");
+			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_MSG);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
 			return true;
@@ -73,41 +89,39 @@ public class Manager {
 			br.close();
 			return createAccount(username, password);//user is not on registered on file
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "File of users not found", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "IO Exception", e);
 		}
 		return false;
 	}
-	
-	
+
+
 	public String[] listFiles(String localUser) { //list
 		File userFiles = new File("users" + File.separator + localUser + File.separator + "files");
 		String[] res = userFiles.list();		
 		return res;
 	}
-	
+
 	public boolean deleteFile(String fileName) {
 		return false;//fazer
 	}
-	
+
 	public String[] listUsers() { //users	
 		File user = new File("users");
 		String[] res = user.list();		
 		return res;
 	}
-	
+
 	private boolean isRegistered(String user) {
 		return Arrays.asList(listUsers()).contains(user);
 	}
-	
+
 	private boolean friends(String localUser, String otherUser) {
 		return false;//fazer
 		//ir ao trusted.txt do local user e verificar se o otherUser esta la
 	}
-	
+
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
 		if(!localUser.equals(trustedUserID)) {
 			File trustedFile = new File("users" + File.separator + localUser + File.separator + "trusted.txt");
@@ -146,11 +160,11 @@ public class Manager {
 	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
 		return OpCode.OP_ERROR;//fazer
 	}
-	
+
 	public boolean sendFile(String fromUser, String nameFile) {//download <userID> <file>
 		return false;//rever nome funcao FAZER
 	}
-	
+
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
 		File userMsgs = new File("users" + File.separator + userReceiver + File.separator + "msg.txt");
 		FileWriter fileWriter;
@@ -168,7 +182,7 @@ public class Manager {
 		}
 		return false;
 	}
-	
+
 	public ArrayList<String> collectMsg(String user) {//collect
 		ArrayList<String> result = new ArrayList<String>();
 		File userMsgs = new File("users" + File.separator + user + File.separator + "msg.txt");
@@ -195,7 +209,7 @@ public class Manager {
 				e.printStackTrace();
 				return null;
 			}
-			
+
 		}
 
 	}
