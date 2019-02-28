@@ -99,39 +99,47 @@ public class Manager {
 		return res;
 	}
 	
-	public boolean isRegistered(String user) {
+	private boolean isRegistered(String user) {
 		return Arrays.asList(listUsers()).contains(user);
 	}
 	
+	private boolean friends(String localUser, String otherUser) {
+		return false;
+	}
+	
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
-		File trustedFile = new File("users" + File.separator + localUser + File.separator + "trusted.txt");
-		BufferedReader br;
-		try {
-			br = new BufferedReader(new FileReader(trustedFile));
-			String st; 
-			while ((st = br.readLine()) != null) {
-				if(st.equals(trustedUserID)) {
-					br.close();
-					//return false;
-					return OpCode.ERR_ALREADY_EXISTS;
+		if(!localUser.equals(trustedUserID)) {
+			File trustedFile = new File("users" + File.separator + localUser + File.separator + "trusted.txt");
+			BufferedReader br;
+			try {
+				br = new BufferedReader(new FileReader(trustedFile));
+				String st; 
+				while ((st = br.readLine()) != null) {
+					if(st.equals(trustedUserID)) {
+						br.close();
+						//return false;
+						return OpCode.ERR_ALREADY_EXISTS;
+					}
 				}
+				br.close();
+				FileWriter fileWriter = new FileWriter(trustedFile,true);
+				fileWriter.write(trustedUserID + System.getProperty("line.separator"));
+				System.out.println("escreveu");
+				fileWriter.close();
+				return OpCode.OP_SUCCESSFUL;
+				//return true;
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			br.close();
-			FileWriter fileWriter = new FileWriter(trustedFile,true);
-			fileWriter.write(trustedUserID + System.getProperty("line.separator"));
-			System.out.println("escreveu");
-			fileWriter.close();
-			return OpCode.OP_SUCCESSFUL;
-			//return true;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//return false;
+			return OpCode.OP_ERROR;
+		}else {
+			return OpCode.OP_INVALID;
 		}
-		//return false;
-		return OpCode.OP_ERROR;
 	}
 
 	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
