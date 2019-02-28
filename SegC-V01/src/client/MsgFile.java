@@ -90,6 +90,11 @@ public class MsgFile {
 		            	msgSent = new Message(OpCode.LIST_FILES, client.getUsername());
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
+		            	if (msgResponse != null) {
+		            		for(String curr : msgResponse.getArrStrParam()) {
+		            			System.out.println(curr);
+		            		}
+		            	}
 	            	}else {
 	            		incompleteCommand();
 	            	}
@@ -111,6 +116,11 @@ public class MsgFile {
 		            	msgSent = new Message(OpCode.USERS);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
+		            	if (msgResponse != null) {
+		            		for(String curr : msgResponse.getArrStrParam()) {
+		            			System.out.println(curr);
+		            		}
+		            	}		            	
 	            	}else {
 	            		incompleteCommand();
 	            	}
@@ -171,7 +181,7 @@ public class MsgFile {
 	            case "collect":
 	            	if(parsedInput.length == 1) {
 	            		System.out.println("collect");
-		            	msgSent = new Message(OpCode.SHOW_MSG);
+		            	msgSent = new Message(OpCode.COLLECT_MSG, client.getUsername());
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
 	            	}else {

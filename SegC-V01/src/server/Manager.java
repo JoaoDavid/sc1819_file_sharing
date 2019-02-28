@@ -146,6 +146,9 @@ public class Manager {
 		File userMsgs = new File("users" + File.separator + userReceiver + File.separator + "msg.txt");
 		FileWriter fileWriter;
 		try {
+			/*
+			 * falta verificar as se os users estao registados e se sao amigos
+			 */
 			fileWriter = new FileWriter(userMsgs,true);
 			fileWriter.write(userSender + ":" + msg + System.getProperty("line.separator"));
 			fileWriter.close();

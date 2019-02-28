@@ -81,6 +81,17 @@ public class Client {
 	}
 	
 	public Message sendMsg(Message msgSent) {
+		try {
+			out.writeObject(msgSent);
+			Message response = (Message) in.readObject();
+			return response;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 		//depois de enviar msgSent deve receber a resposta o server e devolver para o msgFile
 	}

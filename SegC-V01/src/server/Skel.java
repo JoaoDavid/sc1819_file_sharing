@@ -6,7 +6,7 @@ import communication.OpCode;
 public class Skel {
 	//fazer padrao singleton para o manager
 	//msg != null
-	public static void invoke(Message msg, Manager svM) { //alterar no fim para retornar uma message que depois
+	public static Message invoke(Message msg, Manager svM) { //alterar no fim para retornar uma message que depois
 								//e enviada no ciclo do msgFileServer
 
 		Message response;
@@ -23,12 +23,12 @@ public class Skel {
         	arrStrRes = svM.listFiles(msg.getStrParam());
         	if(arrStrRes != null) {
         		response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
-        		//return response;
+        		return response;
         	}else {
         		response = new Message(OpCode.OP_ERROR,"Error finding list of files");
-        		//return response;
+        		return response;
         	}  	
-            break;
+            //break;
         case REMOVE_FILES: //remove <files>
         	System.out.println("REMOVE_FILES");
         	String[] nameFile = msg.getArrStrParam();
@@ -47,13 +47,14 @@ public class Skel {
         	System.out.println("USERS");
         	arrStrRes = svM.listUsers();
         	if(arrStrRes != null) {
+        		System.out.println("OK:USERS");
         		response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
-        		//return response;
+        		return response;
         	}else {
         		response = new Message(OpCode.OP_ERROR,"Error finding list users");
-        		//return response;
+        		return response;
         	}
-            break;
+            //break;
         case TRUST_USERS: //trusted <trustedUserIDs>
         	System.out.println("TRUST_USERS");
         	String[] usersTrust = msg.getArrStrParam();
@@ -68,7 +69,8 @@ public class Skel {
         		arrOpRes[i] = svM.trusted(msg.getStrParam(), usersTrust[i]);
         	}
         	response = new Message(arrOpRes);
-            break;
+        	return response;
+            //break;
         case UNTRUST_USERS: //untrusted <untrustedUserIDs>
         	System.out.println("UNTRUST_USERS");
         	String[] usersUntrust = msg.getArrStrParam();
@@ -83,15 +85,23 @@ public class Skel {
         		arrOpRes[i] = svM.untrusted(msg.getStrParam(), usersUntrust[i]);
         	}
         	response = new Message(arrOpRes);
-            break;
+        	return response;
+            //break;
         case DOWNLOAD_FILE: //download <userID> <file>
         	System.out.println("DOWNLOAD_FILE");
             break;
         case SEND_MSG: //msg <userID> <msg>
         	System.out.println("SEND_MSG");
-
-            break;
-        case SHOW_MSG:
+        	String[] senderReceiverText = msg.getArrStrParam();
+        	boolean saved = svM.storeMsg(senderReceiverText[0], senderReceiverText[1], senderReceiverText[2]);
+        	if(saved) {
+        		response = new Message(OpCode.OP_SUCCESSFUL);
+        		return response;
+        	}else {
+        		response = new Message(OpCode.OP_ERROR);
+        		return response;
+        	}
+        case COLLECT_MSG:
         	System.out.println("SHOW_MSG");
 
             break;
@@ -99,6 +109,7 @@ public class Skel {
         	System.out.println("Enum not recognized");
         	break;
 		}
+		return null;
 		
 	}
 }

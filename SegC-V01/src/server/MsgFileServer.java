@@ -113,13 +113,14 @@ public class MsgFileServer{
 							if(obj == null || !(obj instanceof Message)) {
 								break;
 							}
-							Message msg = (Message) obj;
+							Message msgReceived = (Message) obj;
 							
-							if(OpCode.END_CONNECTION == msg.getOpCode()) {
+							if(OpCode.END_CONNECTION == msgReceived.getOpCode()) {
 								break;
 							}else {
 								//processar msg
-								Skel.invoke(msg,accM);
+								Message msgSent = Skel.invoke(msgReceived,accM);
+								outStream.writeObject(msgSent);
 							}
 						}
 					} catch (ClassNotFoundException e) {
