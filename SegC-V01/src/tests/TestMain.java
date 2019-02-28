@@ -1,8 +1,6 @@
 package tests;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,7 +9,7 @@ import server.Manager;
 public class TestMain {
 
 	public static void main(String[] args) throws IOException {
-		Manager accM = new Manager("ola.txt");
+		Manager accM = Manager.getInstance();
 		/*boolean res = accM.createAccount("fernando", "pass5353");
 		accM.createAccount("fernangdsgdo", "pasdagadgs5353");
 		accM.createAccount("fernanadgdgdo", "pasadgags5353");

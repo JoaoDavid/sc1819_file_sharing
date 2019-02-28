@@ -36,28 +36,47 @@ public class Message implements Serializable{
 		this.arrStr = arrStrParam;
 	}	
 
-	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes) {
+	public Message() {
 		super();
-		this.opCode = opCode;
-		this.param = param;
-		this.paramBytes = paramBytes;
 	}
 	
-	public Message(OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes, ArrayList<String> inbox) {
-		super();
-		this.opCode = opCode;
-		this.param = param;
-		this.paramBytes = paramBytes;
-		this.inbox = inbox;
+	public OpCode[] getArrCode() {
+		return arrCode;
 	}
 
-	public Message(String strParam, OpCode opCode, ArrayList<String> param, ArrayList<Byte[]> paramBytes,
-			ArrayList<String> inbox) {
-		super();
-		this.str = strParam;
+	public void setArrCode(OpCode[] arrCode) {
+		this.arrCode = arrCode;
+	}
+
+	public String getStr() {
+		return str;
+	}
+
+	public void setStr(String str) {
+		this.str = str;
+	}
+
+	public String[] getArrStr() {
+		return arrStr;
+	}
+
+	public void setArrStr(String[] arrStr) {
+		this.arrStr = arrStr;
+	}
+
+	public void setOpCode(OpCode opCode) {
 		this.opCode = opCode;
+	}
+
+	public void setParam(ArrayList<String> param) {
 		this.param = param;
+	}
+
+	public void setParamBytes(ArrayList<Byte[]> paramBytes) {
 		this.paramBytes = paramBytes;
+	}
+
+	public void setInbox(ArrayList<String> inbox) {
 		this.inbox = inbox;
 	}
 

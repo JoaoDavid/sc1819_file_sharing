@@ -87,13 +87,11 @@ public class Client {
 			return response;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Error to resquest/response", e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Send message class not found", e);
 		}
 		return null;
-		//depois de enviar msgSent deve receber a resposta o server e devolver para o msgFile
 	}
 
 }

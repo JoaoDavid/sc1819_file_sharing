@@ -1,5 +1,9 @@
 package client;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -68,25 +72,51 @@ public class MsgFile {
 		while(onLoop) {
 			System.out.print(">>>");
 			String rawInput = sc.nextLine();
-			/*String parsedInput = rawInput;
-			int lastIndex = rawInput.indexOf(' ');
-			if(lastIndex != -1) {
-				parsedInput = rawInput.substring(0, lastIndex);
-			}*/
 			String[] parsedInput = rawInput.split("(\\s)+");
 			
 			switch (parsedInput[0]) {
 	            case "store": //store <files>
-	            	System.out.println("store");
-	            	/*
-	            	 * 
-	            	 * falta fazer, arranjar maneira de enviar os ficheiros
-	            	 * dentro do messages
-	            	 */
+	            	logger.log(Level.CONFIG, "store");
+	            	File file;
+	            	ArrayList<String> fileName = new ArrayList<>();
+	            	ArrayList<Byte[]> byteFiles = new ArrayList<>();
+	            	
+	            	for(int i = 1; i < parsedInput.length ; i++){
+	            		file = new File(parsedInput[i]);
+	            		if(file.exists()){
+	            			
+	            			try {
+								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
+								fileName.add(file.getName());
+							} catch (IOException e) {
+								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
+							}
+	            		}
+	            	}
+	            	if(fileName.isEmpty() && parsedInput.length > 1){
+	            		logger.log(Level.SEVERE, "Não foi possivel enviar ficheiros: " + parsedInput.toString());
+	            	}else if(parsedInput.length == 1){
+	            		incompleteCommand();
+	            	}else{
+	            		msgSent = new Message(OpCode.STORE_FILES);
+	            		msgSent.setParam(fileName);
+	            		msgSent.setParamBytes(byteFiles);
+	            		msgResponse = client.sendMsg(msgSent);
+	            		if(msgResponse == null){
+	            			logger.log(Level.SEVERE, "Erro ao receber a resposta do servidor");
+	            		}else{
+	            			if(msgResponse.getOpCode() == OpCode.OP_SUCC_ERROR){
+	            				logger.log(Level.SEVERE, "Os seguintes ficheiros já existiam no servidor: " 
+	            			+ msgResponse.getInbox().toString());
+	            			}
+	            			logger.log(Level.INFO, "Os seguintes ficheiros foram carregados no servidor: " 
+	    	            			+ msgResponse.getParam().toString());
+	            		}
+	            	}
 	                break;
 	            case "list":
 	            	if(parsedInput.length == 1) {
-	            		System.out.println("list");
+	            		logger.log(Level.CONFIG, "list");
 		            	msgSent = new Message(OpCode.LIST_FILES);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
@@ -101,7 +131,7 @@ public class MsgFile {
 	                break;
 	            case "remove": //remove <files>
 	            	if(parsedInput.length > 1) {
-	            		System.out.println("remove");
+	            		logger.log(Level.CONFIG, "remove");
 	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
 	            		msgSent = new Message(OpCode.REMOVE_FILES,arrSent);
 		            	//send message method
@@ -116,7 +146,7 @@ public class MsgFile {
 	                break;
 	            case "users":
 	            	if(parsedInput.length == 1) {
-	            		System.out.println("users");
+	            		logger.log(Level.CONFIG, "users");
 		            	msgSent = new Message(OpCode.USERS);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
@@ -132,7 +162,7 @@ public class MsgFile {
 	                break;
 	            case "trusted": //trusted <trustedUserIDs>
 	            	if(parsedInput.length > 1) {
-	            		System.out.println("trusted");
+	            		logger.log(Level.CONFIG, "trusted");
 	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
 	            		msgSent = new Message(OpCode.TRUST_USERS,arrSent);
 		            	//send message method
@@ -147,7 +177,7 @@ public class MsgFile {
 	                break;
 	            case "untrusted": //untrusted <untrustedUserIDs>
 	            	if(parsedInput.length > 1) {
-	            		System.out.println("untrusted");
+	            		logger.log(Level.CONFIG, "untrusted");
 	            		String[] arrSent = Arrays.copyOfRange(parsedInput, 1, parsedInput.length);
 	            		msgSent = new Message(OpCode.UNTRUST_USERS,arrSent);
 		            	//send message method
@@ -157,7 +187,7 @@ public class MsgFile {
 	            	}
 	                break;
 	            case "download": //download <userID> <file>
-	            	System.out.println("download");
+	            	logger.log(Level.CONFIG, "download");
 	            	if(parsedInput.length == 3) {
 	            		String[] arrSent = new String[2];
 	            		arrSent[0] = parsedInput[1];//users name account that has the file
@@ -170,7 +200,7 @@ public class MsgFile {
 	            	}
 	                break;
 	            case "msg": //msg <userID> <msg>
-	            	System.out.println("msg");
+	            	logger.log(Level.CONFIG, "msg");
 	            	if(parsedInput.length >= 3) {
 	            		String userReceiver = parsedInput[1];
 	            		String msg = rawInput.substring(3+2+userReceiver.length());
@@ -187,7 +217,7 @@ public class MsgFile {
 	                break;
 	            case "collect":
 	            	if(parsedInput.length == 1) {
-	            		System.out.println("collect");
+	            		logger.log(Level.CONFIG, "collect");
 		            	msgSent = new Message(OpCode.COLLECT_MSG, client.getUsername());
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
@@ -201,7 +231,7 @@ public class MsgFile {
 	                break;
 	            case "exit":
 	            	if(parsedInput.length == 1) {
-	            		System.out.println("exit");
+	            		logger.log(Level.CONFIG, "exit");
 		            	msgSent = new Message(OpCode.END_CONNECTION);
 		            	msgResponse = client.sendMsg(msgSent);
 		            	if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
@@ -213,7 +243,7 @@ public class MsgFile {
 	            	}
 	                break;
 	            default:
-	            	System.out.println("Command is not recognized");
+	            	logger.log(Level.INFO, "Command is not recognized");
 	            	break;
 				}
 		}
@@ -224,5 +254,12 @@ public class MsgFile {
 		System.out.println("Error: unrecognized or incomplete command line");
 	}
 
-
+	public static Byte[] toObjects(byte[] bytesPrim) {
+	    Byte[] bytes = new Byte[bytesPrim.length];
+	    int i = 0;
+	    for (byte b : bytesPrim){
+	    	bytes[i++] = b;
+	    }
+	    return bytes;
+	}
 }
