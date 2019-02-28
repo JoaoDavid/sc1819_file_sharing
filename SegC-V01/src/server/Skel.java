@@ -6,7 +6,7 @@ import communication.OpCode;
 public class Skel {
 	//fazer padrao singleton para o manager
 	//msg != null
-	public static Message invoke(Message msg, Manager svM) { //alterar no fim para retornar uma message que depois
+	public static Message invoke(Message msg, Manager svM, String connectedUser) { //alterar no fim para retornar uma message que depois
 								//e enviada no ciclo do msgFileServer
 
 		Message response;
@@ -20,7 +20,7 @@ public class Skel {
             break;
         case LIST_FILES:
         	System.out.println("LIST_FILES");
-        	arrStrRes = svM.listFiles(msg.getStrParam());
+        	arrStrRes = svM.listFiles(connectedUser);
         	if(arrStrRes != null) {
         		response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
         		return response;
@@ -66,7 +66,7 @@ public class Skel {
         		}else {
         			arrOpRes[i] = OpCode.OP_ERROR;
         		}*/
-        		arrOpRes[i] = svM.trusted(msg.getStrParam(), usersTrust[i]);
+        		arrOpRes[i] = svM.trusted(connectedUser, usersTrust[i]);
         	}
         	response = new Message(arrOpRes);
         	return response;
@@ -82,7 +82,7 @@ public class Skel {
         		}else {
         			arrOpRes[i] = OpCode.OP_ERROR;
         		}*/
-        		arrOpRes[i] = svM.untrusted(msg.getStrParam(), usersUntrust[i]);
+        		arrOpRes[i] = svM.untrusted(connectedUser, usersUntrust[i]);
         	}
         	response = new Message(arrOpRes);
         	return response;
@@ -92,8 +92,8 @@ public class Skel {
             break;
         case SEND_MSG: //msg <userID> <msg>
         	System.out.println("SEND_MSG");
-        	String[] senderReceiverText = msg.getArrStrParam();
-        	boolean saved = svM.storeMsg(senderReceiverText[0], senderReceiverText[1], senderReceiverText[2]);
+        	String[] receiverText = msg.getArrStrParam();
+        	boolean saved = svM.storeMsg(connectedUser, receiverText[0], receiverText[1]);
         	if(saved) {
         		response = new Message(OpCode.OP_SUCCESSFUL);
         		return response;

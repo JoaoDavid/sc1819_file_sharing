@@ -87,7 +87,7 @@ public class MsgFile {
 	            case "list":
 	            	if(parsedInput.length == 1) {
 	            		System.out.println("list");
-		            	msgSent = new Message(OpCode.LIST_FILES, client.getUsername());
+		            	msgSent = new Message(OpCode.LIST_FILES);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
 		            	if (msgResponse != null) {
@@ -133,6 +133,10 @@ public class MsgFile {
 	            		msgSent = new Message(OpCode.TRUST_USERS,arrSent);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
+		            	OpCode[] arrCodes = msgResponse.getOpCodeArr();
+		            	for(int i = 0; i < arrSent.length; i++) {
+		            		System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+		            	}
 	            	}else {
 	            		incompleteCommand();
 	            	}
@@ -168,10 +172,9 @@ public class MsgFile {
 	            		String msg = rawInput.substring(3+2+userReceiver.length());
 	            		//send message
 	            		System.out.println("destino:" + userReceiver + " msg:" + msg);
-	            		String[] arrSent = new String[3];
-	            		arrSent[0] = client.getUsername();//sender
-	            		arrSent[1] = userReceiver;//receiver
-	            		arrSent[2] = msg;//text message
+	            		String[] arrSent = new String[2];
+	            		arrSent[0] = userReceiver;//receiver
+	            		arrSent[1] = msg;//text message
 	            		msgSent = new Message(OpCode.SEND_MSG, arrSent);
 	            		msgResponse = client.sendMsg(msgSent);
 	            	}else {

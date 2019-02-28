@@ -65,6 +65,10 @@ public class Message implements Serializable{
 		return this.opCode;
 	}
 	
+	public OpCode[] getOpCodeArr() {
+		return this.arrCode;
+	}
+	
 	public String getStrParam() {
 		return this.str;
 	}
