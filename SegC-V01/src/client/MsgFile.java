@@ -106,6 +106,10 @@ public class MsgFile {
 	            		msgSent = new Message(OpCode.REMOVE_FILES,arrSent);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
+		            	OpCode[] arrCodes = msgResponse.getOpCodeArr();
+		            	for(int i = 0; i < arrSent.length; i++) {
+		            		System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+		            	}
 	            	}else {
 	            		incompleteCommand();
 	            	}
@@ -199,8 +203,11 @@ public class MsgFile {
 	            	if(parsedInput.length == 1) {
 	            		System.out.println("exit");
 		            	msgSent = new Message(OpCode.END_CONNECTION);
-		            	client.disconnect();
-		            	onLoop = false;
+		            	msgResponse = client.sendMsg(msgSent);
+		            	if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
+		            		client.disconnect();
+		            		onLoop = false;
+		            	}		            	
 	            	}else {
 	            		incompleteCommand();
 	            	}

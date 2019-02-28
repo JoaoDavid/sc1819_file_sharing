@@ -116,6 +116,8 @@ public class MsgFileServer{
 							Message msgReceived = (Message) obj;
 							
 							if(OpCode.END_CONNECTION == msgReceived.getOpCode()) {
+								Message msgSent = new Message(OpCode.OP_SUCCESSFUL);
+								outStream.writeObject(msgSent);
 								break;
 							}else {
 								//processar msg
@@ -138,6 +140,7 @@ public class MsgFileServer{
 				inStream.close();
 
 				socket.close();
+				logger.log(Level.INFO, "Client disconnected, " + user + " logged out");
 
 			} catch (IOException e) {
 				e.printStackTrace();

@@ -104,7 +104,8 @@ public class Manager {
 	}
 	
 	private boolean friends(String localUser, String otherUser) {
-		return false;
+		return false;//fazer
+		//ir ao trusted.txt do local user e verificar se o otherUser esta la
 	}
 	
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
@@ -143,11 +144,11 @@ public class Manager {
 	}
 
 	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
-		return OpCode.OP_ERROR;
+		return OpCode.OP_ERROR;//fazer
 	}
 	
 	public boolean sendFile(String fromUser, String nameFile) {//download <userID> <file>
-		return false;//rever nome funcao
+		return false;//rever nome funcao FAZER
 	}
 	
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
@@ -155,7 +156,7 @@ public class Manager {
 		FileWriter fileWriter;
 		try {
 			/*
-			 * falta verificar as se os users estao registados e se sao amigos
+			 * falta verificar as se os users estao registados e se sao amigos FAZER
 			 */
 			fileWriter = new FileWriter(userMsgs,true);
 			fileWriter.write(userSender + ":" + msg + System.getProperty("line.separator"));
