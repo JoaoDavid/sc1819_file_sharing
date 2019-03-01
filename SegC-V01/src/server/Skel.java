@@ -29,7 +29,7 @@ public class Skel {
 			ArrayList<String> failed = new ArrayList<>();			
 			File file;
 			for(int i = 0; i < msg.getParam().size();i++){
-				file = new File(ServerConst.FOLDER_SERVER 
+				file = new File(ServerConst.FOLDER_SERVER_USERS 
 						+ File.separator + connectedUser 
 						+ File.separator + msg.getParam().get(i));
 				if(file.exists()){
