@@ -52,16 +52,16 @@ public class Manager {
 				fileWriter.close();
 			}
 
-			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
-					+ username + File.pathSeparator + ServerConst.FOLDER_FILES);
+			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FOLDER_FILES);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
-			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
-					+ username + File.pathSeparator + ServerConst.FILE_NAME_TRUSTED);
+			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
-			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
-					+ username + File.pathSeparator + ServerConst.FILE_NAME_MSG);
+			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_MSG);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
 			return true;
@@ -104,7 +104,7 @@ public class Manager {
 
 
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + localUser + File.pathSeparator + "files");
+		File userFiles = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + "files");
 		String[] res = userFiles.list();		
 		return res;
 	}
@@ -138,7 +138,7 @@ public class Manager {
 
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
 		if(!localUser.equals(trustedUserID)) {
-			File trustedFile = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + localUser + File.pathSeparator + "trusted.txt");
+			File trustedFile = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + "trusted.txt");
 			BufferedReader br;
 			try {
 				br = new BufferedReader(new FileReader(trustedFile));
@@ -180,7 +180,7 @@ public class Manager {
 	}
 
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
-		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + userReceiver + File.pathSeparator + ServerConst.FILE_NAME_MSG);
+		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
 		FileWriter fileWriter;
 		try {
 			/*
@@ -199,7 +199,7 @@ public class Manager {
 
 	public ArrayList<String> collectMsg(String user) {//collect
 		ArrayList<String> result = new ArrayList<String>();
-		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + user + File.pathSeparator + ServerConst.FILE_NAME_MSG);
+		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.separator + user + File.separator + ServerConst.FILE_NAME_MSG);
 		if(userMsgs.length() == 0) {
 			return null;//nao ha msgs na caixa
 		}else {			 

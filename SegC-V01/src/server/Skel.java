@@ -30,12 +30,14 @@ public class Skel {
 			File file;
 			for(int i = 0; i < msg.getParam().size();i++){
 				file = new File(ServerConst.FOLDER_SERVER 
-						+ File.pathSeparator + connectedUser 
-						+ File.pathSeparator + msg.getParam().get(i));
+						+ File.separator + connectedUser 
+						+ File.separator + msg.getParam().get(i));
 				if(file.exists()){
 					failed.add(file.getName());
 				}else{
 					try{
+						file.getParentFile().mkdirs();
+						file.createNewFile();
 						FileOutputStream fos = new FileOutputStream(file);
 						fos.write(toPrimitives(msg.getParamBytes().get(i)));
 						fos.close();

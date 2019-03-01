@@ -32,7 +32,7 @@ public class MsgFile {
 			if(args.length == 3) {
 				passwd = args[2];
 			}else {
-				System.out.println("Write your password please");
+				System.out.print("Write your password please\n>>>");
 				passwd = sc.nextLine();
 			}
 			try {
