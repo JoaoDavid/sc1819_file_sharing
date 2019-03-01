@@ -122,7 +122,7 @@ public class MsgFileServer{
 							}else {
 								//processar msg
 								System.out.println(user);
-								Message msgSent = Skel.invoke(msgReceived,accM,user);
+								Message msgSent = Skel.invoke(msgReceived, user);
 								outStream.writeObject(msgSent);
 							}
 						}

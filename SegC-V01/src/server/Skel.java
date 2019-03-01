@@ -12,11 +12,12 @@ import communication.OpCode;
 public class Skel {
 
 	private static final String CLASS_NAME = Skel.class.getName();
+	private static Manager svM = Manager.getInstance();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 	//fazer padrao singleton para o manager
 	//msg != null
-	public static Message invoke(Message msg, Manager svM, String connectedUser) { //alterar no fim para retornar uma message que depois
+	public static Message invoke(Message msg, String connectedUser) { //alterar no fim para retornar uma message que depois
 		//e enviada no ciclo do msgFileServer
 		Message response = null;
 		String[] arrStrRes;
@@ -26,8 +27,10 @@ public class Skel {
 		case STORE_FILES: //store <files>
 			logger.log(Level.CONFIG, "STORE_FILES");
 			ArrayList<String> succ = new ArrayList<>();
-			ArrayList<String> failed = new ArrayList<>();			
-			
+			ArrayList<String> failed = new ArrayList<>();
+			//atualiza lista dos files que foram carregados e não carregados
+			svM.storeFiles(succ,failed,msg,connectedUser);
+			//criação da reposta
 			response = new Message();
 			if(succ.size() == 0 && failed.size() > 0){
 				response.setOpCode(OpCode.OP_ERROR);

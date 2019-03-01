@@ -153,14 +153,13 @@ public class Manager {
 		return bytes;
 
 	}
-	
 	/**
 	 * @requires localUser != null
 	 * @param localUser
 	 * @return lista os ficheiros que o utilizador local (localUserID) tem no servidor.
 	 */
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + ServerConst.FOLDER_FILES);
+		File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FOLDER_FILES);
 		return userFiles.list();
 	}
 
@@ -193,7 +192,7 @@ public class Manager {
 
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
 		if(!localUser.equals(trustedUserID)) {
-			File trustedFile = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + "trusted.txt");
+			File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FOLDER_SERVER_USERS);
 			BufferedReader br;
 			try {
 				br = new BufferedReader(new FileReader(trustedFile));
@@ -230,12 +229,16 @@ public class Manager {
 		return OpCode.OP_ERROR;//fazer
 	}
 
-	public boolean sendFile(String fromUser, String nameFile) {//download <userID> <file>
-		return false;//rever nome funcao FAZER
+	public boolean sendFileToClient(String userOwner, String userDownloading, String nameFile) {//download <userID> <file>
+		if(friends(userOwner,userDownloading)) {
+			return false;//FAZER
+		}else {
+			return false;
+		}
 	}
 
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
-		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
+		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
 		FileWriter fileWriter;
 		try {
 			/*
@@ -254,7 +257,7 @@ public class Manager {
 
 	public ArrayList<String> collectMsg(String user) {//collect
 		ArrayList<String> result = new ArrayList<String>();
-		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.separator + user + File.separator + ServerConst.FILE_NAME_MSG);
+		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + user + File.separator + ServerConst.FILE_NAME_MSG);
 		if(userMsgs.length() == 0) {
 			return null;//nao ha msgs na caixa
 		}else {			 
