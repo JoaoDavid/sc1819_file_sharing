@@ -38,7 +38,7 @@ public class Skel {
 				response.setOpCode(OpCode.OP_SUCCESSFUL);
 				response.setParam(succ);
 			} else{
-				response.setOpCode(OpCode.OP_SUCC_ERROR);
+				response.setOpCode(OpCode.ERR_ALREADY_EXISTS);
 				response.setParam(succ);
 				response.setInbox(failed);
 			}
@@ -49,7 +49,7 @@ public class Skel {
 			if(arrStrRes != null) {
 				response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
 			}else {
-				response = new Message(OpCode.OP_ERROR,"Error finding list of files");
+				response = new Message(OpCode.OP_ERROR);
 			}  	
 			break;
 		case REMOVE_FILES: //remove <files>
@@ -73,7 +73,7 @@ public class Skel {
 				logger.log(Level.CONFIG, "OK:USERS");
 				response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
 			}else {
-				response = new Message(OpCode.OP_ERROR,"Error finding list users");
+				response = new Message(OpCode.OP_ERROR);
 			}
 			break;
 		case TRUST_USERS: //trusted <trustedUserIDs>
@@ -112,6 +112,18 @@ public class Skel {
 		case SEND_MSG: //msg <userID> <msg>
 			logger.log(Level.CONFIG, "SEND_MSG");
 			String[] receiverText = msg.getArrStrParam();
+			if(connectedUser.equals(receiverText[0])) {//rever, possivelmente colocar estes ifs dentro do storeMsg
+				response = new Message(OpCode.ERR_YOURSELF);
+				return response;
+			}
+			if(!svM.isRegistered(receiverText[0])) {
+				response = new Message(OpCode.ERR_NOT_FOUND);
+				return response;
+			}
+			if(!svM.friends(connectedUser,receiverText[0])) {
+				response = new Message(OpCode.ERR_NOT_FRIENDS);
+				return response;
+			}
 			boolean saved = svM.storeMsg(connectedUser, receiverText[0], receiverText[1]);
 			if(saved) {
 				response = new Message(OpCode.OP_SUCCESSFUL);

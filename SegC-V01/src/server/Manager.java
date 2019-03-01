@@ -103,7 +103,7 @@ public class Manager {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * envia um ou mais ficheiros para o servidor, para a conta do utilizador local
 	 * (localUserID). Caso este utilizador já tenha algum ficheiro com o mesmo nome no
@@ -176,56 +176,77 @@ public class Manager {
 	}
 
 	public String[] listUsers() { //users	
-		File user = new File(ServerConst.FOLDER_SERVER);
-		String[] res = user.list();		
-		return res;
+		File user = new File(ServerConst.FOLDER_SERVER_USERS);
+		return user.list();
 	}
 
-	private boolean isRegistered(String user) {
+	public boolean isRegistered(String user) {
 		return Arrays.asList(listUsers()).contains(user);
 	}
 
-	private boolean friends(String localUser, String otherUser) {
-		return false;//fazer
-		//ir ao trusted.txt do local user e verificar se o otherUser esta la
+	public boolean friends(String localUser, String otherUser) {
+		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(trustedFile));
+			String st; 
+			while ((st = br.readLine()) != null) {
+				if(st.equals(otherUser)) {
+					br.close();
+					return true;
+				}
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
-		if(!localUser.equals(trustedUserID)) {
-			File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FOLDER_SERVER_USERS);
-			BufferedReader br;
-			try {
-				br = new BufferedReader(new FileReader(trustedFile));
-				String st; 
-				while ((st = br.readLine()) != null) {
-					if(st.equals(trustedUserID)) {
-						br.close();
-						//return false;
-						return OpCode.ERR_ALREADY_EXISTS;
-					}
+		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		BufferedReader br;
+		try {
+			br = new BufferedReader(new FileReader(trustedFile));
+			String st; 
+			while ((st = br.readLine()) != null) {
+				if(st.equals(trustedUserID)) {
+					br.close();
+					//return false;
+					return OpCode.ERR_ALREADY_EXISTS;
 				}
-				br.close();
-				FileWriter fileWriter = new FileWriter(trustedFile,true);
-				fileWriter.write(trustedUserID + System.getProperty("line.separator"));
-				System.out.println("escreveu");
-				fileWriter.close();
-				return OpCode.OP_SUCCESSFUL;
-				//return true;
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
-			//return false;
-			return OpCode.OP_ERROR;
-		}else {
-			return OpCode.OP_INVALID;
+			br.close();
+			if(localUser.equals(trustedUserID)) {
+				return OpCode.ERR_YOURSELF;
+			}
+			if(!isRegistered(trustedUserID)) {
+				return OpCode.ERR_NOT_FOUND;
+			}
+			FileWriter fileWriter = new FileWriter(trustedFile,true);
+			fileWriter.write(trustedUserID + System.getProperty("line.separator"));
+			System.out.println("escreveu");
+			fileWriter.close();
+			return OpCode.OP_SUCCESSFUL;
+			//return true;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		//return false;
+		return OpCode.OP_ERROR;
 	}
 
 	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
+		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		//
 		return OpCode.OP_ERROR;//fazer
 	}
 
@@ -241,9 +262,6 @@ public class Manager {
 		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
 		FileWriter fileWriter;
 		try {
-			/*
-			 * falta verificar as se os users estao registados e se sao amigos FAZER
-			 */
 			fileWriter = new FileWriter(userMsgs,true);
 			fileWriter.write(userSender + ":" + msg + System.getProperty("line.separator"));
 			fileWriter.close();

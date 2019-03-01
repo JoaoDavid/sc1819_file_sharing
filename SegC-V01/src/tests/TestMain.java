@@ -34,7 +34,7 @@ public class TestMain {
 		for(String ola : batata) {
 			System.out.println(ola);
 		}*/
-		for(String ola : accM.listFiles("fernando")) {
+		/*for(String ola : accM.listFiles("fernando")) {
 			System.out.println(ola);
 		}
 		String palavra = "ola";
@@ -44,7 +44,8 @@ public class TestMain {
 			System.out.println(palavra + " matches");
 		}else {
 			System.out.println(palavra + " DOES NOT match");
-		}
+		}*/
+		System.out.println("FRIENDS:" + accM.friends("fernando", "rita"));
 	}
 
 }

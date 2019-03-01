@@ -105,7 +105,7 @@ public class MsgFile {
 	            		if(msgResponse == null || msgResponse.getOpCode() == OpCode.OP_ERROR){
 	            			logger.log(Level.SEVERE, "Erro ao receber a resposta do servidor");
 	            		}else{
-	            			if(msgResponse.getOpCode() == OpCode.OP_SUCC_ERROR){
+	            			if(msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
 	            				logger.log(Level.SEVERE, "Os seguintes ficheiros já existiam no servidor: " 
 	            			+ msgResponse.getInbox().toString());
 	            			}

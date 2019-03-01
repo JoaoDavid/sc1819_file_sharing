@@ -7,8 +7,8 @@ public enum OpCode {
 	DOWNLOAD_FILE("download"), SEND_MSG("msg"), COLLECT_MSG("collect"), 
 	END_CONNECTION("exit"), OP_ERROR("error"), OP_SUCCESSFUL("sucess"), 
 	OP_RES_ARRAY("op res in array"), OP_HELP("help"), OP_INVALID("invalid"),
-	ERR_NOT_FOUND("not found"), ERR_ALREADY_EXISTS("already exists"),
-	OP_SUCC_ERROR("sucess with some errors");
+	ERR_NOT_FOUND("err not found"), ERR_ALREADY_EXISTS("err already exists"),
+	ERR_NOT_FRIENDS("err not friends"), ERR_YOURSELF("err yourself");
 	
 	private final String val;
 	/**
