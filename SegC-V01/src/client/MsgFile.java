@@ -102,7 +102,7 @@ public class MsgFile {
 	            		msgSent.setParam(fileName);
 	            		msgSent.setParamBytes(byteFiles);
 	            		msgResponse = client.sendMsg(msgSent);
-	            		if(msgResponse == null){
+	            		if(msgResponse == null || msgResponse.getOpCode() == OpCode.OP_ERROR){
 	            			logger.log(Level.SEVERE, "Erro ao receber a resposta do servidor");
 	            		}else{
 	            			if(msgResponse.getOpCode() == OpCode.OP_SUCC_ERROR){
@@ -218,7 +218,7 @@ public class MsgFile {
 	            case "collect":
 	            	if(parsedInput.length == 1) {
 	            		logger.log(Level.CONFIG, "collect");
-		            	msgSent = new Message(OpCode.COLLECT_MSG, client.getUsername());
+		            	msgSent = new Message(OpCode.COLLECT_MSG);
 		            	//send message method
 		            	msgResponse = client.sendMsg(msgSent);
 	            	}else {
@@ -226,8 +226,16 @@ public class MsgFile {
 	            	}
 	                break;
 	            case "help":
-	            	System.out.println("help");
-
+	            	logger.log(Level.CONFIG, "help");
+	            	logger.log(Level.INFO, "store <files>");
+	            	logger.log(Level.INFO, "list");
+	            	logger.log(Level.INFO, "users");
+	            	logger.log(Level.INFO, "trusted <trustedUserIDs>");
+	            	logger.log(Level.INFO, "untrusted <untrustedUserIDs>");
+	            	logger.log(Level.INFO, "download <userID> <file>");
+	            	logger.log(Level.INFO, "msg <userID> <msg>");
+	            	logger.log(Level.INFO, "collect");
+	            	logger.log(Level.INFO, "exit");
 	                break;
 	            case "exit":
 	            	if(parsedInput.length == 1) {
@@ -251,7 +259,7 @@ public class MsgFile {
 	}
 	
 	public static void incompleteCommand() {
-		System.out.println("Error: unrecognized or incomplete command line");
+		logger.log(Level.SEVERE,"Error: unrecognized or incomplete command line");
 	}
 
 	public static Byte[] toObjects(byte[] bytesPrim) {

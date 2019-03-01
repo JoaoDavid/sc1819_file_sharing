@@ -45,20 +45,23 @@ public class Manager {
 	public boolean createAccount(String username, String password) {
 		logger.log(Level.INFO, "Creating account");
 		try {
-			FileWriter fileWriter = new FileWriter(usersFile,true);
-			String newLine = System.getProperty("line.separator");
-			fileWriter.write(username + ":" + password + newLine);
-			fileWriter.close();
-			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FOLDER_FILES);
+			synchronized (usersFile) {
+				FileWriter fileWriter = new FileWriter(usersFile,true);
+				String newLine = System.getProperty("line.separator");
+				fileWriter.write(username + ":" + password + newLine);
+				fileWriter.close();
+			}
+
+			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
+					+ username + File.pathSeparator + ServerConst.FOLDER_FILES);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
-			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED);
+			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
+					+ username + File.pathSeparator + ServerConst.FILE_NAME_TRUSTED);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
-			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_MSG);
+			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.pathSeparator 
+					+ username + File.pathSeparator + ServerConst.FILE_NAME_MSG);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
 			return true;
@@ -70,23 +73,26 @@ public class Manager {
 
 	public boolean login(String username, String password) {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(usersFile));
-			String st; 
-			while ((st = br.readLine()) != null) {
-				//loginInfo[0] = username   loginInfo[1] = password				
-				String[] loginInfo = st.split(":");
-				if(username.equals(loginInfo[0])) {
-					if(password.equals(loginInfo[1])) {
-						System.out.println("Login successful");
-						br.close();
-						return true;//user and pass match info on file
-					}else {
-						br.close();
-						return false;//password does not match
-					}
-				}				
+			synchronized (usersFile) {
+				BufferedReader br = new BufferedReader(new FileReader(usersFile));
+				String st; 
+				while ((st = br.readLine()) != null) {
+					//loginInfo[0] = username   loginInfo[1] = password				
+					String[] loginInfo = st.split(":");
+					if(username.equals(loginInfo[0])) {
+						if(password.equals(loginInfo[1])) {
+							System.out.println("Login successful");
+							br.close();
+							return true;//user and pass match info on file
+						}else {
+							br.close();
+							return false;//password does not match
+						}
+					}				
+				}
+
+				br.close();
 			}
-			br.close();
 			return createAccount(username, password);//user is not on registered on file
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, "File of users not found", e);
@@ -98,17 +104,25 @@ public class Manager {
 
 
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File("users" + File.separator + localUser + File.separator + "files");
+		File userFiles = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + localUser + File.pathSeparator + "files");
 		String[] res = userFiles.list();		
 		return res;
 	}
 
 	public boolean deleteFile(String fileName) {
+		/* try {
+		       synchronized (file) {
+		          // ... open/modify/close file as per the request parameters...
+		       }
+		    }
+		    finally {
+		       releaseFile( file );
+		    }*/
 		return false;//fazer
 	}
 
 	public String[] listUsers() { //users	
-		File user = new File("users");
+		File user = new File(ServerConst.FOLDER_SERVER);
 		String[] res = user.list();		
 		return res;
 	}
@@ -124,7 +138,7 @@ public class Manager {
 
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
 		if(!localUser.equals(trustedUserID)) {
-			File trustedFile = new File("users" + File.separator + localUser + File.separator + "trusted.txt");
+			File trustedFile = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + localUser + File.pathSeparator + "trusted.txt");
 			BufferedReader br;
 			try {
 				br = new BufferedReader(new FileReader(trustedFile));
@@ -166,7 +180,7 @@ public class Manager {
 	}
 
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
-		File userMsgs = new File("users" + File.separator + userReceiver + File.separator + "msg.txt");
+		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + userReceiver + File.pathSeparator + ServerConst.FILE_NAME_MSG);
 		FileWriter fileWriter;
 		try {
 			/*
@@ -185,7 +199,7 @@ public class Manager {
 
 	public ArrayList<String> collectMsg(String user) {//collect
 		ArrayList<String> result = new ArrayList<String>();
-		File userMsgs = new File("users" + File.separator + user + File.separator + "msg.txt");
+		File userMsgs = new File(ServerConst.FOLDER_SERVER + File.pathSeparator + user + File.pathSeparator + ServerConst.FILE_NAME_MSG);
 		if(userMsgs.length() == 0) {
 			return null;//nao ha msgs na caixa
 		}else {			 
