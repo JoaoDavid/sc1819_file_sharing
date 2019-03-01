@@ -3,6 +3,7 @@ package server;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import communication.Message;
 import communication.OpCode;
 
 public class Manager {
@@ -101,12 +103,65 @@ public class Manager {
 		}
 		return false;
 	}
+	
+	/**
+	 * envia um ou mais ficheiros para o servidor, para a conta do utilizador local
+	 * (localUserID). Caso este utilizador já tenha algum ficheiro com o mesmo nome no
+	 * servidor, o servidor não substitui o ficheiro existente. O comando deve indicar, para cada
+	 * ficheiro, se o envio foi realizado com sucesso ou se o ficheiro já existia no servidor.
+	 * @param succ
+	 * @param failed
+	 * @param msg
+	 * @param connectedUser
+	 * @requires succ != null && failed != null && msg != null && connectedUser != null
+	 */
+	public void storeFiles(ArrayList<String> succ, ArrayList<String> failed, 
+			Message msg, String connectedUser){
+		File file;
+		for(int i = 0; i < msg.getParam().size();i++){
+			file = new File(ServerConst.FOLDER_SERVER_USERS 
+					+ File.separator + connectedUser 
+					+ File.separator + msg.getParam().get(i));
+			if(file.exists()){
+				failed.add(file.getName());
+			}else{
+				try{
+					file.getParentFile().mkdirs();
+					file.createNewFile();
+					FileOutputStream fos = new FileOutputStream(file);
+					fos.write(toPrimitives(msg.getParamBytes().get(i)));
+					fos.close();
+					succ.add(file.getName());
+				}catch(Exception e){
+					logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
+					failed.add(file.getName());
+				}
+			}
+		}
+	}
+	/**
+	 * Turn array of Byte[] to byte[]
+	 * @param oBytes
+	 * @return
+	 */
+	private static byte[] toPrimitives(Byte[] oBytes) {
 
+		byte[] bytes = new byte[oBytes.length];
+		for(int i = 0; i < oBytes.length; i++){
+			bytes[i] = oBytes[i];
+		}
+		return bytes;
 
+	}
+	
+	/**
+	 * @requires localUser != null
+	 * @param localUser
+	 * @return lista os ficheiros que o utilizador local (localUserID) tem no servidor.
+	 */
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + "files");
-		String[] res = userFiles.list();		
-		return res;
+		File userFiles = new File(ServerConst.FOLDER_SERVER + File.separator + localUser + File.separator + ServerConst.FOLDER_FILES);
+		return userFiles.list();
 	}
 
 	public boolean deleteFile(String fileName) {

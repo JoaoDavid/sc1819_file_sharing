@@ -27,27 +27,7 @@ public class Skel {
 			logger.log(Level.CONFIG, "STORE_FILES");
 			ArrayList<String> succ = new ArrayList<>();
 			ArrayList<String> failed = new ArrayList<>();			
-			File file;
-			for(int i = 0; i < msg.getParam().size();i++){
-				file = new File(ServerConst.FOLDER_SERVER_USERS 
-						+ File.separator + connectedUser 
-						+ File.separator + msg.getParam().get(i));
-				if(file.exists()){
-					failed.add(file.getName());
-				}else{
-					try{
-						file.getParentFile().mkdirs();
-						file.createNewFile();
-						FileOutputStream fos = new FileOutputStream(file);
-						fos.write(toPrimitives(msg.getParamBytes().get(i)));
-						fos.close();
-						succ.add(file.getName());
-					}catch(Exception e){
-						logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
-						failed.add(file.getName());
-					}
-				}
-			}
+			
 			response = new Message();
 			if(succ.size() == 0 && failed.size() > 0){
 				response.setOpCode(OpCode.OP_ERROR);
@@ -148,13 +128,5 @@ public class Skel {
 		return response;
 
 	}
-	private static byte[] toPrimitives(Byte[] oBytes) {
-
-		byte[] bytes = new byte[oBytes.length];
-		for(int i = 0; i < oBytes.length; i++){
-			bytes[i] = oBytes[i];
-		}
-		return bytes;
-
-	}
+	
 }
