@@ -1,6 +1,7 @@
 package client;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -12,15 +13,23 @@ import java.util.logging.Logger;
 import communication.Message;
 import communication.OpCode;
 
-
+/**
+ * MSG FILE
+ *
+ */
 public class MsgFile {
-
+	/* Logger*/
+	
 	private static final String CLASS_NAME = MsgFile.class.getName();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
+	/**
+	 * main
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
 		if(args.length == 2 || args.length == 3) {
@@ -59,8 +68,8 @@ public class MsgFile {
 		}
 
 	}
-
 	/**
+	 * Parser of commands line
 	 * @requires client != null && client.isConnected()
 	 * @param client
 	 */
@@ -120,18 +129,10 @@ public class MsgFile {
 					msgSent = new Message(OpCode.LIST_FILES);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-						if(msgResponse.getArrStrParam().length != 0) {
-							System.out.println("Files in the server");
-							for(String curr : msgResponse.getArrStrParam()) {
-								System.out.println(curr);
-							}
-							System.out.println("-------------------");
-						}else {
-							System.out.println("You have no files in the server");
-						}	
-					}else {
-						System.out.println("error: no answer from server");
+					if (msgResponse != null) {
+						for(String curr : msgResponse.getArrStrParam()) {
+							logger.log(Level.INFO, curr);
+						}
 					}
 				}else {
 					incompleteCommand();
@@ -144,9 +145,13 @@ public class MsgFile {
 					msgSent = new Message(OpCode.REMOVE_FILES,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					OpCode[] arrCodes = msgResponse.getOpCodeArr();
-					for(int i = 0; i < arrSent.length; i++) {
-						System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+					if (msgResponse != null){
+						OpCode[] arrCodes = msgResponse.getOpCodeArr();
+						for(int i = 0; i < arrSent.length; i++) {
+							logger.log(Level.INFO, arrSent[i] + ":" + arrCodes[i].toString());
+						}
+					} else {
+						logger.log(Level.SEVERE, "ERROR to recieve response");
 					}
 				}else {
 					incompleteCommand();
@@ -158,19 +163,11 @@ public class MsgFile {
 					msgSent = new Message(OpCode.USERS);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-						if(msgResponse.getArrStrParam().length != 0) {
-							System.out.println("Users registered in the server");
-							for(String curr : msgResponse.getArrStrParam()) {
-								System.out.println(curr);
-							}
-							System.out.println("-------------------");
-						}else {
-							System.out.println("No users registered in the server");
-						}	
-					}else {
-						System.out.println("error: no answer from server");
-					}	            	
+					if (msgResponse != null) {
+						for(String curr : msgResponse.getArrStrParam()) {
+							logger.log(Level.INFO, curr);
+						}
+					}		            	
 				}else {
 					incompleteCommand();
 				}
@@ -183,9 +180,13 @@ public class MsgFile {
 					msgSent = new Message(OpCode.TRUST_USERS,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					OpCode[] arrCodes = msgResponse.getOpCodeArr();
-					for(int i = 0; i < arrSent.length; i++) {
-						System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+					if (msgResponse != null){
+						OpCode[] arrCodes = msgResponse.getOpCodeArr();
+						for(int i = 0; i < arrSent.length; i++) {
+							logger.log(Level.INFO, arrSent[i] + ":" + arrCodes[i].toString());
+						}
+					} else{
+						incompleteCommand();
 					}
 				}else {
 					incompleteCommand();
@@ -198,6 +199,15 @@ public class MsgFile {
 					msgSent = new Message(OpCode.UNTRUST_USERS,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
+					if(msgResponse == null){
+						incompleteCommand();
+					}else{
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL){
+							logger.log(Level.INFO, "Friends removed: " + msgResponse.getStr());
+						}else{
+							logger.log(Level.SEVERE, msgResponse.getStr());
+						}
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -211,6 +221,24 @@ public class MsgFile {
 					//download file
 					msgSent = new Message(OpCode.DOWNLOAD_FILE, arrSent);
 					msgResponse = client.sendMsg(msgSent);
+					if(msgResponse == null){
+						incompleteCommand();
+					}{
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL){
+							try {
+								File fileTemp = new File(msgResponse.getStr());
+								FileOutputStream fos = new FileOutputStream(fileTemp);
+								fos.write(toPrimitives(msgResponse.getParamBytes().get(0)));
+								fos.close();
+								logger.log(Level.INFO, "Download file done: " + msgResponse.getStr());
+							} catch (Exception e) {
+								logger.log(Level.SEVERE, "Error to create the file " + msgResponse.getStr() 
+								+ "in machine of client");
+							}
+						}else{
+							logger.log(Level.SEVERE, msgResponse.getStr());
+						}
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -219,28 +247,21 @@ public class MsgFile {
 				logger.log(Level.CONFIG, "msg");
 				if(parsedInput.length >= 3) {
 					String userReceiver = parsedInput[1];
-					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length());
+					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length() + 1);
 					//send message
-					System.out.println("To:" + userReceiver + " msg:" + msg);
+					logger.log(Level.CONFIG, "destino:" + userReceiver + " msg:" + msg);
 					String[] arrSent = new String[2];
 					arrSent[0] = userReceiver;//receiver
 					arrSent[1] = msg;//text message
-					if(client.getUsername().equals(userReceiver)) {
-						System.out.println("msg not sent : can't send a msg to yourself");
-					}else {
-						msgSent = new Message(OpCode.SEND_MSG, arrSent);
-						msgResponse = client.sendMsg(msgSent);
-						if(msgResponse != null) {
-							if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-								System.out.println("Message Sent Successfully");
-							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FOUND) {
-								System.out.println("error: " + userReceiver + " not registered");
-							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
-								System.out.println("error: " + userReceiver + " is not on your friends list");
-								System.out.println("add " + userReceiver + " before sending him a message");
-							}
-						}else {
-							System.out.println("error: no answer from server");
+					msgSent = new Message(OpCode.SEND_MSG, arrSent);
+					msgResponse = client.sendMsg(msgSent);
+					if(msgResponse == null){
+						incompleteCommand();
+					}else{
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL){
+							logger.log(Level.INFO, msgResponse.getStr());
+						}else{
+							logger.log(Level.SEVERE, msgResponse.getStr());
 						}
 					}
 				}else {
@@ -253,10 +274,18 @@ public class MsgFile {
 					msgSent = new Message(OpCode.COLLECT_MSG);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					if(msgResponse != null) {
-						//tratar resposta
-					}else {
-						System.out.println("error: no answer from server");
+					if(msgResponse != null){
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL 
+								&& msgResponse.getInbox() != null && !msgResponse.getInbox().isEmpty()){
+							for(String msgToClient : msgResponse.getInbox()){
+								logger.log(Level.INFO, msgToClient);
+							}
+							//done your job! -> mostrou as mensagens
+						}else{
+							logger.log(Level.INFO, "Empty mail box.");
+						}
+					}else{
+						incompleteCommand();
 					}
 				}else {
 					incompleteCommand();
@@ -264,17 +293,15 @@ public class MsgFile {
 				break;
 			case "help":
 				logger.log(Level.CONFIG, "help");
-				System.out.println("Commands available");				
-				System.out.println("store <files>");
-				System.out.println("list");
-				System.out.println("users");
-				System.out.println("trusted <trustedUserIDs>");
-				System.out.println("untrusted <untrustedUserIDs>");
-				System.out.println("download <userID> <file>");
-				System.out.println("msg <userID> <msg>");
-				System.out.println("collect");
-				System.out.println("exit");
-				System.out.println("-------------------");
+				logger.log(Level.INFO, "store <files>");
+				logger.log(Level.INFO, "list");
+				logger.log(Level.INFO, "users");
+				logger.log(Level.INFO, "trusted <trustedUserIDs>");
+				logger.log(Level.INFO, "untrusted <untrustedUserIDs>");
+				logger.log(Level.INFO, "download <userID> <file>");
+				logger.log(Level.INFO, "msg <userID> <msg>");
+				logger.log(Level.INFO, "collect");
+				logger.log(Level.INFO, "exit");
 				break;
 			case "exit":
 				if(parsedInput.length == 1) {
@@ -284,7 +311,9 @@ public class MsgFile {
 					if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 						client.disconnect();
 						onLoop = false;
-					}		            	
+					}else{
+						incompleteCommand();
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -296,11 +325,17 @@ public class MsgFile {
 		}
 		sc.close();
 	}
-
+	/**
+	 * Message with error/incomplete request
+	 */
 	public static void incompleteCommand() {
 		logger.log(Level.SEVERE,"Error: unrecognized or incomplete command line");
 	}
-
+	/**
+	 * Convert to Object
+	 * @param bytesPrim
+	 * @return byte[] to Byte[]
+	 */
 	public static Byte[] toObjects(byte[] bytesPrim) {
 		Byte[] bytes = new Byte[bytesPrim.length];
 		int i = 0;
@@ -308,5 +343,19 @@ public class MsgFile {
 			bytes[i++] = b;
 		}
 		return bytes;
+	}
+	/**
+	 * Turn array of Byte[] to byte[]
+	 * @param oBytes
+	 * @return
+	 */
+	private static byte[] toPrimitives(Byte[] oBytes) {
+
+		byte[] bytes = new byte[oBytes.length];
+		for(int i = 0; i < oBytes.length; i++){
+			bytes[i] = oBytes[i];
+		}
+		return bytes;
+
 	}
 }

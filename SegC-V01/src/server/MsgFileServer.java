@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -122,6 +121,7 @@ public class MsgFileServer{
 								break;
 							}else {
 								//processar msg
+								System.out.println(user);
 								Message msgSent = Skel.invoke(msgReceived, user);
 								outStream.writeObject(msgSent);
 							}
@@ -129,11 +129,6 @@ public class MsgFileServer{
 					} catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();//rever esta excecao
-					} catch (SocketException e) {//resolver lancamento de exception quando user e desligado abruptamente
-						// TODO Auto-generated catch block
-						e.printStackTrace();//rever esta excecao
-						System.out.println("Client disconnected abruptly");//tentar descobrir excecao
-						return;//tentar descobrir excecao
 					}
 				}
 				else {

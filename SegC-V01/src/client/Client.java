@@ -100,7 +100,7 @@ public class Client {
 	/**
 	 * Send the message to Server
 	 * @param msgSent
-	 * @return if receive response return Message otherwise null
+	 * @return if recieve response return Message otherwise null
 	 * @requires msgSent != null
 	 */
 	public Message sendMsg(Message msgSent) {
