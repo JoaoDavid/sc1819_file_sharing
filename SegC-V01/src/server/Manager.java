@@ -209,7 +209,12 @@ public class Manager {
 	public boolean isRegistered(String user) {
 		return Arrays.asList(listUsers()).contains(user);
 	}
-
+	/**
+	 * Friends 
+	 * @param localUser
+	 * @param otherUser
+	 * @return localUser is friend of otherUser
+	 */
 	public boolean friends(String localUser, String otherUser) {
 		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
 		BufferedReader br;
@@ -224,11 +229,9 @@ public class Manager {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "File Not Found in Friends", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Method Friends fail", e);
 		}
 		return false;
 	}
@@ -283,7 +286,13 @@ public class Manager {
 			return false;
 		}
 	}
-
+	/**
+	 * Write message on the file of user
+	 * @param userSender
+	 * @param userReceiver
+	 * @param msg
+	 * @return true if it is success 
+	 */
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
 		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
 		FileWriter fileWriter;
@@ -293,25 +302,26 @@ public class Manager {
 			fileWriter.close();
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "Error to write in store Msg", e);
 		}
 		return false;
 	}
-
+	/**
+	 * Collect Msg from user
+	 * @param user
+	 * @return list with all messages -> null if empty
+	 */
 	public ArrayList<String> collectMsg(String user) {//collect
 		ArrayList<String> result = new ArrayList<String>();
 		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + user + File.separator + ServerConst.FILE_NAME_MSG);
 		if(userMsgs.length() == 0) {
+			logger.log(Level.CONFIG, "Empty InBox");
 			return null;//nao ha msgs na caixa
 		}else {			 
 			try {
 				BufferedReader br = new BufferedReader(new FileReader(userMsgs));
 				String st;
 				while ((st = br.readLine()) != null) {					
-					/*int indexSep = st.indexOf(':');
-					String userFrom = st.substring(0, indexSep);
-					String msg = st.substring(indexSep+1);*/
 					result.add(st);
 				}				
 				br.close();
@@ -321,13 +331,10 @@ public class Manager {
 				//clear inbox
 				return result;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.log(Level.SEVERE, "Impossible Colect Messages", e);
 				return null;
 			}
-
 		}
 
 	}
-
 }

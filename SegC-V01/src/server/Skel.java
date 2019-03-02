@@ -110,29 +110,33 @@ public class Skel {
 		case SEND_MSG: //msg <userID> <msg>
 			logger.log(Level.CONFIG, "SEND_MSG");
 			String[] receiverText = msg.getArrStrParam();
-			if(connectedUser.equals(receiverText[0])) {//rever, possivelmente colocar estes ifs dentro do storeMsg
-				response = new Message(OpCode.ERR_YOURSELF);
-				return response;
-			}
-			if(!svM.isRegistered(receiverText[0])) {
-				response = new Message(OpCode.ERR_NOT_FOUND);
-				return response;
-			}
-			if(!svM.friends(connectedUser,receiverText[0])) {
-				response = new Message(OpCode.ERR_NOT_FRIENDS);
-				return response;
-			}
-			boolean saved = svM.storeMsg(connectedUser, receiverText[0], receiverText[1]);
-			if(saved) {
-				response = new Message(OpCode.OP_SUCCESSFUL);
-				return response;
-			}else {
+			if(receiverText == null || receiverText.length == 0){
 				response = new Message(OpCode.OP_ERROR);
-				return response;
+			}else if(connectedUser.equals(receiverText[0])) {//rever, possivelmente colocar estes ifs dentro do storeMsg
+				response = new Message(OpCode.ERR_YOURSELF);
+			}else if(!svM.isRegistered(receiverText[0])) {
+				response = new Message(OpCode.ERR_NOT_FOUND);
+			}else if(!svM.friends(connectedUser,receiverText[0])) {
+				response = new Message(OpCode.ERR_NOT_FRIENDS);
+			}else{
+				boolean saved = svM.storeMsg(connectedUser, receiverText[0], receiverText[1]);
+				if(saved) {
+					response = new Message(OpCode.OP_SUCCESSFUL);
+				}else {
+					response = new Message(OpCode.OP_ERROR);
+				}
 			}
+			break;
 		case COLLECT_MSG:
 			logger.log(Level.CONFIG, "SHOW_MSG");
-
+			ArrayList<String> inbox = svM.collectMsg(connectedUser);
+			response = new Message();
+			if(inbox == null){
+				response.setOpCode(OpCode.OP_ERROR);
+			}else{
+				response.setOpCode(OpCode.OP_SUCCESSFUL);
+				response.setInbox(inbox);
+			}
 			break;
 		default:
 			logger.log(Level.SEVERE, "Enum not recognized");
@@ -141,5 +145,5 @@ public class Skel {
 		return response;
 
 	}
-	
+
 }

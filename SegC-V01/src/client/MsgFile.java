@@ -247,7 +247,7 @@ public class MsgFile {
 				logger.log(Level.CONFIG, "msg");
 				if(parsedInput.length >= 3) {
 					String userReceiver = parsedInput[1];
-					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length());
+					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length() + 1);
 					//send message
 					logger.log(Level.CONFIG, "destino:" + userReceiver + " msg:" + msg);
 					String[] arrSent = new String[2];
@@ -275,8 +275,9 @@ public class MsgFile {
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
 					if(msgResponse != null){
-						if(msgResponse.getParam() != null && !msgResponse.getParam().isEmpty()){
-							for(String msgToClient : msgResponse.getParam()){
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL 
+								&& msgResponse.getInbox() != null && !msgResponse.getInbox().isEmpty()){
+							for(String msgToClient : msgResponse.getInbox()){
 								logger.log(Level.INFO, msgToClient);
 							}
 							//done your job! -> mostrou as mensagens
