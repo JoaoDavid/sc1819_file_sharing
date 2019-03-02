@@ -8,7 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.Message;
-
+/**
+ * Responsible to connect to the Server!
+ */
 public class Client {
 
 	private static final String CLASS_NAME = Client.class.getName();
@@ -23,7 +25,14 @@ public class Client {
 	private ObjectOutputStream out;
 	private boolean isConnected;
 
-
+	/**
+	 * Constructor
+	 * @param username
+	 * @param password
+	 * @param host
+	 * @param port
+	 * @requires all parameters != null
+	 */
 	public Client(String username, String password, String host, int port) {
 		this.username = username;
 		this.password = password;
@@ -31,12 +40,17 @@ public class Client {
 		this.port = port;
 		this.isConnected = false;
 	}
-	
+	/**
+	 * Get the UserName to Login
+	 * @return userName
+	 */
 	public String getUsername() {
 		return this.username;
 	}
-
-
+	/**
+	 * Connect to the Server
+	 * @return True if connected otherwise False
+	 */
 	public boolean connect() {
 		//logger.log(Level.CONFIG, host + " " + port);
 		try {
@@ -47,7 +61,7 @@ public class Client {
 			out.writeObject(username);
 			out.writeObject(password);
 			isConnected = (Boolean) in.readObject();
-			
+
 			return isConnected;
 		} catch ( IOException | ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Error to Connect the Client", e);
@@ -55,7 +69,10 @@ public class Client {
 
 		return false;
 	}
-	
+	/**
+	 * Disconnect() from Socket and Streams
+	 * @return without errors True
+	 */
 	public boolean disconnect() {
 		try {
 			if(out != null) {
@@ -73,20 +90,30 @@ public class Client {
 		}
 		return true;
 	}
-
-
-	
+	/**
+	 * Connection with server 
+	 * @return true if connected otherwise false
+	 */
 	public boolean isConnected() {
 		return isConnected;
 	}
-	
+	/**
+	 * Send the message to Server
+	 * @param msgSent
+	 * @return if recieve response return Message otherwise null
+	 * @requires msgSent != null
+	 */
 	public Message sendMsg(Message msgSent) {
 		try {
 			out.writeObject(msgSent);
-			Message response = (Message) in.readObject();
-			return response;
+			Object obj = in.readObject();
+			if(obj instanceof Message){
+				Message response = (Message) obj;
+				return response;
+			}else{
+				logger.log(Level.SEVERE, "Different object send by socket");
+			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			logger.log(Level.SEVERE, "Error to resquest/response", e);
 		} catch (ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Send message class not found", e);
