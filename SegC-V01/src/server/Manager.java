@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,9 @@ public class Manager {
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 
 	private File usersFile;
+	private Semaphore semaphoreMSG = new Semaphore(1);
+	private Semaphore semaphoreTRUSTED = new Semaphore(1);
+	private Semaphore semaphoreUSERS = new Semaphore(1);
 
 
 	private static Manager INSTANCE;
@@ -36,14 +40,22 @@ public class Manager {
 			}
 		}
 	}
-
+	/**
+	 * Singleton
+	 * @return Manager
+	 */
 	public static Manager getInstance() {
 		if(INSTANCE == null) {
 			INSTANCE = new Manager();
 		}
 		return INSTANCE;
 	}
-
+	/**
+	 * Create Account
+	 * @param username
+	 * @param password
+	 * @return true if got success
+	 */
 	public boolean createAccount(String username, String password) {
 		logger.log(Level.INFO, "Creating account");
 		try {
@@ -72,7 +84,12 @@ public class Manager {
 		}
 		return false;
 	}
-
+	/**
+	 * Loggin
+	 * @param username
+	 * @param password
+	 * @return true was a user with password valid
+	 */
 	public boolean login(String username, String password) {
 		try {
 			synchronized (usersFile) {
@@ -159,20 +176,29 @@ public class Manager {
 	 * @return lista os ficheiros que o utilizador local (localUserID) tem no servidor.
 	 */
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FOLDER_FILES);
+		//na minha opinião carregava para uma tabela has todos os users para depois mais tarde podermos usar
+		File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + ServerConst.FOLDER_FILES);
 		return userFiles.list();
 	}
-
+	/**
+	 * remove um ou mais ficheiros do servidor, da conta do utilizador local. O
+	 * comando deve indicar, para cada ficheiro, se a remoção foi realizada com sucesso ou um
+	 * erro no caso de o ficheiro não existir no servidor.
+	 * @param fileName
+	 * @return
+	 */
 	public boolean deleteFile(String fileName) {
-		/* try {
-		       synchronized (file) {
-		          // ... open/modify/close file as per the request parameters...
-		       }
-		    }
-		    finally {
-		       releaseFile( file );
-		    }*/
-		return false;//fazer
+		try {
+			File file = new File(fileName);
+			semaphoreUSERS.acquire();
+			return file.delete();
+		}catch(Exception e){
+			logger.log(Level.SEVERE, e.getMessage(), e);
+		}finally {
+			semaphoreUSERS.release();
+		}
+		return false;
 	}
 
 	public String[] listUsers() { //users	
