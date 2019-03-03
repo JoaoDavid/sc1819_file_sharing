@@ -254,7 +254,7 @@ public class Manager {
 				return OpCode.ERR_YOURSELF;
 			}
 			if(!isRegistered(trustedUserID)) {
-				return OpCode.ERR_NOT_FOUND;
+				return OpCode.ERR_NOT_REGISTERED;
 			}
 			FileWriter fileWriter = new FileWriter(trustedFile,true);
 			fileWriter.write(trustedUserID + System.getProperty("line.separator"));
@@ -273,10 +273,50 @@ public class Manager {
 		return OpCode.OP_ERROR;
 	}
 
-	public OpCode untrusted(String localUser, String untrustedUserID) { //trusted <trustedUserIDs>
+	public OpCode[] untrusted(String localUser, String[] untrustedUserID) { //trusted <trustedUserIDs>
+		OpCode[] result = new OpCode[untrustedUserID.length];
 		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
-		//
-		return OpCode.OP_ERROR;//fazer
+		BufferedReader br;
+		ArrayList<String> fileContent = new ArrayList<String>();
+		try {
+			br = new BufferedReader(new FileReader(trustedFile));
+			String st; 
+			while ((st = br.readLine()) != null) {
+				fileContent.add(st);
+			}
+			br.close();
+			for(int i = 0; i < untrustedUserID.length; i++) {
+				if(!isRegistered(untrustedUserID[i])) {
+					result[i] = OpCode.ERR_NOT_REGISTERED;
+				}else if(localUser.equals(untrustedUserID[i])) {
+					result[i] = OpCode.ERR_YOURSELF;
+				}else {
+					boolean untrusted = fileContent.remove(untrustedUserID[i]);
+					if(untrusted) {
+						result[i] = OpCode.OP_SUCCESSFUL;
+					}else {
+						result[i] = OpCode.ERR_NOT_FOUND;
+					}
+				}
+			}
+			FileWriter fileWriter = new FileWriter(trustedFile);
+			fileWriter.write("");
+			fileWriter.close();
+			fileWriter = new FileWriter(trustedFile,true);
+			for(String str : fileContent) {
+				System.out.println(str);
+				fileWriter.write(str + System.getProperty("line.separator"));
+			}
+			fileWriter.close();
+			return result;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public boolean sendFileToClient(String userOwner, String userDownloading, String nameFile) {//download <userID> <file>

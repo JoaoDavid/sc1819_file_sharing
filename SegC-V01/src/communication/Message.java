@@ -21,7 +21,11 @@ public class Message implements Serializable{
 	}
 	
 	public Message(OpCode[] arrCodeParam) {
-		super();
+		this.arrCode = arrCodeParam;
+	}
+	
+	public Message(OpCode opCode, OpCode[] arrCodeParam) {
+		this.opCode = opCode;
 		this.arrCode = arrCodeParam;
 	}
 	

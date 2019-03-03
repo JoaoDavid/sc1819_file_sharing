@@ -68,7 +68,6 @@ public class Skel {
 			logger.log(Level.CONFIG, "USERS");
 			arrStrRes = svM.listUsers();
 			if(arrStrRes != null) {
-				logger.log(Level.CONFIG, "OK:USERS");
 				response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
 			}else {
 				response = new Message(OpCode.OP_ERROR);
@@ -87,22 +86,17 @@ public class Skel {
         		}*/
 				arrOpRes[i] = svM.trusted(connectedUser, usersTrust[i]);
 			}
-			response = new Message(arrOpRes);
+			response = new Message(OpCode.OP_RES_ARRAY,arrOpRes);
 			break;
 		case UNTRUST_USERS: //untrusted <untrustedUserIDs>
 			logger.log(Level.CONFIG, "UNTRUST_USERS");
 			String[] usersUntrust = msg.getArrStrParam();
-			arrOpRes = new OpCode[usersUntrust.length];
-			for(int i = 0; i < usersUntrust.length; i++) {
-				/*boolean deleted = svM.trusted(msg.getStrParam(), usersUntrust[i]);
-        		if(deleted) {
-        			arrOpRes[i] = OpCode.OP_SUCCESSFUL;
-        		}else {
-        			arrOpRes[i] = OpCode.OP_ERROR;
-        		}*/
-				arrOpRes[i] = svM.untrusted(connectedUser, usersUntrust[i]);
+			arrOpRes = svM.untrusted(connectedUser, usersUntrust);
+			if(arrOpRes != null) {
+				response = new Message(OpCode.OP_RES_ARRAY, arrOpRes);
+			}else {
+				response = new Message(OpCode.OP_ERROR);
 			}
-			response = new Message(arrOpRes);
 			break;
 		case DOWNLOAD_FILE: //download <userID> <file>
 			logger.log(Level.CONFIG, "DOWNLOAD_FILE");
@@ -112,10 +106,8 @@ public class Skel {
 			String[] receiverText = msg.getArrStrParam();
 			if(receiverText == null || receiverText.length == 0){
 				response = new Message(OpCode.OP_ERROR);
-			}else if(connectedUser.equals(receiverText[0])) {//rever, possivelmente colocar estes ifs dentro do storeMsg
-				response = new Message(OpCode.ERR_YOURSELF);
 			}else if(!svM.isRegistered(receiverText[0])) {
-				response = new Message(OpCode.ERR_NOT_FOUND);
+				response = new Message(OpCode.ERR_NOT_REGISTERED);
 			}else if(!svM.friends(connectedUser,receiverText[0])) {
 				response = new Message(OpCode.ERR_NOT_FRIENDS);
 			}else{

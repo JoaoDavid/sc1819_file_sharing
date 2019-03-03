@@ -122,11 +122,11 @@ public class MsgFile {
 					msgResponse = client.sendMsg(msgSent);
 					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 						if(msgResponse.getArrStrParam().length != 0) {
-							System.out.println("Files in the server");
+							System.out.println("--- Files in the server ---");
 							for(String curr : msgResponse.getArrStrParam()) {
 								System.out.println(curr);
 							}
-							System.out.println("-------------------");
+							System.out.println("---------------------------");
 						}else {
 							System.out.println("You have no files in the server");
 						}	
@@ -160,11 +160,11 @@ public class MsgFile {
 					msgResponse = client.sendMsg(msgSent);
 					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 						if(msgResponse.getArrStrParam().length != 0) {
-							System.out.println("Users registered in the server");
+							System.out.println("--- Users registered in the server ---");
 							for(String curr : msgResponse.getArrStrParam()) {
 								System.out.println(curr);
 							}
-							System.out.println("-------------------");
+							System.out.println("--------------------------------------");
 						}else {
 							System.out.println("No users registered in the server");
 						}	
@@ -174,7 +174,6 @@ public class MsgFile {
 				}else {
 					incompleteCommand();
 				}
-
 				break;
 			case "trusted": //trusted <trustedUserIDs>
 				if(parsedInput.length > 1) {
@@ -183,9 +182,16 @@ public class MsgFile {
 					msgSent = new Message(OpCode.TRUST_USERS,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					OpCode[] arrCodes = msgResponse.getOpCodeArr();
-					for(int i = 0; i < arrSent.length; i++) {
-						System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_RES_ARRAY) {
+						OpCode[] arrCode = msgResponse.getOpCodeArr();
+						System.out.println("--- Operation results ---");
+						for(int i = 0; i < arrSent.length; i++) {
+							System.out.println(arrSent[i] + ":" + arrCode[i]);
+						}
+						System.out.println("--------------------------------------");
+
+					}else {
+						System.out.println("error: no answer from server");
 					}
 				}else {
 					incompleteCommand();
@@ -198,6 +204,17 @@ public class MsgFile {
 					msgSent = new Message(OpCode.UNTRUST_USERS,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
+					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_RES_ARRAY) {
+						OpCode[] arrCode = msgResponse.getOpCodeArr();
+						System.out.println("--- Operation results ---");
+						for(int i = 0; i < arrSent.length; i++) {
+							System.out.println(arrSent[i] + ":" + arrCode[i]);
+						}
+						System.out.println("--------------------------------------");
+
+					}else {
+						System.out.println("error: no answer from server");
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -232,12 +249,14 @@ public class MsgFile {
 						msgResponse = client.sendMsg(msgSent);
 						if(msgResponse != null) {
 							if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-								System.out.println("Message Sent Successfully");
-							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FOUND) {
+								System.out.println("Message Sent Successfully to " + userReceiver);
+							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_REGISTERED) {
 								System.out.println("error: " + userReceiver + " not registered");
 							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
 								System.out.println("error: " + userReceiver + " is not on your friends list");
 								System.out.println("add " + userReceiver + " before sending him a message");
+							}else{
+								System.out.println("error: msg not sent");
 							}
 						}else {
 							System.out.println("error: no answer from server");
