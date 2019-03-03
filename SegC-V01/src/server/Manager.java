@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
@@ -56,6 +57,38 @@ public class Manager {
 				logger.log(Level.SEVERE, "IO Exception", e);
 			}
 		}
+		File file = new File(ServerConst.FOLDER_SERVER_USERS);
+		File temp;
+		if(file.exists()){
+			for(String paths: file.list()){
+				temp = new File(file.getPath() + File.separator + paths);
+				if(file.exists() && file.isDirectory() && users.containsKey(paths)){
+					createSemaphore(temp, paths);
+				}
+			}
+		}
+	}
+	/**
+	 * Recursion to add all semaphore for each file
+	 * ignore all folders only add semaphore only to files 
+	 * @param file
+	 * @param user
+	 * @requires file.exists() and user != null
+	 */
+	private void createSemaphore(File file, String user){
+		File temp;
+		for(String path: file.list()){
+			temp = new File(file.getPath() + File.separator +path);
+			if(temp.exists()){
+				if(ServerConst.FILE_NAME_TRUSTED.equals(temp.getName())){
+					continue;
+				}else if(temp.isFile()){
+					sempManager.addSem(user, temp.getPath());
+				}else{
+					createSemaphore(temp, user);
+				}
+			}
+		}
 	}
 	/**
 	 * Singleton
@@ -94,7 +127,7 @@ public class Manager {
 			File userTrusted = new File(path);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
-			sempManager.addSem(username, path);
+			//sempManager.addSem(username, path);
 			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
 					+ username + File.separator + ServerConst.FILE_NAME_MSG;
 			File userMsg = new File(path);
@@ -160,7 +193,7 @@ public class Manager {
 		String path;
 		for(int i = 0; i < msg.getParam().size();i++){
 			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
-					+ File.separator + msg.getParam().get(i);
+					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.getParam().get(i);
 			file = new File(path);
 			if(file.exists()){
 				failed.add(file.getName());
@@ -252,13 +285,8 @@ public class Manager {
 	public boolean friends(String localUser, String otherUser) {
 		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
-		Semaphore sem = sempManager.getSem(localUser, path);
 		BufferedReader br;
-		if(sem == null){
-			return false;
-		}
 		try {
-			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -272,17 +300,13 @@ public class Manager {
 			logger.log(Level.SEVERE, "File Not Found in Friends", e);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Method Friends fail", e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Semaphore fail", e);
-		} finally{
-			sem.release();
 		}
 		return false;
 	}
 	/**
 	 * adiciona os utilizadores trustedUserIDs como amigos do
 	 * utilizador local. Se algum dos utilizadores já estiver na lista de amigos do utilizador local
-     * deve ser assinalado um erro. Os restantes utilizadores são adicionados normalmente
+	 * deve ser assinalado um erro. Os restantes utilizadores são adicionados normalmente
 	 * @param localUser
 	 * @param trustedUserID
 	 * @return OpCode
@@ -291,13 +315,8 @@ public class Manager {
 		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
 				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
-		Semaphore sem = sempManager.getSem(localUser, path);
 		BufferedReader br;
-		if(sem == null){
-			return OpCode.OP_ERROR;
-		}
 		try {
-			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -324,10 +343,6 @@ public class Manager {
 			logger.log(Level.SEVERE, "File not found: " + path, e);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "IOException in trusted", e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Semaphore fail", e);
-		}finally{
-			sem.release();
 		}
 		//return false;
 		return OpCode.OP_ERROR;
@@ -345,12 +360,7 @@ public class Manager {
 		File trustedFile = new File(path);
 		BufferedReader br;
 		ArrayList<String> fileContent = new ArrayList<String>();
-		Semaphore sem = sempManager.getSem(localUser, path);
-		if(sem == null){
-			return null;
-		}
 		try {
-			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -385,10 +395,6 @@ public class Manager {
 			logger.log(Level.SEVERE, "File not found: " + path, e);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "IOException", e);
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Semaphore error", e);
-		}finally{
-			sem.release();
 		}
 		return null;
 	}
@@ -399,12 +405,33 @@ public class Manager {
 	 * @param nameFile
 	 * @return
 	 */
-	public boolean sendFileToClient(String userOwner, String userDownloading, String nameFile) {//download <userID> <file>
-		if(friends(userOwner,userDownloading)) {
-			return false;//FAZER
-		}else {
-			return false;
+	public Byte[] sendFileToClient(String userOwner, String nameFile) {//download <userID> <file>
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + userOwner 
+				+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFile;
+		File file = new File(path);
+		if(file.exists()){
+			Semaphore sem = sempManager.getSem(userOwner, nameFile);
+			if(sem == null){
+				return null;
+			}
+			try {
+				sem.acquire();
+				return toObjects(Files.readAllBytes(file.toPath()));
+			} catch (IOException | InterruptedException e) {
+				logger.log(Level.SEVERE, "Error to converte the file :" + nameFile + " to bytes", e);
+			}finally{
+				sem.release();
+			}
 		}
+		return null;
+	}
+	private static Byte[] toObjects(byte[] bytesPrim) {
+		Byte[] bytes = new Byte[bytesPrim.length];
+		int i = 0;
+		for (byte b : bytesPrim){
+			bytes[i++] = b;
+		}
+		return bytes;
 	}
 	/**
 	 * Write message on the file of user

@@ -1,6 +1,9 @@
 package client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -8,6 +11,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import communication.Message;
 import communication.OpCode;
@@ -94,7 +98,8 @@ public class MsgFile {
 					}
 				}
 				if(fileName.isEmpty() && parsedInput.length > 1){
-					logger.log(Level.SEVERE, "Não foi possivel enviar ficheiros: " + parsedInput.toString());
+					logger.log(Level.SEVERE, "Não foi possivel enviar ficheiros: " + Arrays.asList(parsedInput)
+					.stream().map(Object::toString).collect(Collectors.joining(",")));
 				}else if(parsedInput.length == 1){
 					incompleteCommand();
 				}else{
@@ -236,6 +241,28 @@ public class MsgFile {
 					//download file
 					msgSent = new Message(OpCode.DOWNLOAD_FILE, arrSent);
 					msgResponse = client.sendMsg(msgSent);
+					if(msgResponse != null) {
+						if(msgResponse.getOpCode() == OpCode.ERR_YOURSELF || 
+								msgResponse.getOpCode() == OpCode.OP_ERROR ||
+								msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
+							System.out.println(msgResponse.getStr());
+						}else if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
+							File tempFile = new File("MsgFileResources" + File.separator + "client" + msgResponse.getStr());					
+							try{
+								FileOutputStream fos = new FileOutputStream(tempFile);
+								fos.write(toPrimitives(msgResponse.getParamBytes().get(0)));
+								fos.close();
+								System.out.println("File path: " + tempFile.getPath());
+								System.out.println("It is avaible");
+							}catch(Exception e){
+								System.out.println("error:  Can not possible create the file in local");
+							}	
+						}else{
+							System.out.println("ERROR: msg not sent");
+						}
+					}else {
+						System.out.println("ERROR: no answer from server");
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -336,5 +363,19 @@ public class MsgFile {
 			bytes[i++] = b;
 		}
 		return bytes;
+	}
+	/**
+	 * Turn array of Byte[] to byte[]
+	 * @param oBytes
+	 * @return
+	 */
+	private static byte[] toPrimitives(Byte[] oBytes) {
+
+		byte[] bytes = new byte[oBytes.length];
+		for(int i = 0; i < oBytes.length; i++){
+			bytes[i] = oBytes[i];
+		}
+		return bytes;
+
 	}
 }

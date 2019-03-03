@@ -78,12 +78,6 @@ public class Skel {
 			String[] usersTrust = msg.getArrStrParam();
 			arrOpRes = new OpCode[usersTrust.length];
 			for(int i = 0; i < usersTrust.length; i++) {
-				/*boolean deleted = svM.trusted(msg.getStrParam(), usersTrust[i]);
-        		if(deleted) {
-        			arrOpRes[i] = OpCode.OP_SUCCESSFUL;
-        		}else {
-        			arrOpRes[i] = OpCode.OP_ERROR;
-        		}*/
 				arrOpRes[i] = svM.trusted(connectedUser, usersTrust[i]);
 			}
 			response = new Message(OpCode.OP_RES_ARRAY,arrOpRes);
@@ -100,6 +94,34 @@ public class Skel {
 			break;
 		case DOWNLOAD_FILE: //download <userID> <file>
 			logger.log(Level.CONFIG, "DOWNLOAD_FILE");
+			String[] users = msg.getArrStrParam();
+			response = new Message();
+			if(connectedUser.equals(users[0])){
+				logger.log(Level.SEVERE, "Same user.");
+				//erro -> é o user local
+				response.setOpCode(OpCode.ERR_YOURSELF);
+				response.setStr("Erro: Utilizador é o mesmo do pedido.");
+			}else if(svM.friends(connectedUser, users[0])){
+				//sao amigos
+				logger.log(Level.SEVERE, "they are friends");
+				Byte[] byteArray = svM.sendFileToClient(users[0],users[1]);
+				if(byteArray == null){
+					logger.log(Level.SEVERE, "Error to send the File by Server");
+					response.setOpCode(OpCode.OP_ERROR);
+					response.setStr("Error to send the File by Server");
+				}else{
+					response.setOpCode(OpCode.OP_SUCCESSFUL);
+					ArrayList<Byte[]> bytes = new ArrayList<>();
+					bytes.add(byteArray);
+					response.setParamBytes(bytes);
+					response.setStr(users[1]);
+				}
+			}else{
+				//não sao amigos
+				logger.log(Level.SEVERE, "Error, they are not friends");
+				response.setOpCode(OpCode.ERR_NOT_FRIENDS);
+				response.setStr("Não é amigo do utilizador: " + users[0]);
+			}
 			break;
 		case SEND_MSG: //msg <userID> <msg>
 			logger.log(Level.CONFIG, "SEND_MSG");
