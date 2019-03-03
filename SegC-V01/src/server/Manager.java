@@ -8,7 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,19 +17,20 @@ import communication.Message;
 import communication.OpCode;
 
 public class Manager {
-
+	//** Log **//
 	private static final String CLASS_NAME = Manager.class.getName();
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
-
+	//** File of passwords **//
 	private File usersFile;
-	private Semaphore semaphoreMSG = new Semaphore(1);
-	private Semaphore semaphoreTRUSTED = new Semaphore(1);
-	private Semaphore semaphoreUSERS = new Semaphore(1);
-
-
+	//** Object to Singleton **//
 	private static Manager INSTANCE;
+	//** ConcurrentManager **//
+	private ConcurrentManager sempManager;
+	private HashMap<String, String> users;
 
 	private Manager() {
+		sempManager = new ConcurrentManager();
+		users = new HashMap<>();
 		usersFile = new File(ServerConst.FILE_USERS_PASSWORDS);
 		if(!usersFile.exists()) {
 			try {
@@ -37,6 +38,22 @@ public class Manager {
 				usersFile.createNewFile();
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "ERROR to open the file " , e);
+			}
+		}else{
+			try {
+				synchronized (usersFile) {
+					BufferedReader br = new BufferedReader(new FileReader(usersFile));
+					String st; 
+					while ((st = br.readLine()) != null) {
+						String[] usersPass = st.split(":");
+						users.put(usersPass[0], usersPass[1]);
+					}
+					br.close();
+				}
+			} catch (FileNotFoundException e) {
+				logger.log(Level.SEVERE, "File of users not found", e);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "IO Exception", e);
 			}
 		}
 	}
@@ -63,21 +80,27 @@ public class Manager {
 				FileWriter fileWriter = new FileWriter(usersFile,true);
 				String newLine = System.getProperty("line.separator");
 				fileWriter.write(username + ":" + password + newLine);
+				users.put(username, password);
 				fileWriter.close();
 			}
-
-			File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FOLDER_FILES);
+			String path = ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FOLDER_FILES;
+			File userFiles = new File(path);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
-			File userTrusted = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED);
+			sempManager.addSem(username, path);
+			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED;
+			File userTrusted = new File(path);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
-			File userMsg = new File(ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_MSG);
+			sempManager.addSem(username, path);
+			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + ServerConst.FILE_NAME_MSG;
+			File userMsg = new File(path);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
+			sempManager.addSem(username, path);
 			return true;
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Error creating account", e);
@@ -120,7 +143,6 @@ public class Manager {
 		}
 		return false;
 	}
-
 	/**
 	 * envia um ou mais ficheiros para o servidor, para a conta do utilizador local
 	 * (localUserID). Caso este utilizador já tenha algum ficheiro com o mesmo nome no
@@ -135,10 +157,11 @@ public class Manager {
 	public void storeFiles(ArrayList<String> succ, ArrayList<String> failed, 
 			Message msg, String connectedUser){
 		File file;
+		String path;
 		for(int i = 0; i < msg.getParam().size();i++){
-			file = new File(ServerConst.FOLDER_SERVER_USERS 
-					+ File.separator + connectedUser 
-					+ File.separator + msg.getParam().get(i));
+			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
+					+ File.separator + msg.getParam().get(i);
+			file = new File(path);
 			if(file.exists()){
 				failed.add(file.getName());
 			}else{
@@ -149,6 +172,7 @@ public class Manager {
 					fos.write(toPrimitives(msg.getParamBytes().get(i)));
 					fos.close();
 					succ.add(file.getName());
+					sempManager.addSem(connectedUser, path);
 				}catch(Exception e){
 					logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
 					failed.add(file.getName());
@@ -176,7 +200,6 @@ public class Manager {
 	 * @return lista os ficheiros que o utilizador local (localUserID) tem no servidor.
 	 */
 	public String[] listFiles(String localUser) { //list
-		//na minha opinião carregava para uma tabela has todos os users para depois mais tarde podermos usar
 		File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
 				+ File.separator + ServerConst.FOLDER_FILES);
 		return userFiles.list();
@@ -189,28 +212,36 @@ public class Manager {
 	 * @return
 	 */
 	public boolean deleteFile(String user, String fileName) {
-		try {
-			String path = ServerConst.FOLDER_SERVER_USERS + File.separator + user + 
-					File.separator +  ServerConst.FOLDER_FILES + File.separator + fileName;
-			System.out.println(path);
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + user + 
+				File.separator +  ServerConst.FOLDER_FILES + File.separator + fileName;
+		logger.log(Level.CONFIG, "Patg to delete: " + path);
+		Semaphore sem = sempManager.getSem(user, path);
+		if(sem == null){
+			return false;
+		}
+		try {	
 			File file = new File(path);
-			semaphoreUSERS.acquire();
+			sem.acquire();
 			return file.delete();
 		}catch(Exception e){
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}finally {
-			semaphoreUSERS.release();
+			sem.release();
 		}
 		return false;
 	}
-
+	/**
+	 * @return List of Users
+	 */
 	public String[] listUsers() { //users	
-		File user = new File(ServerConst.FOLDER_SERVER_USERS);
-		return user.list();
+		return users.keySet().toArray(new String[users.size()]);
 	}
-
+	/**
+	 * @param user
+	 * @return true if registered
+	 */
 	public boolean isRegistered(String user) {
-		return Arrays.asList(listUsers()).contains(user);
+		return users.containsKey(user);
 	}
 	/**
 	 * Friends 
@@ -219,9 +250,15 @@ public class Manager {
 	 * @return localUser is friend of otherUser
 	 */
 	public boolean friends(String localUser, String otherUser) {
-		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED;
+		File trustedFile = new File(path);
+		Semaphore sem = sempManager.getSem(localUser, path);
 		BufferedReader br;
+		if(sem == null){
+			return false;
+		}
 		try {
+			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -235,14 +272,32 @@ public class Manager {
 			logger.log(Level.SEVERE, "File Not Found in Friends", e);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Method Friends fail", e);
+		} catch (InterruptedException e) {
+			logger.log(Level.SEVERE, "Semaphore fail", e);
+		} finally{
+			sem.release();
 		}
 		return false;
 	}
-
+	/**
+	 * adiciona os utilizadores trustedUserIDs como amigos do
+	 * utilizador local. Se algum dos utilizadores já estiver na lista de amigos do utilizador local
+     * deve ser assinalado um erro. Os restantes utilizadores são adicionados normalmente
+	 * @param localUser
+	 * @param trustedUserID
+	 * @return OpCode
+	 */
 	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
-		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
+		File trustedFile = new File(path);
+		Semaphore sem = sempManager.getSem(localUser, path);
 		BufferedReader br;
+		if(sem == null){
+			return OpCode.OP_ERROR;
+		}
 		try {
+			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -266,22 +321,36 @@ public class Manager {
 			return OpCode.OP_SUCCESSFUL;
 			//return true;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "File not found: " + path, e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "IOException in trusted", e);
+		} catch (InterruptedException e) {
+			logger.log(Level.SEVERE, "Semaphore fail", e);
+		}finally{
+			sem.release();
 		}
 		//return false;
 		return OpCode.OP_ERROR;
 	}
-
+	/**
+	 * 
+	 * @param localUser
+	 * @param untrustedUserID
+	 * @return
+	 */
 	public OpCode[] untrusted(String localUser, String[] untrustedUserID) { //trusted <trustedUserIDs>
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
 		OpCode[] result = new OpCode[untrustedUserID.length];
-		File trustedFile = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED);
+		File trustedFile = new File(path);
 		BufferedReader br;
 		ArrayList<String> fileContent = new ArrayList<String>();
+		Semaphore sem = sempManager.getSem(localUser, path);
+		if(sem == null){
+			return null;
+		}
 		try {
+			sem.acquire();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -313,15 +382,23 @@ public class Manager {
 			fileWriter.close();
 			return result;
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "File not found: " + path, e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log(Level.SEVERE, "IOException", e);
+		} catch (InterruptedException e) {
+			logger.log(Level.SEVERE, "Semaphore error", e);
+		}finally{
+			sem.release();
 		}
 		return null;
 	}
-
+	/**
+	 * 
+	 * @param userOwner
+	 * @param userDownloading
+	 * @param nameFile
+	 * @return
+	 */
 	public boolean sendFileToClient(String userOwner, String userDownloading, String nameFile) {//download <userID> <file>
 		if(friends(userOwner,userDownloading)) {
 			return false;//FAZER
@@ -337,15 +414,24 @@ public class Manager {
 	 * @return true if it is success 
 	 */
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
-		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver + File.separator + ServerConst.FILE_NAME_MSG);
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver 
+				+ File.separator + ServerConst.FILE_NAME_MSG;
+		File userMsgs = new File(path);
+		Semaphore sem = sempManager.getSem(userReceiver, path);
+		if(sem == null){
+			return false;
+		}
 		FileWriter fileWriter;
 		try {
+			sem.acquire();
 			fileWriter = new FileWriter(userMsgs,true);
 			fileWriter.write(userSender + ":" + msg + System.getProperty("line.separator"));
 			fileWriter.close();
 			return true;
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			logger.log(Level.SEVERE, "Error to write in store Msg", e);
+		}finally{
+			sem.release();
 		}
 		return false;
 	}
@@ -355,13 +441,20 @@ public class Manager {
 	 * @return list with all messages -> null if empty
 	 */
 	public ArrayList<String> collectMsg(String user) {//collect
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator 
+				+ user + File.separator + ServerConst.FILE_NAME_MSG;
 		ArrayList<String> result = new ArrayList<String>();
-		File userMsgs = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + user + File.separator + ServerConst.FILE_NAME_MSG);
-		if(userMsgs.length() == 0) {
+		File userMsgs = new File(path);
+		Semaphore sem = sempManager.getSem(user, path);
+		if(sem == null){
+			logger.log(Level.CONFIG, "Semaphore Empty");
+			return null;
+		}else if(userMsgs.length() == 0) {
 			logger.log(Level.CONFIG, "Empty InBox");
 			return null;//nao ha msgs na caixa
 		}else {			 
 			try {
+				sem.acquire();
 				BufferedReader br = new BufferedReader(new FileReader(userMsgs));
 				String st;
 				while ((st = br.readLine()) != null) {					
@@ -373,9 +466,11 @@ public class Manager {
 				fileWriter.close();
 				//clear inbox
 				return result;
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				logger.log(Level.SEVERE, "Impossible Colect Messages", e);
 				return null;
+			}finally{
+				sem.release();
 			}
 		}
 
