@@ -55,14 +55,14 @@ public class Skel {
 			String[] nameFile = msg.getArrStrParam();
 			arrOpRes = new OpCode[nameFile.length];
 			for(int i = 0; i < nameFile.length; i++) {
-				boolean deleted = svM.deleteFile(nameFile[i]);
+				boolean deleted = svM.deleteFile(connectedUser,nameFile[i]);
 				if(deleted) {
 					arrOpRes[i] = OpCode.OP_SUCCESSFUL;
 				}else {
-					arrOpRes[i] = OpCode.OP_ERROR;
+					arrOpRes[i] = OpCode.ERR_NOT_FOUND;
 				}
 			}
-			response = new Message(arrOpRes);
+			response = new Message(OpCode.OP_RES_ARRAY,arrOpRes);
 			break;
 		case USERS:
 			logger.log(Level.CONFIG, "USERS");

@@ -188,9 +188,12 @@ public class Manager {
 	 * @param fileName
 	 * @return
 	 */
-	public boolean deleteFile(String fileName) {
+	public boolean deleteFile(String user, String fileName) {
 		try {
-			File file = new File(fileName);
+			String path = ServerConst.FOLDER_SERVER_USERS + File.separator + user + 
+					File.separator +  ServerConst.FOLDER_FILES + File.separator + fileName;
+			System.out.println(path);
+			File file = new File(path);
 			semaphoreUSERS.acquire();
 			return file.delete();
 		}catch(Exception e){

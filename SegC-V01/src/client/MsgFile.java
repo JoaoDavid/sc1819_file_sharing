@@ -144,9 +144,17 @@ public class MsgFile {
 					msgSent = new Message(OpCode.REMOVE_FILES,arrSent);
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
-					OpCode[] arrCodes = msgResponse.getOpCodeArr();
-					for(int i = 0; i < arrSent.length; i++) {
-						System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_RES_ARRAY) {
+						OpCode[] arrCodes = msgResponse.getOpCodeArr();
+						for(int i = 0; i < arrSent.length; i++) {
+							if(arrCodes[i] == OpCode.OP_SUCCESSFUL) {
+								System.out.println(arrSent[i] + ":" + "DELETED");
+							}else {
+								System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+							}
+						}
+					}else {
+						System.out.println("ERROR: no answer from server");
 					}
 				}else {
 					incompleteCommand();
@@ -169,7 +177,7 @@ public class MsgFile {
 							System.out.println("No users registered in the server");
 						}	
 					}else {
-						System.out.println("error: no answer from server");
+						System.out.println("ERROR: no answer from server");
 					}	            	
 				}else {
 					incompleteCommand();
@@ -191,7 +199,7 @@ public class MsgFile {
 						System.out.println("--------------------------------------");
 
 					}else {
-						System.out.println("error: no answer from server");
+						System.out.println("ERROR: no answer from server");
 					}
 				}else {
 					incompleteCommand();
@@ -213,7 +221,7 @@ public class MsgFile {
 						System.out.println("--------------------------------------");
 
 					}else {
-						System.out.println("error: no answer from server");
+						System.out.println("ERROR: no answer from server");
 					}
 				}else {
 					incompleteCommand();
@@ -256,10 +264,10 @@ public class MsgFile {
 								System.out.println("error: " + userReceiver + " is not on your friends list");
 								System.out.println("add " + userReceiver + " before sending him a message");
 							}else{
-								System.out.println("error: msg not sent");
+								System.out.println("ERROR: msg not sent");
 							}
 						}else {
-							System.out.println("error: no answer from server");
+							System.out.println("ERROR: no answer from server");
 						}
 					}
 				}else {
@@ -275,7 +283,7 @@ public class MsgFile {
 					if(msgResponse != null) {
 						//tratar resposta
 					}else {
-						System.out.println("error: no answer from server");
+						System.out.println("ERROR: no answer from server");
 					}
 				}else {
 					incompleteCommand();
@@ -286,6 +294,7 @@ public class MsgFile {
 				System.out.println("Commands available");				
 				System.out.println("store <files>");
 				System.out.println("list");
+				System.out.println("remove <files>");
 				System.out.println("users");
 				System.out.println("trusted <trustedUserIDs>");
 				System.out.println("untrusted <untrustedUserIDs>");
@@ -309,7 +318,7 @@ public class MsgFile {
 				}
 				break;
 			default:
-				logger.log(Level.INFO, "Command is not recognized");
+				System.out.println("Command is not recognized");
 				break;
 			}
 		}
@@ -317,7 +326,7 @@ public class MsgFile {
 	}
 
 	public static void incompleteCommand() {
-		logger.log(Level.SEVERE,"Error: unrecognized or incomplete command line");
+		System.out.println("ERROR: unrecognized or incomplete command line");
 	}
 
 	public static Byte[] toObjects(byte[] bytesPrim) {
