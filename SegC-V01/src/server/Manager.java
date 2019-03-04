@@ -191,9 +191,9 @@ public class Manager {
 			Message msg, String connectedUser){
 		File file;
 		String path;
-		for(int i = 0; i < msg.getParam().size();i++){
+		for(int i = 0; i < msg.arrListStr().size();i++){
 			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
-					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.getParam().get(i);
+					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.arrListStr().get(i);
 			file = new File(path);
 			if(file.exists()){
 				failed.add(file.getName());
@@ -480,9 +480,9 @@ public class Manager {
 		if(sem == null){
 			logger.log(Level.CONFIG, "Semaphore Empty");
 			return null;
-		}else if(userMsgs.length() == 0) {
+		}else if(userMsgs.length() == 0) {//nao ha msgs na caixa, client ve se length == 0
 			logger.log(Level.CONFIG, "Empty InBox");
-			return null;//nao ha msgs na caixa
+			return result;
 		}else {			 
 			try {
 				sem.acquire();

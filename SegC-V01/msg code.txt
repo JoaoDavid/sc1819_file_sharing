@@ -1,0 +1,20 @@
+store <files>	STORE_FILES ...	decidir
+		decidir
+list	LIST_FILES	OP_SUCCESSFUL <arrStr>
+		OP_ERROR
+remove <files>	REMOVE_FILES <arrStr>	OP_RES_ARRAY <arrCode>
+		ERR_NOT_FOUND
+users	USERS	OP_SUCCESSFUL <arrStr>
+		OP_ERROR
+trusted <trustedUserIDs>	TRUST_USERS <arrStr>	OP_RES_ARRAY <arrCode of ERR_YOURSELF or ERR_NOT_REGISTERED or ERR_ALREADY_EXISTS or OP_SUCCESSFUL>
+		OP_ERROR
+untrusted <untrustedUserIDs>	UNTRUST_USERS <arrStr>	OP_RES_ARRAY <arrCode of ERR_YOURSELF or ERR_NOT_REGISTERED or ERR_NOT_FOUND or OP_SUCCESSFUL>
+		OP_ERROR
+download <userID> <file>	DOWNLOAD_FILE ...	decidir
+		decidir
+msg <userID> <msg>	SEND_MSG <arrStr(receiver,textMsg)>	OP_SUCCESSFUL
+		OP_ERROR or ERR_NOT_FRIENDS or ERR_NOT_REGISTERED
+collect	COLLECT_MSG <str>	OP_SUCCESSFUL <arrListStr>
+		OP_ERROR
+exit	END_CONNECTION	OP_SUCCESSFUL
+		

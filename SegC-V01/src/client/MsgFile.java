@@ -115,7 +115,7 @@ public class MsgFile {
 									+ msgResponse.getInbox().toString());
 						}
 						logger.log(Level.INFO, "Os seguintes ficheiros foram carregados no servidor: " 
-								+ msgResponse.getParam().toString());
+								+ msgResponse.arrListStr().toString());
 					}
 				}
 				break;
@@ -308,7 +308,17 @@ public class MsgFile {
 					//send message method
 					msgResponse = client.sendMsg(msgSent);
 					if(msgResponse != null) {
-						//tratar resposta
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
+							if(msgResponse.arrListStr().size() == 0) {
+								System.out.println("Your mail box is empty");
+							}else {
+								System.out.println("--- Messages in your mail box ---");
+								for (String str : msgResponse.arrListStr()) {
+									System.out.println(str);
+								}
+								System.out.println("---------------------------------");
+							}
+						}
 					}else {
 						System.out.println("ERROR: no answer from server");
 					}

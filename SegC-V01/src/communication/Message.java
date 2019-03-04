@@ -11,7 +11,7 @@ public class Message implements Serializable{
 	private OpCode[] arrCode;//used for used operations that require different opcodes for every argument
 	private String str;//used to send a string as message
 	private String[] arrStr;	
-	private ArrayList<String> param;
+	private ArrayList<String> arrListStr;
 	private ArrayList<Byte[]> paramBytes;
 	private ArrayList<String> inbox;
 	
@@ -24,6 +24,11 @@ public class Message implements Serializable{
 		this.arrCode = arrCodeParam;
 	}
 	
+	public Message(OpCode opCode, ArrayList<String> param) {
+		this.opCode = opCode;
+		this.arrListStr = param;
+	}
+
 	public Message(OpCode opCode, OpCode[] arrCodeParam) {
 		this.opCode = opCode;
 		this.arrCode = arrCodeParam;
@@ -73,7 +78,7 @@ public class Message implements Serializable{
 	}
 
 	public void setParam(ArrayList<String> param) {
-		this.param = param;
+		this.arrListStr = param;
 	}
 
 	public void setParamBytes(ArrayList<Byte[]> paramBytes) {
@@ -100,8 +105,8 @@ public class Message implements Serializable{
 		return this.arrStr;
 	}
 
-	public ArrayList<String> getParam() {
-		return param;
+	public ArrayList<String> arrListStr() {
+		return arrListStr;
 	}
 
 	public ArrayList<Byte[]> getParamBytes() {

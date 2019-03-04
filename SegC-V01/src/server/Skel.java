@@ -145,12 +145,10 @@ public class Skel {
 		case COLLECT_MSG:
 			logger.log(Level.CONFIG, "SHOW_MSG");
 			ArrayList<String> inbox = svM.collectMsg(connectedUser);
-			response = new Message();
 			if(inbox == null){
-				response.setOpCode(OpCode.OP_ERROR);
+				response = new Message(OpCode.OP_ERROR);
 			}else{
-				response.setOpCode(OpCode.OP_SUCCESSFUL);
-				response.setInbox(inbox);
+				response = new Message(OpCode.OP_SUCCESSFUL, inbox);
 			}
 			break;
 		default:
