@@ -7,7 +7,7 @@ public enum OpCode {
 	DOWNLOAD_FILE("download"), SEND_MSG("msg"), COLLECT_MSG("collect"), 
 	END_CONNECTION("exit"), OP_ERROR("error"), OP_SUCCESSFUL("OK"), 
 	OP_RES_ARRAY("op res in array"), OP_HELP("help"), OP_INVALID("invalid"),
-	ERR_NOT_REGISTERED("not registered"), ERR_ALREADY_EXISTS("already exists"),
+	ERR_NOT_REGISTERED("not registered in the server"), ERR_ALREADY_EXISTS("already exists"),
 	ERR_NOT_FRIENDS("not friends"), ERR_YOURSELF("it's yourself"),
 	ERR_NOT_FOUND("not found");
 	

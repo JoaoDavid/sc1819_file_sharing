@@ -153,9 +153,9 @@ public class MsgFile {
 						OpCode[] arrCodes = msgResponse.getOpCodeArr();
 						for(int i = 0; i < arrSent.length; i++) {
 							if(arrCodes[i] == OpCode.OP_SUCCESSFUL) {
-								System.out.println(arrSent[i] + ":" + "DELETED");
+								System.out.println(arrSent[i] + " : " + "DELETED");
 							}else {
-								System.out.println(arrSent[i] + ":" + arrCodes[i].toString());
+								System.out.println(arrSent[i] + " : " + arrCodes[i].toString());
 							}
 						}
 					}else {
@@ -199,7 +199,7 @@ public class MsgFile {
 						OpCode[] arrCode = msgResponse.getOpCodeArr();
 						System.out.println("--- Operation results ---");
 						for(int i = 0; i < arrSent.length; i++) {
-							System.out.println(arrSent[i] + ":" + arrCode[i]);
+							System.out.println(arrSent[i] + " : " + arrCode[i]);
 						}
 						System.out.println("--------------------------------------");
 
@@ -221,7 +221,7 @@ public class MsgFile {
 						OpCode[] arrCode = msgResponse.getOpCodeArr();
 						System.out.println("--- Operation results ---");
 						for(int i = 0; i < arrSent.length; i++) {
-							System.out.println(arrSent[i] + ":" + arrCode[i]);
+							System.out.println(arrSent[i] + " : " + arrCode[i]);
 						}
 						System.out.println("--------------------------------------");
 
@@ -286,7 +286,7 @@ public class MsgFile {
 							if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 								System.out.println("Message Sent Successfully to " + userReceiver);
 							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_REGISTERED) {
-								System.out.println("error: " + userReceiver + " not registered");
+								System.out.println("error: " + userReceiver + " not registered in the server");
 							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
 								System.out.println("error: " + userReceiver + " is not on your friends list");
 								System.out.println("add " + userReceiver + " before sending him a message");

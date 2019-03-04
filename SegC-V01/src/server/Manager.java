@@ -303,50 +303,54 @@ public class Manager {
 		}
 		return false;
 	}
+	
 	/**
 	 * adiciona os utilizadores trustedUserIDs como amigos do
 	 * utilizador local. Se algum dos utilizadores já estiver na lista de amigos do utilizador local
 	 * deve ser assinalado um erro. Os restantes utilizadores são adicionados normalmente
+	 * 
 	 * @param localUser
 	 * @param trustedUserID
-	 * @return OpCode
+	 * @return vetor de opcode ou null em caso de erro
 	 */
-	public OpCode trusted(String localUser, String trustedUserID) { //trusted <trustedUserIDs>
+	public OpCode[] trusted(String localUser, String[] trustedUserID) { //trusted <trustedUserIDs>
 		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
 				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
+		OpCode[] result = new OpCode[trustedUserID.length];
 		BufferedReader br;
+		ArrayList<String> fileContent = new ArrayList<String>();
 		try {
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
-				if(st.equals(trustedUserID)) {
-					br.close();
-					//return false;
-					return OpCode.ERR_ALREADY_EXISTS;
-				}
+				fileContent.add(st);
 			}
 			br.close();
-			if(localUser.equals(trustedUserID)) {
-				return OpCode.ERR_YOURSELF;
-			}
-			if(!isRegistered(trustedUserID)) {
-				return OpCode.ERR_NOT_REGISTERED;
-			}
 			FileWriter fileWriter = new FileWriter(trustedFile,true);
-			fileWriter.write(trustedUserID + System.getProperty("line.separator"));
-			System.out.println("escreveu");
+			for (int i = 0; i < trustedUserID.length; i++) {
+				if(localUser.equals(trustedUserID[i])) {
+					result[i] = OpCode.ERR_YOURSELF;
+				}else if(!isRegistered(trustedUserID[i])) {
+					result[i] = OpCode.ERR_NOT_REGISTERED;
+				}else if(fileContent.contains(trustedUserID[i])) {
+					result[i] = OpCode.ERR_ALREADY_EXISTS;
+				}else {
+					fileWriter.write(trustedUserID[i] + System.getProperty("line.separator"));
+					fileContent.add(trustedUserID[i]);
+					result[i] = OpCode.OP_SUCCESSFUL;
+				}
+			}			
 			fileWriter.close();
-			return OpCode.OP_SUCCESSFUL;
-			//return true;
+			return result;
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE, "File not found: " + path, e);
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "IOException in trusted", e);
 		}
-		//return false;
-		return OpCode.OP_ERROR;
+		return null;
 	}
+
 	/**
 	 * 
 	 * @param localUser

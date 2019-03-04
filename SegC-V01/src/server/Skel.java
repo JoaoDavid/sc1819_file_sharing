@@ -76,11 +76,12 @@ public class Skel {
 		case TRUST_USERS: //trusted <trustedUserIDs>
 			logger.log(Level.CONFIG, "TRUST_USERS");
 			String[] usersTrust = msg.getArrStrParam();
-			arrOpRes = new OpCode[usersTrust.length];
-			for(int i = 0; i < usersTrust.length; i++) {
-				arrOpRes[i] = svM.trusted(connectedUser, usersTrust[i]);
+			arrOpRes = svM.trusted(connectedUser, usersTrust);
+			if(arrOpRes != null) {
+				response = new Message(OpCode.OP_RES_ARRAY, arrOpRes);
+			}else {
+				response = new Message(OpCode.OP_ERROR);
 			}
-			response = new Message(OpCode.OP_RES_ARRAY,arrOpRes);
 			break;
 		case UNTRUST_USERS: //untrusted <untrustedUserIDs>
 			logger.log(Level.CONFIG, "UNTRUST_USERS");
