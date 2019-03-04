@@ -104,7 +104,7 @@ public class Skel {
 				response.setStr("Erro: Utilizador é o mesmo do pedido.");
 			}else if(svM.friends(connectedUser, users[0])){
 				//sao amigos
-				logger.log(Level.SEVERE, "they are friends");
+				logger.log(Level.INFO, "they are friends");
 				Byte[] byteArray = svM.sendFileToClient(users[0],users[1]);
 				if(byteArray == null){
 					logger.log(Level.SEVERE, "Error to send the File by Server");

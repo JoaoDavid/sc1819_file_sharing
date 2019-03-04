@@ -121,7 +121,8 @@ public class Manager {
 			File userFiles = new File(path);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
-			sempManager.addSem(username, path);
+			//it is a folder do not need semaphore
+			//sempManager.addSem(username, path);
 			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
 					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED;
 			File userTrusted = new File(path);
@@ -414,8 +415,9 @@ public class Manager {
 				+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFile;
 		File file = new File(path);
 		if(file.exists()){
-			Semaphore sem = sempManager.getSem(userOwner, nameFile);
+			Semaphore sem = sempManager.getSem(userOwner, path);
 			if(sem == null){
+				logger.log(Level.SEVERE, "Semaphore null");
 				return null;
 			}
 			try {

@@ -1,9 +1,7 @@
 package client;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -247,13 +245,15 @@ public class MsgFile {
 								msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
 							System.out.println(msgResponse.getStr());
 						}else if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-							File tempFile = new File("MsgFileResources" + File.separator + "client" + msgResponse.getStr());					
+							File tempFile = new File("MsgFileResources" + File.separator + "client" 
+									+ File.separator + client.getUsername() + File.separator + msgResponse.getStr());					
 							try{
+								tempFile.delete();
 								FileOutputStream fos = new FileOutputStream(tempFile);
 								fos.write(toPrimitives(msgResponse.getParamBytes().get(0)));
 								fos.close();
 								System.out.println("File path: " + tempFile.getPath());
-								System.out.println("It is avaible");
+								System.out.println("It is avaiable");
 							}catch(Exception e){
 								System.out.println("error:  Can not possible create the file in local");
 							}	
