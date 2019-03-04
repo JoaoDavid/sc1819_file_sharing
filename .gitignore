@@ -1,0 +1,5 @@
+# ignore tmp, log, class and war files
+*.tmp
+*.log
+*.class
+*.war
