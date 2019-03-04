@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.Message;
+import communication.OpCode;
 /**
  * Responsible to connect to the Server!
  */
@@ -60,9 +61,13 @@ public class Client {
 			logger.log(Level.CONFIG, "Connecting the user: " + username);
 			out.writeObject(username);
 			out.writeObject(password);
-			isConnected = (Boolean) in.readObject();
-
-			return isConnected;
+			 Message response = (Message) in.readObject();
+			 if(response != null && response.getOpCode() == OpCode.OP_SUCCESSFUL){
+				 isConnected = true;
+				 return isConnected;
+			 }else if(response != null && response.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
+				 logger.log(Level.SEVERE, "Error to Connect: Already logged!");
+			 }	 
 		} catch ( IOException | ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Error to Connect the Client", e);
 		}

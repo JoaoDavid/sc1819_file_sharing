@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -74,6 +75,8 @@ public class MsgFileServer{
 
 	}
 
+	//save users logged
+	private static ArrayList<String> usersLogged = new ArrayList<>();
 
 	//Threads utilizadas para comunicacao com os clientes
 	class ServerThread extends Thread {
@@ -104,11 +107,24 @@ public class MsgFileServer{
 				}
 
 				if (accM.login(user, passwd)){
-					logger.log(Level.INFO, "Client connected: " + user + " logged in");
-					outStream.writeObject(new Boolean(true));//envia true para o cliente a confirmar conecao
+
+					boolean islogged = false; 
+					synchronized (usersLogged) {
+						if(!usersLogged.contains(user)){
+							usersLogged.add(user);
+							logger.log(Level.INFO, "Client connected: " + user + " logged in");
+							outStream.writeObject(new Message(OpCode.OP_SUCCESSFUL));//envia true para o cliente a confirmar conecao
+							islogged = true;
+						}else{ 
+							logger.log(Level.INFO, "Error: client " + user + " already logged");
+							outStream.writeObject(new Message(OpCode.ERR_ALREADY_EXISTS));//envia true para o cliente a confirmar conecao
+						}
+
+					}
+					
 
 					try {
-						while(true) {
+						while(islogged) {
 							Object obj = inStream.readObject();
 
 							if(obj == null || !(obj instanceof Message)) {
@@ -134,11 +150,17 @@ public class MsgFileServer{
 						// TODO Auto-generated catch block
 						//e.printStackTrace();//rever esta excecao
 						logger.log(Level.INFO, "Client disconnected: Connection lost with " + user);
+					}finally{
+						if(islogged){
+							synchronized (usersLogged) {
+								usersLogged.remove(user);
+							}
+						}
 					}
 				}
 				else {
 					System.out.println("Password errada " + user);
-					outStream.writeObject(new Boolean(false));//envia false para o cliente a rejeitar conexao
+					outStream.writeObject(new Message(OpCode.OP_ERROR));//envia false para o cliente a rejeitar conexao
 				}
 				outStream.close();
 				inStream.close();
