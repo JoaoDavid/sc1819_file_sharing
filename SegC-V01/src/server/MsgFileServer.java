@@ -104,21 +104,22 @@ public class MsgFileServer{
 				}
 
 				if (accM.login(user, passwd)){
-					logger.log(Level.INFO, "Client connected, " + user + " logged in");
+					logger.log(Level.INFO, "Client connected: " + user + " logged in");
 					outStream.writeObject(new Boolean(true));//envia true para o cliente a confirmar conecao
-					
+
 					try {
 						while(true) {
 							Object obj = inStream.readObject();
-							
+
 							if(obj == null || !(obj instanceof Message)) {
 								break;
 							}
 							Message msgReceived = (Message) obj;
-							
+
 							if(OpCode.END_CONNECTION == msgReceived.getOpCode()) {
 								Message msgSent = new Message(OpCode.OP_SUCCESSFUL);
 								outStream.writeObject(msgSent);
+								logger.log(Level.INFO, "Client disconnected: " + user + " logged out");
 								break;
 							}else {
 								//processar msg
@@ -131,22 +132,17 @@ public class MsgFileServer{
 						e.printStackTrace();//rever esta excecao
 					} catch (SocketException e) {//resolver lancamento de exception quando user e desligado abruptamente
 						// TODO Auto-generated catch block
-						e.printStackTrace();//rever esta excecao
-						System.out.println("Client disconnected abruptly");//tentar descobrir excecao
-						return;//tentar descobrir excecao
+						//e.printStackTrace();//rever esta excecao
+						logger.log(Level.INFO, "Client disconnected: Connection lost with " + user);
 					}
 				}
 				else {
-					System.out.println("Password errada");
+					System.out.println("Password errada " + user);
 					outStream.writeObject(new Boolean(false));//envia false para o cliente a rejeitar conexao
 				}
-
 				outStream.close();
 				inStream.close();
-
 				socket.close();
-				logger.log(Level.INFO, "Client disconnected, " + user + " logged out");
-
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
