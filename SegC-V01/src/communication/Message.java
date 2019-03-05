@@ -12,7 +12,7 @@ public class Message implements Serializable{
 	private String str;//used to send a string as message
 	private String[] arrStr;	
 	private ArrayList<String> arrListStr;
-	private ArrayList<Byte[]> paramBytes;
+	private ArrayList<Byte[]> arrListArrBytes;
 	private ArrayList<String> inbox;
 	
 	
@@ -82,7 +82,7 @@ public class Message implements Serializable{
 	}
 
 	public void setParamBytes(ArrayList<Byte[]> paramBytes) {
-		this.paramBytes = paramBytes;
+		this.arrListArrBytes = paramBytes;
 	}
 
 	public void setInbox(ArrayList<String> inbox) {
@@ -105,12 +105,19 @@ public class Message implements Serializable{
 		return this.arrStr;
 	}
 
-	public ArrayList<String> arrListStr() {
+	public ArrayList<String> getArrListStr() {
 		return arrListStr;
 	}
 
-	public ArrayList<Byte[]> getParamBytes() {
-		return paramBytes;
+	public ArrayList<Byte[]> getArrListArrBytes() {
+		return arrListArrBytes;
+	}
+
+	public Message(OpCode opCode, ArrayList<String> arrListStr, ArrayList<Byte[]> arrListArrBytes) {
+		super();
+		this.opCode = opCode;
+		this.arrListStr = arrListStr;
+		this.arrListArrBytes = arrListArrBytes;
 	}
 
 	public ArrayList<String> getInbox() {

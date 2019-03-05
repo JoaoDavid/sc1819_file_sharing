@@ -24,21 +24,11 @@ public class Skel {
 		switch (code) {
 		case STORE_FILES: //store <files>
 			logger.log(Level.CONFIG, "STORE_FILES");
-			ArrayList<String> succ = new ArrayList<>();
-			ArrayList<String> failed = new ArrayList<>();
-			//atualiza lista dos files que foram carregados e não carregados
-			svM.storeFiles(succ,failed,msg,connectedUser);
-			//criação da reposta
-			response = new Message();
-			if(succ.size() == 0 && failed.size() > 0){
-				response.setOpCode(OpCode.OP_ERROR);
-			} else if(succ.size() != 0 && failed.size() == 0){
-				response.setOpCode(OpCode.OP_SUCCESSFUL);
-				response.setParam(succ);
-			} else{
-				response.setOpCode(OpCode.ERR_ALREADY_EXISTS);
-				response.setParam(succ);
-				response.setInbox(failed);
+			arrOpRes = svM.storeFiles(msg.getArrListStr(), msg.getArrListArrBytes(), connectedUser);
+			if(arrOpRes != null) {
+				response = new Message(OpCode.OP_RES_ARRAY, arrOpRes);
+			}else {
+				response = new Message(OpCode.OP_ERROR);
 			}
 			break;
 		case LIST_FILES:

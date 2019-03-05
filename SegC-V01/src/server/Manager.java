@@ -192,9 +192,9 @@ public class Manager {
 			Message msg, String connectedUser){
 		File file;
 		String path;
-		for(int i = 0; i < msg.arrListStr().size();i++){
+		for(int i = 0; i < msg.getArrListStr().size();i++){
 			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
-					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.arrListStr().get(i);
+					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.getArrListStr().get(i);
 			file = new File(path);
 			if(file.exists()){
 				failed.add(file.getName());
@@ -203,7 +203,7 @@ public class Manager {
 					file.getParentFile().mkdirs();
 					file.createNewFile();
 					FileOutputStream fos = new FileOutputStream(file);
-					fos.write(toPrimitives(msg.getParamBytes().get(i)));
+					fos.write(toPrimitives(msg.getArrListArrBytes().get(i)));
 					fos.close();
 					succ.add(file.getName());
 					sempManager.addSem(connectedUser, path);
@@ -214,6 +214,35 @@ public class Manager {
 			}
 		}
 	}
+	
+	public OpCode[] storeFiles(ArrayList<String> nameFiles, ArrayList<Byte[]> byteFiles, String connectedUser){
+		File file;
+		String path;
+		OpCode[] result = new OpCode[nameFiles.size()];
+		for(int i = 0; i < nameFiles.size();i++){
+			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
+					+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFiles.get(i);
+			file = new File(path);
+			if(file.exists()){
+				result[i] = OpCode.ERR_ALREADY_EXISTS;
+			}else{
+				try{
+					file.getParentFile().mkdirs();
+					file.createNewFile();
+					FileOutputStream fos = new FileOutputStream(file);
+					fos.write(toPrimitives(byteFiles.get(i)));
+					fos.close();
+					result[i] = OpCode.OP_SUCCESSFUL;
+					sempManager.addSem(connectedUser, path);
+				}catch(Exception e){
+					logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
+					result[i] = OpCode.OP_ERROR;
+				}
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * Turn array of Byte[] to byte[]
 	 * @param oBytes

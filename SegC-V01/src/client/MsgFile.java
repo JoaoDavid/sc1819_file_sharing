@@ -78,43 +78,55 @@ public class MsgFile {
 
 			switch (parsedInput[0]) {
 			case "store": //store <files>
-				logger.log(Level.CONFIG, "store");
-				File file;
-				ArrayList<String> fileName = new ArrayList<>();
-				ArrayList<Byte[]> byteFiles = new ArrayList<>();
-
-				for(int i = 1; i < parsedInput.length ; i++){
-					file = new File(parsedInput[i]);
-					if(file.exists()){
-
-						try {
-							byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
-							fileName.add(file.getName());
-						} catch (IOException e) {
-							logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
+				if(parsedInput.length > 1) {
+					logger.log(Level.CONFIG, "store");
+					File file;
+					ArrayList<String> nameFiles = new ArrayList<>();
+					ArrayList<Byte[]> byteFiles = new ArrayList<>();
+					ArrayList<String> nonExistent = new ArrayList<>();
+					for(int i = 1; i < parsedInput.length ; i++){
+						file = new File(parsedInput[i]);
+						if(file.exists()){
+							try {
+								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
+								nameFiles.add(file.getName());
+							} catch (IOException e) {
+								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
+							}
+						}else {
+							nonExistent.add(parsedInput[i]);
 						}
 					}
-				}
-				if(fileName.isEmpty() && parsedInput.length > 1){
-					logger.log(Level.SEVERE, "Não foi possivel enviar ficheiros: " + Arrays.asList(parsedInput)
-					.stream().map(Object::toString).collect(Collectors.joining(",")));
-				}else if(parsedInput.length == 1){
+					if(nameFiles.size() != 0) {
+						msgSent = new Message(OpCode.STORE_FILES, nameFiles, byteFiles);
+						msgResponse = client.sendMsg(msgSent);
+					}else {
+						System.out.println("Input files were not found : No files sent");
+						break;
+					}
+					if (msgResponse != null && msgResponse.getOpCode() == OpCode.OP_RES_ARRAY) {
+						OpCode[] arrCodes = msgResponse.getOpCodeArr();
+						int i = 0;
+						System.out.println("--- Operation results ---");
+						for(String str : nameFiles) {
+							if(arrCodes[i] == OpCode.OP_SUCCESSFUL) {
+								System.out.println(str + " : " + "STORED");
+							}else {
+								System.out.println(str + " : " + arrCodes[i].toString());
+							}
+							i++;
+						}
+						if(nonExistent.size() != 0) {
+							for(String str : nonExistent) {
+								System.out.println(str+ " : not found");
+							}
+						}
+						System.out.println("-------------------------");
+					}else {
+						System.out.println("ERROR: no answer from server");
+					}
+				}else {
 					incompleteCommand();
-				}else{
-					msgSent = new Message(OpCode.STORE_FILES);
-					msgSent.setParam(fileName);
-					msgSent.setParamBytes(byteFiles);
-					msgResponse = client.sendMsg(msgSent);
-					if(msgResponse == null || msgResponse.getOpCode() == OpCode.OP_ERROR){
-						logger.log(Level.SEVERE, "Erro ao receber a resposta do servidor");
-					}else{
-						if(msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
-							logger.log(Level.SEVERE, "Os seguintes ficheiros já existiam no servidor: " 
-									+ msgResponse.getInbox().toString());
-						}
-						logger.log(Level.INFO, "Os seguintes ficheiros foram carregados no servidor: " 
-								+ msgResponse.arrListStr().toString());
-					}
 				}
 				break;
 			case "list":
@@ -250,7 +262,7 @@ public class MsgFile {
 							try{
 								tempFile.delete();
 								FileOutputStream fos = new FileOutputStream(tempFile);
-								fos.write(toPrimitives(msgResponse.getParamBytes().get(0)));
+								fos.write(toPrimitives(msgResponse.getArrListArrBytes().get(0)));
 								fos.close();
 								System.out.println("File path: " + tempFile.getPath());
 								System.out.println("It is avaiable");
@@ -309,11 +321,11 @@ public class MsgFile {
 					msgResponse = client.sendMsg(msgSent);
 					if(msgResponse != null) {
 						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-							if(msgResponse.arrListStr().size() == 0) {
+							if(msgResponse.getArrListStr().size() == 0) {
 								System.out.println("Your mail box is empty");
 							}else {
 								System.out.println("--- Messages in your mail box ---");
-								for (String str : msgResponse.arrListStr()) {
+								for (String str : msgResponse.getArrListStr()) {
 									System.out.println(str);
 								}
 								System.out.println("---------------------------------");
@@ -363,7 +375,7 @@ public class MsgFile {
 	}
 
 	public static void incompleteCommand() {
-		System.out.println("ERROR: unrecognized or incomplete command line");
+		System.out.println("ERROR: incomplete command line");
 	}
 
 	public static Byte[] toObjects(byte[] bytesPrim) {

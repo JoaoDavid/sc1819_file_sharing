@@ -1,9 +1,10 @@
-store <files>	STORE_FILES ...	decidir
-		decidir
+Comando Utilizador	Mensagem de envio	Mensagem de resposta
+store <files>	STORE_FILES <arrListStr> <arrListArrBytes>	OP_RES_ARRAY <arrCode of OP_SUCCESSFUL or ERR_ALREADY_EXISTS or OP_ERROR>
+		OP_ERROR
 list	LIST_FILES	OP_SUCCESSFUL <arrStr>
 		OP_ERROR
-remove <files>	REMOVE_FILES <arrStr>	OP_RES_ARRAY <arrCode>
-		ERR_NOT_FOUND
+remove <files>	REMOVE_FILES <arrStr>	OP_RES_ARRAY <arrCode of OP_SUCCESSFUL or ERR_NOT_FOUND>
+		
 users	USERS	OP_SUCCESSFUL <arrStr>
 		OP_ERROR
 trusted <trustedUserIDs>	TRUST_USERS <arrStr>	OP_RES_ARRAY <arrCode of ERR_YOURSELF or ERR_NOT_REGISTERED or ERR_ALREADY_EXISTS or OP_SUCCESSFUL>
