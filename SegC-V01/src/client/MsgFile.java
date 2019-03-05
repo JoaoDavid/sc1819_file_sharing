@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Currency;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -252,25 +253,31 @@ public class MsgFile {
 					msgSent = new Message(OpCode.DOWNLOAD_FILE, arrSent);
 					msgResponse = client.sendMsg(msgSent);
 					if(msgResponse != null) {
-						if(msgResponse.getOpCode() == OpCode.ERR_YOURSELF || 
-								msgResponse.getOpCode() == OpCode.OP_ERROR ||
-								msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
-							System.out.println(msgResponse.getStr());
-						}else if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
-							File tempFile = new File("MsgFileResources" + File.separator + "client" 
-									+ File.separator + client.getUsername() + File.separator + msgResponse.getStr());					
+						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
+							//File tempFile = new File("MsgFileResources" + File.separator + "client" 
+							//		+ File.separator + client.getUsername() + File.separator + msgResponse.getStr());					
+							File fileDown = new File("MsgFileResources" + File.separator + "downloads" 
+							+ File.separator + arrSent[1]);
 							try{
-								tempFile.delete();
-								FileOutputStream fos = new FileOutputStream(tempFile);
-								fos.write(toPrimitives(msgResponse.getArrListArrBytes().get(0)));
+								if(fileDown.exists()) {
+									fileDown.delete();
+									System.out.println("File will be replaced with the new one that was downloaded");
+								}								
+								fileDown.getParentFile().mkdirs(); 
+								fileDown.createNewFile();
+								FileOutputStream fos = new FileOutputStream(fileDown);
+								fos.write(toPrimitives(msgResponse.getArrByte()));
 								fos.close();
-								System.out.println("File path: " + tempFile.getPath());
-								System.out.println("It is avaiable");
+								System.out.println("File downloaded to");
+								System.out.println("File path: " + fileDown.getPath());
 							}catch(Exception e){
-								System.out.println("error:  Can not possible create the file in local");
+								System.out.println("error downloading file");
+								e.printStackTrace();
 							}	
-						}else{
-							System.out.println("ERROR: msg not sent");
+						}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FOUND){
+							System.out.println(arrSent[1] + " : " + msgResponse.getOpCode());
+						}else {
+							System.out.println(arrSent[0] + " : " + msgResponse.getOpCode());
 						}
 					}else {
 						System.out.println("ERROR: no answer from server");

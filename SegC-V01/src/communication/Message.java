@@ -12,10 +12,17 @@ public class Message implements Serializable{
 	private String str;//used to send a string as message
 	private String[] arrStr;	
 	private ArrayList<String> arrListStr;
-	private ArrayList<Byte[]> arrListArrBytes;
+	private ArrayList<Byte[]> arrListArrByte;
+	private Byte[] arrByte;
 	private ArrayList<String> inbox;
 	
 	
+	public Message(OpCode opCode, Byte[] arrByte) {
+		super();
+		this.opCode = opCode;
+		this.arrByte = arrByte;
+	}
+
 	public Message (OpCode opCode) {
 		this.opCode = opCode;
 	}
@@ -43,7 +50,14 @@ public class Message implements Serializable{
 		super();
 		this.opCode = opCode;
 		this.arrStr = arrStrParam;
-	}	
+	}
+	
+	public Message(OpCode opCode, ArrayList<String> arrListStr, ArrayList<Byte[]> arrListArrBytes) {
+		super();
+		this.opCode = opCode;
+		this.arrListStr = arrListStr;
+		this.arrListArrByte = arrListArrBytes;
+	}
 
 	public Message() {
 		super();
@@ -68,6 +82,10 @@ public class Message implements Serializable{
 	public String[] getArrStr() {
 		return arrStr;
 	}
+	
+	public Byte[] getArrByte() {
+		return this.arrByte;
+	}
 
 	public void setArrStr(String[] arrStr) {
 		this.arrStr = arrStr;
@@ -82,7 +100,7 @@ public class Message implements Serializable{
 	}
 
 	public void setParamBytes(ArrayList<Byte[]> paramBytes) {
-		this.arrListArrBytes = paramBytes;
+		this.arrListArrByte = paramBytes;
 	}
 
 	public void setInbox(ArrayList<String> inbox) {
@@ -110,14 +128,7 @@ public class Message implements Serializable{
 	}
 
 	public ArrayList<Byte[]> getArrListArrBytes() {
-		return arrListArrBytes;
-	}
-
-	public Message(OpCode opCode, ArrayList<String> arrListStr, ArrayList<Byte[]> arrListArrBytes) {
-		super();
-		this.opCode = opCode;
-		this.arrListStr = arrListStr;
-		this.arrListArrBytes = arrListArrBytes;
+		return arrListArrByte;
 	}
 
 	public ArrayList<String> getInbox() {

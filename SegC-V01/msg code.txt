@@ -11,8 +11,8 @@ trusted <trustedUserIDs>	TRUST_USERS <arrStr>	OP_RES_ARRAY <arrCode of ERR_YOURS
 		OP_ERROR
 untrusted <untrustedUserIDs>	UNTRUST_USERS <arrStr>	OP_RES_ARRAY <arrCode of ERR_YOURSELF or ERR_NOT_REGISTERED or ERR_NOT_FOUND or OP_SUCCESSFUL>
 		OP_ERROR
-download <userID> <file>	DOWNLOAD_FILE ...	decidir
-		decidir
+download <userID> <file>	DOWNLOAD_FILE <arrSent(fileOwner,fileName)>	OP_SUCCESSFUL <byteArray>
+		ERR_YOURSELF or ERR_NOT_FOUND or ERR_NOT_FRIENDS or ERR_NOT_REGISTERED
 msg <userID> <msg>	SEND_MSG <arrStr(receiver,textMsg)>	OP_SUCCESSFUL
 		OP_ERROR or ERR_NOT_FRIENDS or ERR_NOT_REGISTERED
 collect	COLLECT_MSG <str>	OP_SUCCESSFUL <arrListStr>
