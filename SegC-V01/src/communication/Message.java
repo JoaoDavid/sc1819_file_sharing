@@ -14,11 +14,9 @@ public class Message implements Serializable{
 	private ArrayList<String> arrListStr;
 	private ArrayList<Byte[]> arrListArrByte;
 	private Byte[] arrByte;
-	private ArrayList<String> inbox;
 	
 	
 	public Message(OpCode opCode, Byte[] arrByte) {
-		super();
 		this.opCode = opCode;
 		this.arrByte = arrByte;
 	}
@@ -47,36 +45,22 @@ public class Message implements Serializable{
 	}
 	
 	public Message(OpCode opCode, String[] arrStrParam) {
-		super();
 		this.opCode = opCode;
-		this.arrStr = arrStrParam;
+		this.arrStr = arrStrParam.clone();
 	}
 	
 	public Message(OpCode opCode, ArrayList<String> arrListStr, ArrayList<Byte[]> arrListArrBytes) {
-		super();
 		this.opCode = opCode;
 		this.arrListStr = arrListStr;
 		this.arrListArrByte = arrListArrBytes;
-	}
-
-	public Message() {
-		super();
 	}
 	
 	public OpCode[] getArrCode() {
 		return arrCode;
 	}
 
-	public void setArrCode(OpCode[] arrCode) {
-		this.arrCode = arrCode;
-	}
-
 	public String getStr() {
 		return str;
-	}
-
-	public void setStr(String str) {
-		this.str = str;
 	}
 
 	public String[] getArrStr() {
@@ -85,26 +69,6 @@ public class Message implements Serializable{
 	
 	public Byte[] getArrByte() {
 		return this.arrByte;
-	}
-
-	public void setArrStr(String[] arrStr) {
-		this.arrStr = arrStr;
-	}
-
-	public void setOpCode(OpCode opCode) {
-		this.opCode = opCode;
-	}
-
-	public void setParam(ArrayList<String> param) {
-		this.arrListStr = param;
-	}
-
-	public void setParamBytes(ArrayList<Byte[]> paramBytes) {
-		this.arrListArrByte = paramBytes;
-	}
-
-	public void setInbox(ArrayList<String> inbox) {
-		this.inbox = inbox;
 	}
 
 	public OpCode getOpCode() {
@@ -120,7 +84,7 @@ public class Message implements Serializable{
 	}
 	
 	public String[] getArrStrParam() {
-		return this.arrStr;
+		return this.arrStr.clone();
 	}
 
 	public ArrayList<String> getArrListStr() {
@@ -129,10 +93,6 @@ public class Message implements Serializable{
 
 	public ArrayList<Byte[]> getArrListArrBytes() {
 		return arrListArrByte;
-	}
-
-	public ArrayList<String> getInbox() {
-		return inbox;
 	}
 	
 }

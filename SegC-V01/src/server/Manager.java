@@ -14,7 +14,6 @@ import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import communication.Message;
 import communication.OpCode;
 
 public class Manager {
@@ -90,6 +89,7 @@ public class Manager {
 			}
 		}
 	}
+	
 	/**
 	 * Singleton
 	 * @return Manager
@@ -100,6 +100,7 @@ public class Manager {
 		}
 		return INSTANCE;
 	}
+	
 	/**
 	 * Create Account
 	 * @param username
@@ -141,8 +142,9 @@ public class Manager {
 		}
 		return false;
 	}
+	
 	/**
-	 * Loggin
+	 * Login
 	 * @param username
 	 * @param password
 	 * @return true was a user with password valid
@@ -166,7 +168,6 @@ public class Manager {
 						}
 					}				
 				}
-
 				br.close();
 			}
 			return createAccount(username, password);//user is not on registered on file
@@ -177,44 +178,20 @@ public class Manager {
 		}
 		return false;
 	}
+	
 	/**
 	 * envia um ou mais ficheiros para o servidor, para a conta do utilizador local
 	 * (localUserID). Caso este utilizador já tenha algum ficheiro com o mesmo nome no
 	 * servidor, o servidor não substitui o ficheiro existente. O comando deve indicar, para cada
 	 * ficheiro, se o envio foi realizado com sucesso ou se o ficheiro já existia no servidor.
-	 * @param succ
-	 * @param failed
-	 * @param msg
+	 * 
+	 * @param nameFiles
+	 * @param byteFiles
 	 * @param connectedUser
-	 * @requires succ != null && failed != null && msg != null && connectedUser != null
+	 * @requires nameFiles != null && byteFiles != null && connectedUser != null
+	 * @return array of opcodes, with the same length as nameFiles and byteFiles, for each position has the respective
+	 * code indicating if the file was successfuly stored
 	 */
-	public void storeFiles(ArrayList<String> succ, ArrayList<String> failed, 
-			Message msg, String connectedUser){
-		File file;
-		String path;
-		for(int i = 0; i < msg.getArrListStr().size();i++){
-			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
-					+ File.separator + ServerConst.FOLDER_FILES + File.separator + msg.getArrListStr().get(i);
-			file = new File(path);
-			if(file.exists()){
-				failed.add(file.getName());
-			}else{
-				try{
-					file.getParentFile().mkdirs();
-					file.createNewFile();
-					FileOutputStream fos = new FileOutputStream(file);
-					fos.write(toPrimitives(msg.getArrListArrBytes().get(i)));
-					fos.close();
-					succ.add(file.getName());
-					sempManager.addSem(connectedUser, path);
-				}catch(Exception e){
-					logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
-					failed.add(file.getName());
-				}
-			}
-		}
-	}
-	
 	public OpCode[] storeFiles(ArrayList<String> nameFiles, ArrayList<Byte[]> byteFiles, String connectedUser){
 		File file;
 		String path;
