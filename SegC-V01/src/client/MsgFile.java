@@ -2,6 +2,7 @@ package client;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class MsgFile {
 	private static final String CLASS_NAME = MsgFile.class.getName();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
+
 
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
@@ -256,8 +258,8 @@ public class MsgFile {
 						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 							//File tempFile = new File("MsgFileResources" + File.separator + "client" 
 							//		+ File.separator + client.getUsername() + File.separator + msgResponse.getStr());					
-							File fileDown = new File("MsgFileResources" + File.separator + "downloads" 
-							+ File.separator + arrSent[1]);
+							File fileDown = new File(ClientConst.FOLDER_CLIENT_USERS + File.separator + client.getUsername() + 
+									File.separator + ClientConst.FOLDER_DOWNLOADS + File.separator + arrSent[1]);
 							try{
 								if(fileDown.exists()) {
 									fileDown.delete();
@@ -331,11 +333,22 @@ public class MsgFile {
 							if(msgResponse.getArrListStr().size() == 0) {
 								System.out.println("Your mail box is empty");
 							}else {
-								System.out.println("--- Messages in your mail box ---");
-								for (String str : msgResponse.getArrListStr()) {
-									System.out.println(str);
+								File inboxFile = new File(ClientConst.FOLDER_CLIENT_USERS + File.separator + client.getUsername() + 
+										File.separator + ClientConst.FILE_NAME_INBOX);
+								try {
+									FileWriter fileWriter = new FileWriter(inboxFile,true);
+									System.out.println("--- Messages collected from the server ---");
+									System.out.println("---    and stored in your inbox file   ---");
+									for (String str : msgResponse.getArrListStr()) {
+										fileWriter.write(str + System.getProperty("line.separator"));
+										System.out.println(str);
+									}
+									fileWriter.close();
+									System.out.println("------------------------------------------");
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									System.out.println("Error saving messages in your inbox");
 								}
-								System.out.println("---------------------------------");
 							}
 						}
 					}else {
