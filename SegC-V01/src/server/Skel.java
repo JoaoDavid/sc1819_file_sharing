@@ -23,7 +23,7 @@ public class Skel {
 		OpCode code = msg.getOpCode();
 		switch (code) {
 		case STORE_FILES: //store <files>
-			logger.log(Level.CONFIG, "STORE_FILES");
+			logger.log(Level.CONFIG, "STORE_FILES user: " + connectedUser);
 			arrOpRes = svM.storeFiles(msg.getArrListStr(), msg.getArrListArrBytes(), connectedUser);
 			if(arrOpRes != null) {
 				response = new Message(OpCode.OP_RES_ARRAY, arrOpRes);
@@ -32,7 +32,7 @@ public class Skel {
 			}
 			break;
 		case LIST_FILES:
-			logger.log(Level.CONFIG, "LIST_FILES");
+			logger.log(Level.CONFIG, "LIST_FILES user: " + connectedUser);
 			arrStrRes = svM.listFiles(connectedUser);
 			if(arrStrRes != null) {
 				response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
@@ -41,7 +41,7 @@ public class Skel {
 			}  	
 			break;
 		case REMOVE_FILES: //remove <files>
-			logger.log(Level.CONFIG, "REMOVE_FILES");
+			logger.log(Level.CONFIG, "REMOVE_FILES user: " + connectedUser);
 			String[] nameFile = msg.getArrStrParam();
 			arrOpRes = new OpCode[nameFile.length];
 			for(int i = 0; i < nameFile.length; i++) {
@@ -55,7 +55,7 @@ public class Skel {
 			response = new Message(OpCode.OP_RES_ARRAY,arrOpRes);
 			break;
 		case USERS:
-			logger.log(Level.CONFIG, "USERS");
+			logger.log(Level.CONFIG, "USERS user: " + connectedUser);
 			arrStrRes = svM.listUsers();
 			if(arrStrRes != null) {
 				response = new Message(OpCode.OP_SUCCESSFUL, arrStrRes);
@@ -64,7 +64,7 @@ public class Skel {
 			}
 			break;
 		case TRUST_USERS: //trusted <trustedUserIDs>
-			logger.log(Level.CONFIG, "TRUST_USERS");
+			logger.log(Level.CONFIG, "TRUST_USERS user: " + connectedUser);
 			String[] usersTrust = msg.getArrStrParam();
 			arrOpRes = svM.trusted(connectedUser, usersTrust);
 			if(arrOpRes != null) {
@@ -74,7 +74,7 @@ public class Skel {
 			}
 			break;
 		case UNTRUST_USERS: //untrusted <untrustedUserIDs>
-			logger.log(Level.CONFIG, "UNTRUST_USERS");
+			logger.log(Level.CONFIG, "UNTRUST_USERS user: " + connectedUser);
 			String[] usersUntrust = msg.getArrStrParam();
 			arrOpRes = svM.untrusted(connectedUser, usersUntrust);
 			if(arrOpRes != null) {
@@ -84,7 +84,7 @@ public class Skel {
 			}
 			break;
 		case DOWNLOAD_FILE: //download <userID> <file>
-			logger.log(Level.CONFIG, "DOWNLOAD_FILE");
+			logger.log(Level.CONFIG, "DOWNLOAD_FILE user: " + connectedUser);
 			//users name account that has the file and name of the file
 			String[] ownerFile = msg.getArrStrParam();
 			if(connectedUser.equals(ownerFile[0])){
@@ -112,7 +112,7 @@ public class Skel {
 			}
 			break;
 		case SEND_MSG: //msg <userID> <msg>
-			logger.log(Level.CONFIG, "SEND_MSG");
+			logger.log(Level.CONFIG, "SEND_MSG user: " + connectedUser);
 			String[] receiverText = msg.getArrStrParam();
 			if(receiverText == null || receiverText.length == 0){
 				response = new Message(OpCode.OP_ERROR);
@@ -130,7 +130,7 @@ public class Skel {
 			}
 			break;
 		case COLLECT_MSG:
-			logger.log(Level.CONFIG, "SHOW_MSG");
+			logger.log(Level.CONFIG, "SHOW_MSG user: " + connectedUser);
 			ArrayList<String> inbox = svM.collectMsg(connectedUser);
 			if(inbox == null){
 				response = new Message(OpCode.OP_ERROR);

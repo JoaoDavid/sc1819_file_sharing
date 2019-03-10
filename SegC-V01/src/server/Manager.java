@@ -261,7 +261,11 @@ public class Manager {
 		try {	
 			File file = new File(path);
 			sem.acquire();
-			return file.delete();
+			boolean isDeleted = file.delete();
+			if(isDeleted){
+				sempManager.delSem(user, path);
+			}
+			return isDeleted;
 		}catch(Exception e){
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}finally {

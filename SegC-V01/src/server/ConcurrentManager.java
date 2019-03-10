@@ -83,8 +83,22 @@ public class ConcurrentManager {
 				}
 			}
 		}
-		logger.log(Level.CONFIG, "Semaphore not found!");
+		logger.log(Level.CONFIG, "Semaphore not found! user: "+ user + "; path: "+ path);
 		return null;
+	}
+	public void delSem(String user, String path) {
+		logger.log(Level.CONFIG, "Delete Semaphore user: "+ user + "; path: "+ path);
+		if(user == null || user.isEmpty()|| path == null || path.isEmpty()){
+			logger.log(Level.SEVERE, "Error on parameters");
+			return;
+		}
+		Tuple<ArrayList<String>, ArrayList<Semaphore>> value = concurrentFilesUsers.get(user);
+		for(int i = 0;i < value.x.size(); i++){
+			if(value.x.get(i).equals(path)){
+				value.x.remove(i);
+				value.y.remove(i);
+			}
+		}
 	}
 }
 
