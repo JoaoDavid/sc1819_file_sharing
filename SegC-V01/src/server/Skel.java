@@ -108,7 +108,7 @@ public class Skel {
 			}else{
 				//não sao amigos
 				logger.log(Level.SEVERE, "Error, they are not friends");
-				response = new Message(OpCode.ERR_NOT_FRIENDS);
+				response = new Message(OpCode.ERR_NOT_TRUSTED);
 			}
 			break;
 		case SEND_MSG: //msg <userID> <msg>
@@ -119,7 +119,7 @@ public class Skel {
 			}else if(!svM.isRegistered(receiverText[0])) {
 				response = new Message(OpCode.ERR_NOT_REGISTERED);
 			}else if(!svM.friends(connectedUser,receiverText[0])) {
-				response = new Message(OpCode.ERR_NOT_FRIENDS);
+				response = new Message(OpCode.ERR_NOT_TRUSTED);
 			}else{
 				boolean saved = svM.storeMsg(connectedUser, receiverText[0], receiverText[1]);
 				if(saved) {

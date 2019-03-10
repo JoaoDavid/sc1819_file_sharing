@@ -278,8 +278,10 @@ public class MsgFile {
 							}	
 						}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FOUND){
 							System.out.println(arrSent[1] + " : " + msgResponse.getOpCode());
+						}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_TRUSTED){
+							System.out.println("error: you are not on " + arrSent[0] + "'s trusted list");
 						}else {
-							System.out.println(arrSent[0] + " : " + msgResponse.getOpCode());
+							System.out.println(msgResponse.getOpCode());
 						}
 					}else {
 						System.out.println("ERROR: no answer from server");
@@ -308,9 +310,8 @@ public class MsgFile {
 								System.out.println("Message Sent Successfully to " + userReceiver);
 							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_REGISTERED) {
 								System.out.println("error: " + userReceiver + " not registered in the server");
-							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_FRIENDS) {
-								System.out.println("error: " + userReceiver + " is not on your friends list");
-								System.out.println("add " + userReceiver + " before sending him a message");
+							}else if(msgResponse.getOpCode() == OpCode.ERR_NOT_TRUSTED) {
+								System.out.println("error: you are not on " + userReceiver + "'s trusted list");
 							}else{
 								System.out.println("ERROR: msg not sent");
 							}
@@ -331,11 +332,14 @@ public class MsgFile {
 					if(msgResponse != null) {
 						if(msgResponse.getOpCode() == OpCode.OP_SUCCESSFUL) {
 							if(msgResponse.getArrListStr().size() == 0) {
-								System.out.println("Your mail box is empty");
+								System.out.println("You don't have new messages in the server");
 							}else {
 								File inboxFile = new File(ClientConst.FOLDER_CLIENT_USERS + File.separator + client.getUsername() + 
 										File.separator + ClientConst.FILE_NAME_INBOX);
+
 								try {
+									inboxFile.getParentFile().mkdirs();
+									inboxFile.createNewFile();
 									FileWriter fileWriter = new FileWriter(inboxFile,true);
 									System.out.println("--- Messages collected from the server ---");
 									System.out.println("---    and stored in your inbox file   ---");

@@ -10,7 +10,7 @@ public enum OpCode {
 	OP_ERROR("error"), OP_SUCCESSFUL("OK"), OP_RES_ARRAY("op res in array"),
 	
 	ERR_NOT_REGISTERED("not registered in the server"), ERR_ALREADY_EXISTS("already exists"),
-	ERR_NOT_FRIENDS("not friends"), ERR_YOURSELF("it's yourself"),
+	ERR_NOT_TRUSTED("not trusted"), ERR_YOURSELF("it's yourself"),
 	ERR_NOT_FOUND("not found");
 	
 	private final String val;

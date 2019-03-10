@@ -89,7 +89,7 @@ public class Manager {
 			}
 		}
 	}
-	
+
 	/**
 	 * Singleton
 	 * @return Manager
@@ -100,7 +100,7 @@ public class Manager {
 		}
 		return INSTANCE;
 	}
-	
+
 	/**
 	 * Create Account
 	 * @param username
@@ -142,7 +142,7 @@ public class Manager {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Login
 	 * @param username
@@ -159,7 +159,6 @@ public class Manager {
 					String[] loginInfo = st.split(":");
 					if(username.equals(loginInfo[0])) {
 						if(password.equals(loginInfo[1])) {
-							System.out.println("Login successful");
 							br.close();
 							return true;//user and pass match info on file
 						}else {
@@ -178,7 +177,7 @@ public class Manager {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * envia um ou mais ficheiros para o servidor, para a conta do utilizador local
 	 * (localUserID). Caso este utilizador já tenha algum ficheiro com o mesmo nome no
@@ -219,7 +218,7 @@ public class Manager {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Turn array of Byte[] to byte[]
 	 * @param oBytes
@@ -290,27 +289,29 @@ public class Manager {
 	 * @return localUser is friend of otherUser
 	 */
 	public boolean friends(String localUser, String otherUser) {
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser + File.separator + ServerConst.FILE_NAME_TRUSTED;
+		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + otherUser + File.separator + ServerConst.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
 		BufferedReader br;
-		try {
-			br = new BufferedReader(new FileReader(trustedFile));
-			String st; 
-			while ((st = br.readLine()) != null) {
-				if(st.equals(otherUser)) {
-					br.close();
-					return true;
+		if(trustedFile.exists()) {
+			try {
+				br = new BufferedReader(new FileReader(trustedFile));
+				String st; 
+				while ((st = br.readLine()) != null) {
+					if(st.equals(localUser)) {
+						br.close();
+						return true;
+					}
 				}
+				br.close();
+			} catch (FileNotFoundException e) {
+				logger.log(Level.SEVERE, "File Not Found in Friends", e);
+			} catch (IOException e) {
+				logger.log(Level.SEVERE, "Method Friends fail", e);
 			}
-			br.close();
-		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, "File Not Found in Friends", e);
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Method Friends fail", e);
 		}
 		return false;
 	}
-	
+
 	/**
 	 * adiciona os utilizadores trustedUserIDs como amigos do
 	 * utilizador local. Se algum dos utilizadores já estiver na lista de amigos do utilizador local
