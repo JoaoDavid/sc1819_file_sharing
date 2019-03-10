@@ -354,6 +354,8 @@ public class MsgFile {
 									System.out.println("Error saving messages in your inbox");
 								}
 							}
+						}else {
+							System.out.println(msgResponse.getOpCode());
 						}
 					}else {
 						System.out.println("ERROR: no answer from server");

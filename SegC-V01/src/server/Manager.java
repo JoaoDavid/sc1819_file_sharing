@@ -329,6 +329,8 @@ public class Manager {
 		BufferedReader br;
 		ArrayList<String> fileContent = new ArrayList<String>();
 		try {
+			trustedFile.getParentFile().mkdirs();
+			trustedFile.createNewFile();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -373,6 +375,8 @@ public class Manager {
 		BufferedReader br;
 		ArrayList<String> fileContent = new ArrayList<String>();
 		try {
+			trustedFile.getParentFile().mkdirs();
+			trustedFile.createNewFile();
 			br = new BufferedReader(new FileReader(trustedFile));
 			String st; 
 			while ((st = br.readLine()) != null) {
@@ -486,33 +490,32 @@ public class Manager {
 		ArrayList<String> result = new ArrayList<String>();
 		File userMsgs = new File(path);
 		Semaphore sem = sempManager.getSem(user, path);
-		if(sem == null){
-			logger.log(Level.CONFIG, "Semaphore Empty");
-			return null;
-		}else if(userMsgs.length() == 0) {//nao ha msgs na caixa, client ve se length == 0
-			logger.log(Level.CONFIG, "Empty InBox");
-			return result;
-		}else {			 
-			try {
-				sem.acquire();
-				BufferedReader br = new BufferedReader(new FileReader(userMsgs));
-				String st;
-				while ((st = br.readLine()) != null) {					
-					result.add(st);
-				}				
-				br.close();
-				FileWriter fileWriter = new FileWriter(userMsgs);
-				fileWriter.write("");
-				fileWriter.close();
-				//clear inbox
-				return result;
-			} catch (IOException | InterruptedException e) {
-				logger.log(Level.SEVERE, "Impossible Colect Messages", e);
-				return null;
-			}finally{
-				sem.release();
+		try {
+			if(sem == null){
+				logger.log(Level.CONFIG, "Semaphore Empty");
+				sempManager.addSem(user, path);
+				sem = sempManager.getSem(user, path);
 			}
+			userMsgs.getParentFile().mkdirs();
+			userMsgs.createNewFile();
+			sem.acquire();
+			BufferedReader br = new BufferedReader(new FileReader(userMsgs));
+			String st;
+			while ((st = br.readLine()) != null) {					
+				result.add(st);
+			}				
+			br.close();
+			FileWriter fileWriter = new FileWriter(userMsgs);
+			fileWriter.write("");
+			fileWriter.close();
+			//clear inbox
+			return result;
+		} catch (IOException | InterruptedException e) {
+			logger.log(Level.SEVERE, "Impossible Colect Messages", e);
+			return null;
+		}finally{
+			sem.release();
 		}
-
 	}
+
 }

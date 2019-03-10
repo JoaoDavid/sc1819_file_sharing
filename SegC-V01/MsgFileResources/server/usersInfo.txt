@@ -1,3 +1,2 @@
-fernando:pass123
-user:pass
-user1:pass1
+fernando:pass
+rita:pass
