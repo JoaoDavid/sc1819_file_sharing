@@ -1,8 +1,7 @@
 package server;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.StampedLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,9 +22,7 @@ public class ConcurrentManager {
 			return y;
 		}
 	}
-	//** Default value to initial semaphore**/
-	public static final int DEFAULT_VALUE = 1;
-	private Hashtable<String, Tuple<ArrayList<String>,ArrayList<Semaphore>>> concurrentFilesUsers;
+	private Hashtable<String,StampedLock> concurrentFilesUsers;
 	//** Log **//
 	private static final String CLASS_NAME = ConcurrentManager.class.getName();
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
@@ -39,29 +36,16 @@ public class ConcurrentManager {
 	 * @param path
 	 * @requires user != null and path != null
 	 */
-	public boolean addSem(String user, String path){
-		if(user == null || user.isEmpty()|| path == null || path.isEmpty()){
+	public boolean addSem(String path){
+		if(path == null || path.isEmpty()){
 			logger.log(Level.SEVERE, "Error on parameters");
 			return false;
+		}else if(concurrentFilesUsers.containsKey(path)){
+			logger.log(Level.CONFIG, "Already exists: " + path);
+			return false;
 		}
-		
-		if(concurrentFilesUsers.containsKey(user)){
-			logger.log(Level.CONFIG, "Already exists for: " + user);
-			Tuple<ArrayList<String>, ArrayList<Semaphore>> value = concurrentFilesUsers.get(user);
-			if(value.x.contains(path)){
-				logger.log(Level.CONFIG, "Already exists path for: " + path);
-			}else{
-				logger.log(Level.CONFIG, "Add semaphore to the list for path: " + path);
-				value.x.add(path);
-				value.y.add(new Semaphore(DEFAULT_VALUE));
-			}
-		}else{
-			ArrayList<String> paths = new ArrayList<>();
-			ArrayList<Semaphore> sem = new ArrayList<>();
-			paths.add(path);
-			sem.add(new Semaphore(DEFAULT_VALUE));
-			concurrentFilesUsers.put(user, new Tuple<ArrayList<String>, ArrayList<Semaphore>>(paths, sem));
-		}
+		logger.log(Level.CONFIG, "Semaphore ADDED: " + path);
+		concurrentFilesUsers.put(path, new StampedLock());
 		return true;
 	}
 	/**
@@ -70,34 +54,30 @@ public class ConcurrentManager {
 	 * @return Tuple with file and semaphore
 	 * @requires user != null and path != null
 	 */
-	public Semaphore getSem(String user, String path){
-		if(user == null || user.isEmpty()|| path == null || path.isEmpty()){
+	public StampedLock getSem(String path){
+		if(path == null || path.isEmpty()){
 			logger.log(Level.SEVERE, "Error on parameters");
 			return null;
-		}
-		Tuple<ArrayList<String>, ArrayList<Semaphore>> value = concurrentFilesUsers.get(user);
-		if(value != null){
-			for(int i = 0; i < value.x.size(); i++){
-				if(value.x.get(i).equals(path)){
-					return value.y.get(i);
-				}
+		} else{
+			StampedLock locker = concurrentFilesUsers.get(path);
+			if(locker != null ){
+				logger.log(Level.CONFIG, "Semaphore found! path: "+ path);
+				return locker;
 			}
 		}
-		logger.log(Level.CONFIG, "Semaphore not found! user: "+ user + "; path: "+ path);
+		logger.log(Level.CONFIG, "Semaphore not found! path: "+ path);
 		return null;
 	}
 	public void delSem(String user, String path) {
-		logger.log(Level.CONFIG, "Delete Semaphore user: "+ user + "; path: "+ path);
-		if(user == null || user.isEmpty()|| path == null || path.isEmpty()){
+		logger.log(Level.CONFIG, "Delete Semaphore path: "+ path);
+		if(path == null || path.isEmpty()){
 			logger.log(Level.SEVERE, "Error on parameters");
 			return;
 		}
-		Tuple<ArrayList<String>, ArrayList<Semaphore>> value = concurrentFilesUsers.get(user);
-		for(int i = 0;i < value.x.size(); i++){
-			if(value.x.get(i).equals(path)){
-				value.x.remove(i);
-				value.y.remove(i);
-			}
+		if(concurrentFilesUsers.remove(path) != null){
+			logger.log(Level.CONFIG, "Semaphore deleted to path: "+ path);
+		}else{
+			logger.log(Level.CONFIG, "Semaphore NOT deleted to path: "+ path);
 		}
 	}
 }
