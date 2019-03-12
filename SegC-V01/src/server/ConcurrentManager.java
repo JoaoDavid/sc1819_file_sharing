@@ -6,22 +6,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ConcurrentManager {
-	//nested class
-	public class Tuple<X, Y> { 
-		public final X x; 
-		public final Y y;
-		
-		public Tuple(X x, Y y) { 
-			this.x = x; 
-			this.y = y; 
-		}
-		public X getFirst(){
-			return x;
-		}
-		public Y getSecond(){
-			return y;
-		}
-	}
 	private Hashtable<String,StampedLock> concurrentFilesUsers;
 	//** Log **//
 	private static final String CLASS_NAME = ConcurrentManager.class.getName();

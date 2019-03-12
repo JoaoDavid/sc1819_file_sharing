@@ -50,6 +50,7 @@ public class MsgFile {
 			if(client.connect()) {
 				logger.log(Level.INFO,"Connected to the server");
 				//Process command lines
+				System.out.println("Welcome " + args[1]);
 				parser(client);
 			}else{
 				logger.log(Level.INFO,"Login failed");
