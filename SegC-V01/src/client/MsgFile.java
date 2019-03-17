@@ -7,11 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Currency;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import communication.Message;
 import communication.OpCode;
@@ -22,7 +20,6 @@ public class MsgFile {
 	private static final String CLASS_NAME = MsgFile.class.getName();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
-
 
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
@@ -53,6 +50,7 @@ public class MsgFile {
 			if(client.connect()) {
 				logger.log(Level.INFO,"Connected to the server");
 				//Process command lines
+				System.out.println("Welcome " + args[1]);
 				parser(client);
 			}else{
 				logger.log(Level.INFO,"Login failed");
@@ -64,7 +62,6 @@ public class MsgFile {
 		}
 
 	}
-
 	/**
 	 * @requires client != null && client.isConnected()
 	 * @param client
@@ -399,11 +396,9 @@ public class MsgFile {
 		}
 		sc.close();
 	}
-
 	public static void incompleteCommand() {
 		System.out.println("ERROR: incomplete command line");
 	}
-
 	public static Byte[] toObjects(byte[] bytesPrim) {
 		Byte[] bytes = new Byte[bytesPrim.length];
 		int i = 0;

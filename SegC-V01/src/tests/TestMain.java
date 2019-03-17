@@ -2,12 +2,9 @@ package tests;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import communication.Message;
 import communication.OpCode;
-import server.Manager;
 
 public class TestMain {
 

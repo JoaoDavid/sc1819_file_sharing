@@ -7,6 +7,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -76,7 +78,7 @@ public class MsgFileServer{
 	}
 
 	//save users logged
-	private static ArrayList<String> usersLogged = new ArrayList<>();
+	private static List<String> usersLogged = (List<String>) Collections.synchronizedList(new ArrayList<String>());
 
 	//Threads utilizadas para comunicacao com os clientes
 	class ServerThread extends Thread {
@@ -147,8 +149,6 @@ public class MsgFileServer{
 						// TODO Auto-generated catch block
 						e.printStackTrace();//rever esta excecao
 					} catch (SocketException e) {//resolver lancamento de exception quando user e desligado abruptamente
-						// TODO Auto-generated catch block
-						//e.printStackTrace();//rever esta excecao
 						logger.log(Level.INFO, "Client disconnected: Connection lost with " + user);
 					}finally{
 						if(islogged){

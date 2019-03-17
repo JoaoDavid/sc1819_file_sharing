@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.StampedLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,7 +82,7 @@ public class Manager {
 				if(ServerConst.FILE_NAME_TRUSTED.equals(temp.getName())){
 					continue;
 				}else if(temp.isFile()){
-					sempManager.addSem(user, temp.getPath());
+					sempManager.addSem(temp.getPath());
 				}else{
 					createSemaphore(temp, user);
 				}
@@ -135,7 +135,7 @@ public class Manager {
 			File userMsg = new File(path);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
-			sempManager.addSem(username, path);
+			sempManager.addSem(path);
 			return true;
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Error creating account", e);
@@ -209,7 +209,7 @@ public class Manager {
 					fos.write(toPrimitives(byteFiles.get(i)));
 					fos.close();
 					result[i] = OpCode.OP_SUCCESSFUL;
-					sempManager.addSem(connectedUser, path);
+					sempManager.addSem(path);
 				}catch(Exception e){
 					logger.log(Level.SEVERE, "FAILED to store the file: " + file.getName());
 					result[i] = OpCode.OP_ERROR;
@@ -254,13 +254,13 @@ public class Manager {
 		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + user + 
 				File.separator +  ServerConst.FOLDER_FILES + File.separator + fileName;
 		logger.log(Level.CONFIG, "Patg to delete: " + path);
-		Semaphore sem = sempManager.getSem(user, path);
+		StampedLock sem = sempManager.getSem(path);
 		if(sem == null){
 			return false;
 		}
+		long stamp = sem.writeLock();
 		try {	
 			File file = new File(path);
-			sem.acquire();
 			boolean isDeleted = file.delete();
 			if(isDeleted){
 				sempManager.delSem(user, path);
@@ -269,7 +269,7 @@ public class Manager {
 		}catch(Exception e){
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}finally {
-			sem.release();
+			sem.unlockWrite(stamp);
 		}
 		return false;
 	}
@@ -430,18 +430,18 @@ public class Manager {
 				+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFile;
 		File file = new File(path);
 		if(file.exists()){
-			Semaphore sem = sempManager.getSem(userOwner, path);
+			StampedLock sem = sempManager.getSem(path);
 			if(sem == null){
 				logger.log(Level.SEVERE, "Semaphore null");
 				return null;
 			}
+			long stamp = sem.readLock();
 			try {
-				sem.acquire();
 				return toObjects(Files.readAllBytes(file.toPath()));
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Error to converte the file :" + nameFile + " to bytes", e);
 			}finally{
-				sem.release();
+				sem.unlock(stamp);
 			}
 		}
 		return null;
@@ -465,21 +465,21 @@ public class Manager {
 		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver 
 				+ File.separator + ServerConst.FILE_NAME_MSG;
 		File userMsgs = new File(path);
-		Semaphore sem = sempManager.getSem(userReceiver, path);
+		StampedLock sem = sempManager.getSem(path);
 		if(sem == null){
 			return false;
 		}
 		FileWriter fileWriter;
+		long stamp = sem.writeLock();
 		try {
-			sem.acquire();
 			fileWriter = new FileWriter(userMsgs,true);
 			fileWriter.write(userSender + ":" + msg + System.getProperty("line.separator"));
 			fileWriter.close();
 			return true;
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Error to write in store Msg", e);
 		}finally{
-			sem.release();
+			sem.unlock(stamp);
 		}
 		return false;
 	}
@@ -493,16 +493,13 @@ public class Manager {
 				+ user + File.separator + ServerConst.FILE_NAME_MSG;
 		ArrayList<String> result = new ArrayList<String>();
 		File userMsgs = new File(path);
-		Semaphore sem = sempManager.getSem(user, path);
+		StampedLock sem = sempManager.getSem(path);
+		if(sem == null){
+			logger.log(Level.CONFIG, "Semaphore Empty");
+			return null;
+		}
+		long stamp = sem.writeLock();
 		try {
-			if(sem == null){
-				logger.log(Level.CONFIG, "Semaphore Empty");
-				sempManager.addSem(user, path);
-				sem = sempManager.getSem(user, path);
-			}
-			userMsgs.getParentFile().mkdirs();
-			userMsgs.createNewFile();
-			sem.acquire();
 			BufferedReader br = new BufferedReader(new FileReader(userMsgs));
 			String st;
 			while ((st = br.readLine()) != null) {					
@@ -514,11 +511,11 @@ public class Manager {
 			fileWriter.close();
 			//clear inbox
 			return result;
-		} catch (IOException | InterruptedException e) {
+		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Impossible Colect Messages", e);
 			return null;
 		}finally{
-			sem.release();
+			sem.unlock(stamp);
 		}
 	}
 
