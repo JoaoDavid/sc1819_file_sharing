@@ -1,0 +1,14 @@
+// Grant everyone the following permission
+grant {
+
+    permission java.net.SocketPermission "*:1-", "listen, accept, resolve";
+
+    permission java.io.FilePermission "\\MsgFileResources\\server\\<<ALL FILES>>", "read, write, delete";
+
+    permission java.io.FilePermission "PhotoShare/-", "write";
+    permission java.io.FilePermission "PhotoShare/-", "read";
+    permission java.io.FilePermission "PhotoShare/-", "delete";
+
+   	permission java.io.FilePermission "\\src\\communication\\<<ALL FILES>>", "read";
+	permission java.io.FilePermission "\\src\\server\\<<ALL FILES>>", "read";
+};
