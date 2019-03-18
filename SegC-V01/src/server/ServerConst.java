@@ -5,7 +5,7 @@ import java.io.File;
 public class ServerConst {
 	public static final String FILE_NAME_USERS_PASSWORDS = "usersInfo.txt";
 
-	public static final String FOLDER_SERVER = "MsgFileResources" + File.separator + "server";
+	public static final String FOLDER_SERVER = System.getProperty("user.home") + File.separator + "MsgFileResources" + File.separator + "server";
 	
 	public static final String FOLDER_FILES = "files";
 	
@@ -17,5 +17,4 @@ public class ServerConst {
 
 	public static final String FILE_USERS_PASSWORDS = FOLDER_SERVER + File.separator + FILE_NAME_USERS_PASSWORDS;
 	
-	public static final String FOLDER_CLIENT = "MsgFileResources" + File.separator + "client";
 }

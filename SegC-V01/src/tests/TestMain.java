@@ -9,7 +9,7 @@ import communication.OpCode;
 public class TestMain {
 
 	public static void main(String[] args) throws IOException {
-		ArrayList<String> nameFiles = new ArrayList<>();
+		/*ArrayList<String> nameFiles = new ArrayList<>();
 		nameFiles.add("UM");
 		String[] vetor = new String[5];
 		Message msg = new Message(OpCode.OP_SUCCESSFUL, vetor);
@@ -17,7 +17,9 @@ public class TestMain {
 		vetor2[2] = "batata";
 		for (String str : vetor) {
 			System.out.println(str);
-		}
+		}*/
+		String currentUsersHomeDir = System.getProperty("user.home");
+		System.out.println(currentUsersHomeDir);
 	}
 
 }
