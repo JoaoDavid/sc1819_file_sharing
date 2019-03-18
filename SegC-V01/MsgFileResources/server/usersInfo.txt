@@ -1,5 +1,2 @@
 fernando:pass
 rita:pass
-eva:123
-user:123
-fernando1:pass1

@@ -1,0 +1,7 @@
+grant codeBase "file:bin${/}-" {
+	//usar no VM args= "-Djava.security.manager -Djava.security.policy=server.policy"
+	
+	//permission java.net.SocketPermission "127.0.0.1:23456", "listen";
+	//permission java.net.SocketPermission "127.0.0.1:1024-", "accept, resolve";
+	permission java.security.AllPermission;
+};
