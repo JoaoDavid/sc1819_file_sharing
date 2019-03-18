@@ -518,5 +518,20 @@ public class Manager {
 			sem.unlock(stamp);
 		}
 	}
+	/**
+	 * check if the user have this files or not
+	 * @param list
+	 * @param connectedUser
+	 * @return lista de ficheiros que nao estao armazenados
+	 */
+	public ArrayList<String> haveThisFiles(ArrayList<String> list, String connectedUser) {
+		ArrayList<String> res = new ArrayList<>();
+		for(String fileName:  listFiles(connectedUser)){
+			if(!list.contains(fileName)){
+				res.add(fileName);
+			}
+		}
+		return res;
+	}
 
 }

@@ -11,7 +11,7 @@ public enum OpCode {
 	
 	ERR_NOT_REGISTERED("not registered in the server"), ERR_ALREADY_EXISTS("already exists"),
 	ERR_NOT_TRUSTED("not trusted"), ERR_YOURSELF("it's yourself"),
-	ERR_NOT_FOUND("not found");
+	ERR_NOT_FOUND("not found"), STORE_FILES_I("store I");
 	
 	private final String val;
 	/**

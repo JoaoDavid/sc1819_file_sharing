@@ -23,7 +23,18 @@ public class Skel {
 		OpCode code = msg.getOpCode();
 		switch (code) {
 		case STORE_FILES: //store <files>
-			logger.log(Level.CONFIG, "STORE_FILES user: " + connectedUser);
+			logger.log(Level.CONFIG, "STORE_FILES I user: " + connectedUser);
+			ArrayList<String> list = msg.getArrListStr();
+			list = svM.haveThisFiles(list, connectedUser);
+			if(list.isEmpty()){
+				logger.log(Level.SEVERE, "User "+ connectedUser + " already have all files on server!");
+				response = new Message(OpCode.ERR_ALREADY_EXISTS, "Todos os ficheiros já estavam aramazenados no servidor.");
+			}else{
+				logger.log(Level.CONFIG, "User "+ connectedUser + " File to add to download: " + list.toString());
+				response = new Message(OpCode.OP_SUCCESSFUL, list);
+			}
+			break;
+		case STORE_FILES_I:
 			arrOpRes = svM.storeFiles(msg.getArrListStr(), msg.getArrListArrBytes(), connectedUser);
 			if(arrOpRes != null) {
 				response = new Message(OpCode.OP_RES_ARRAY, arrOpRes);

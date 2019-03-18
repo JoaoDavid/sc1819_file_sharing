@@ -84,17 +84,33 @@ public class MsgFile {
 					ArrayList<String> nameFiles = new ArrayList<>();
 					ArrayList<Byte[]> byteFiles = new ArrayList<>();
 					ArrayList<String> nonExistent = new ArrayList<>();
+					ArrayList<String> alreadyExists = new ArrayList<>();
 					for(int i = 1; i < parsedInput.length ; i++){
 						file = new File(parsedInput[i]);
 						if(file.exists()){
+								nameFiles.add(file.getName());
+						}else {
+							nonExistent.add(parsedInput[i]);
+						}
+					}
+					msgSent = new Message(OpCode.STORE_FILES, nameFiles);
+					msgResponse = client.sendMsg(msgSent);
+					if(msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
+						nameFiles.stream().forEach((a)->System.out.println(a + " already exist on server"));
+						break;
+					}
+					for(String filePath : nameFiles){
+						if(msgResponse.getArrListStr().contains(filePath)){
+						file = new File(filePath);
 							try {
 								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
 								nameFiles.add(file.getName());
 							} catch (IOException e) {
+								nonExistent.add(filePath);
 								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
 							}
-						}else {
-							nonExistent.add(parsedInput[i]);
+						}else{
+							alreadyExists.add(filePath);
 						}
 					}
 					if(nameFiles.size() != 0) {
@@ -121,6 +137,7 @@ public class MsgFile {
 								System.out.println(str+ " : not found");
 							}
 						}
+						alreadyExists.stream().forEach((a) ->System.out.println(a + " :already exists on Server"));
 						System.out.println("-------------------------");
 					}else {
 						System.out.println("ERROR: no answer from server");
