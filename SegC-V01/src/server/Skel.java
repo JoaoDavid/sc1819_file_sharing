@@ -25,7 +25,7 @@ public class Skel {
 		case STORE_FILES: //store <files>
 			logger.log(Level.CONFIG, "STORE_FILES I user: " + connectedUser);
 			ArrayList<String> list = msg.getArrListStr();
-			list = svM.haveThisFiles(list, connectedUser);
+			svM.haveThisFiles(list, connectedUser);
 			if(list.isEmpty()){
 				logger.log(Level.SEVERE, "User "+ connectedUser + " already have all files on server!");
 				response = new Message(OpCode.ERR_ALREADY_EXISTS, "Todos os ficheiros já estavam aramazenados no servidor.");

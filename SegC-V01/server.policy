@@ -4,9 +4,11 @@ grant codeBase "file:bin${/}-" {
 	permission java.io.FilePermission "${user.home}/MsgFileResources", "read,write";
 	permission java.io.FilePermission "${user.home}/MsgFileResources/server", "read,write";
 	permission java.io.FilePermission "${user.home}/MsgFileResources/server/-", "read,write,delete";
-	permission java.net.SocketPermission "127.0.0.1:23456", "listen,resolve";
+	permission java.net.SocketPermission "*:*", "listen,resolve";
 	permission java.util.PropertyPermission "user.home", "read";
-	permission java.net.SocketPermission "127.0.0.1:*", "accept,resolve"; //temos de ver em que portos o server trabalha
-
+	permission java.net.SocketPermission "*:*", "accept,resolve"; //temos de ver em que portos o server trabalha
+	permission java.util.PropertyPermission "file.separator", "read";
+  	permission java.util.PropertyPermission "path.separator", "read";
+  	permission java.util.PropertyPermission "line.separator", "read";
 	//permission java.security.AllPermission;
 };

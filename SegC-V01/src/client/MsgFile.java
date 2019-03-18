@@ -95,8 +95,9 @@ public class MsgFile {
 					}
 					msgSent = new Message(OpCode.STORE_FILES, nameFiles);
 					msgResponse = client.sendMsg(msgSent);
-					if(msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
+					if(!nameFiles.isEmpty() && msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
 						nameFiles.stream().forEach((a)->System.out.println(a + " already exist on server"));
+						nonExistent.stream().forEach((a)->System.out.println(a + " file not found"));
 						break;
 					}
 					for(String filePath : nameFiles){
@@ -104,17 +105,17 @@ public class MsgFile {
 						file = new File(filePath);
 							try {
 								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
-								nameFiles.add(file.getName());
 							} catch (IOException e) {
 								nonExistent.add(filePath);
+								msgResponse.getArrListStr().remove(filePath);
 								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
 							}
 						}else{
 							alreadyExists.add(filePath);
 						}
 					}
-					if(nameFiles.size() != 0) {
-						msgSent = new Message(OpCode.STORE_FILES, nameFiles, byteFiles);
+					if(msgResponse.getArrListStr().size() != 0) {
+						msgSent = new Message(OpCode.STORE_FILES_I, msgResponse.getArrListStr(), byteFiles);
 						msgResponse = client.sendMsg(msgSent);
 					}else {
 						System.out.println("Input files were not found : No files sent");
