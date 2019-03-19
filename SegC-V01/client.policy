@@ -1,7 +1,20 @@
 grant codeBase "file:bin${/}-" {
 	//usar no VM args= "-Djava.security.manager -Djava.security.policy=client.policy"
 	
-	//permission java.net.SocketPermission "*:23456", "listen";
-	//permission java.net.SocketPermission "*:1024-", "accept, resolve";
-	permission java.security.AllPermission;
+	permission java.net.SocketPermission "127.0.0.1:23456", "connect,resolve";
+	
+	permission java.util.PropertyPermission "user.home", "read";
+  	permission java.util.PropertyPermission "line.separator", "read";
+  	
+  	permission java.io.FilePermission "<<ALL FILES>>", "read";
+  	//para o utilizador poder enviar qualquer ficheiro na sua máquina para o servidor,
+  	// por esta razão é que damos a permissão de read
+  	
+  	permission java.io.FilePermission "${user.home}/MsgFileResources", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileResources/client", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileResources/client/-", "read,write,delete";
+	//é dada a permissao de delete porque ao existir um ficheiro com aquele nome apagamos o antigo substituindo pelo novo
+	//poderiamos tambem ter modificado o nome mas optamos por esta solução
+	
+	//permission java.security.AllPermission;
 };
