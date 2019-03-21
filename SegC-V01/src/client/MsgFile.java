@@ -84,21 +84,38 @@ public class MsgFile {
 					ArrayList<String> nameFiles = new ArrayList<>();
 					ArrayList<Byte[]> byteFiles = new ArrayList<>();
 					ArrayList<String> nonExistent = new ArrayList<>();
+					ArrayList<String> alreadyExists = new ArrayList<>();
 					for(int i = 1; i < parsedInput.length ; i++){
 						file = new File(parsedInput[i]);
 						if(file.exists()){
-							try {
-								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
 								nameFiles.add(file.getName());
-							} catch (IOException e) {
-								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
-							}
 						}else {
 							nonExistent.add(parsedInput[i]);
 						}
 					}
-					if(nameFiles.size() != 0) {
-						msgSent = new Message(OpCode.STORE_FILES, nameFiles, byteFiles);
+					msgSent = new Message(OpCode.STORE_FILES, nameFiles);
+					msgResponse = client.sendMsg(msgSent);
+					if(!nameFiles.isEmpty() && msgResponse.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
+						nameFiles.stream().forEach((a)->System.out.println(a + " already exist on server"));
+						nonExistent.stream().forEach((a)->System.out.println(a + " file not found"));
+						break;
+					}
+					for(String filePath : nameFiles){
+						if(msgResponse.getArrListStr().contains(filePath)){
+						file = new File(filePath);
+							try {
+								byteFiles.add(toObjects(Files.readAllBytes(file.toPath())));
+							} catch (IOException e) {
+								nonExistent.add(filePath);
+								msgResponse.getArrListStr().remove(filePath);
+								logger.log(Level.SEVERE, "Não foi possivel converter para bytes", e);
+							}
+						}else{
+							alreadyExists.add(filePath);
+						}
+					}
+					if(msgResponse.getArrListStr().size() != 0) {
+						msgSent = new Message(OpCode.STORE_FILES_I, msgResponse.getArrListStr(), byteFiles);
 						msgResponse = client.sendMsg(msgSent);
 					}else {
 						System.out.println("Input files were not found : No files sent");
@@ -121,6 +138,7 @@ public class MsgFile {
 								System.out.println(str+ " : not found");
 							}
 						}
+						alreadyExists.stream().forEach((a) ->System.out.println(a + " :already exists on Server"));
 						System.out.println("-------------------------");
 					}else {
 						System.out.println("ERROR: no answer from server");
