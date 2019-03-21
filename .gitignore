@@ -4,3 +4,4 @@
 *.class
 *.war
 bin/
+*.bak
