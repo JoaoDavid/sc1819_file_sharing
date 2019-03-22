@@ -31,14 +31,14 @@ public class MsgFileServer{
 				port = Integer.parseInt(args[0]);
 			}
 			catch (NumberFormatException e){
-				logger.log(Level.SEVERE, "Server failed: Invalid port");
+				System.out.println( "Server failed: Invalid port");
 				return;
 			}
 			System.out.println("Initializing server on port: " + args[0]);
 			MsgFileServer server = new MsgFileServer();
 			server.startServer(port);
 		}else {
-			logger.log(Level.SEVERE, "Server failed: <port> is the only argument required");
+			System.out.println("Server failed: <port> is the only argument required");
 		}
 	}
 
@@ -104,7 +104,7 @@ public class MsgFileServer{
 				}catch (ClassNotFoundException e1) {
 					outStream.close();
 					inStream.close();
-					logger.log(Level.SEVERE ,"Erro autenticacao", e1);
+					System.out.println("Erro autenticacao" + e1);
 					return;
 				}
 
