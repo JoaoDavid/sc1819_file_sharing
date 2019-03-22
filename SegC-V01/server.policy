@@ -7,10 +7,10 @@ grant codeBase "file:bin${/}-" {
 	
 	permission java.net.SocketPermission "127.0.0.1:23456", "listen,resolve";
 	//na linha x vai ser colocado o ip do servidor (maquina que executa o servidor)
-	permission java.net.SocketPermission "127.0.0.1:1024-", "accept,resolve"; //temos de ver em que portos o server trabalha
+	//1024 para cima, portas em que o server aceita conections
+	permission java.net.SocketPermission "127.0.0.1:1024-", "accept,resolve";
   	
   	permission java.util.PropertyPermission "user.home", "read";
   	permission java.util.PropertyPermission "line.separator", "read";
-	
-	//permission java.security.AllPermission;
+
 };
