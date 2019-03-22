@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -120,8 +121,10 @@ public class Client {
 			}else{
 				logger.log(Level.SEVERE, "Different object send by socket");
 			}
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Error to resquest/response", e);
+		}catch (SocketException e) {
+			System.out.println("Connection lost with the server");
+		}catch (IOException e) {
+			//logger.log(Level.SEVERE, "Error to resquest/response", e);
 		} catch (ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Send message class not found", e);
 		}

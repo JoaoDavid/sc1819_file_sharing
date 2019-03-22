@@ -34,7 +34,7 @@ public class MsgFileServer{
 				logger.log(Level.SEVERE, "Server failed: Invalid port");
 				return;
 			}
-			logger.log(Level.INFO,"Initializing server on port: " + args[0]);
+			System.out.println("Initializing server on port: " + args[0]);
 			MsgFileServer server = new MsgFileServer();
 			server.startServer(port);
 		}else {
@@ -57,7 +57,7 @@ public class MsgFileServer{
 		while(isReady) {
 			try {
 				Socket inSoc = sSoc.accept();
-				logger.log(Level.INFO, "Client connecting...");
+				System.out.println("Client connecting...");
 				ServerThread newServerThread = new ServerThread(inSoc);
 				newServerThread.start();
 			}
@@ -114,11 +114,11 @@ public class MsgFileServer{
 					synchronized (usersLogged) {
 						if(!usersLogged.contains(user)){
 							usersLogged.add(user);
-							logger.log(Level.INFO, "Client connected: " + user + " logged in");
+							System.out.println("Client connected: " + user + " logged in");
 							outStream.writeObject(new Message(OpCode.OP_SUCCESSFUL));//envia true para o cliente a confirmar conecao
 							islogged = true;
 						}else{ 
-							logger.log(Level.INFO, "Error: client " + user + " already logged");
+							System.out.println("Error: client " + user + " already logged");
 							outStream.writeObject(new Message(OpCode.ERR_ALREADY_EXISTS));//envia true para o cliente a confirmar conecao
 						}
 
@@ -137,7 +137,7 @@ public class MsgFileServer{
 							if(OpCode.END_CONNECTION == msgReceived.getOpCode()) {
 								Message msgSent = new Message(OpCode.OP_SUCCESSFUL);
 								outStream.writeObject(msgSent);
-								logger.log(Level.INFO, "Client disconnected: " + user + " logged out");
+								System.out.println("Client disconnected: " + user + " logged out");
 								break;
 							}else {
 								//processar msg
@@ -149,7 +149,7 @@ public class MsgFileServer{
 						// TODO Auto-generated catch block
 						e.printStackTrace();//rever esta excecao
 					} catch (SocketException e) {//resolver lancamento de exception quando user e desligado abruptamente
-						logger.log(Level.INFO, "Client disconnected: Connection lost with " + user);
+						System.out.println("Client disconnected: Connection lost with " + user);
 					}finally{
 						if(islogged){
 							synchronized (usersLogged) {

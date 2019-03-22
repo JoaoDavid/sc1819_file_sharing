@@ -88,26 +88,24 @@ public class Skel {
 			//users name account that has the file and name of the file
 			String[] ownerFile = msg.getArrStrParam();
 			if(connectedUser.equals(ownerFile[0])){
-				logger.log(Level.SEVERE, "Same user.");
 				//erro -> é o user local
 				response = new Message(OpCode.ERR_YOURSELF);
 				//response.setStr("Erro: Utilizador é o mesmo do pedido.");
 			}else if(!svM.isRegistered(ownerFile[0])) {
-				logger.log(Level.INFO, "user is not registered");
+				//user is not registered
 				response = new Message(OpCode.ERR_NOT_REGISTERED);
 			}else if(svM.friends(connectedUser, ownerFile[0])){
 				//sao amigos
-				logger.log(Level.INFO, "they are friends");
 				Byte[] byteArray = svM.sendFileToClient(ownerFile[0],ownerFile[1]);
 				if(byteArray == null){
-					logger.log(Level.SEVERE, "File not found");
+					//logger.log(Level.CONFIG, "File not found");
 					response = new Message(OpCode.ERR_NOT_FOUND);
 				}else{
 					response = new Message(OpCode.OP_SUCCESSFUL, byteArray);
 				}
 			}else{
 				//não sao amigos
-				logger.log(Level.SEVERE, "Error, they are not friends");
+				//logger.log(Level.CONFIG, "Error, they are not friends");
 				response = new Message(OpCode.ERR_NOT_TRUSTED);
 			}
 			break;
@@ -139,7 +137,7 @@ public class Skel {
 			}
 			break;
 		default:
-			logger.log(Level.SEVERE, "Enum not recognized");
+			logger.log(Level.CONFIG, "Enum not recognized");
 			break;
 		}
 		return response;
