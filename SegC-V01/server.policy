@@ -1,9 +1,9 @@
 grant codeBase "file:bin${/}-" {
 	//usar no VM args= "-Djava.security.manager -Djava.security.policy=server.policy"
 
-	permission java.io.FilePermission "${user.home}/MsgFileResources", "read,write";
-	permission java.io.FilePermission "${user.home}/MsgFileResources/server", "read,write";
-	permission java.io.FilePermission "${user.home}/MsgFileResources/server/-", "read,write,delete";
+	permission java.io.FilePermission "${user.home}/MsgFileG51", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileG51/server", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileG51/server/-", "read,write,delete";
 	
 	permission java.net.SocketPermission "127.0.0.1:23456", "listen,resolve";
 	//na linha x vai ser colocado o ip do servidor (maquina que executa o servidor)

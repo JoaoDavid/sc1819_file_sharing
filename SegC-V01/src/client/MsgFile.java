@@ -34,33 +34,36 @@ public class MsgFile {
 			if(args.length == 3) {
 				passwd = args[2];
 			}else {
-				System.out.print("Write your password please\n>>>");
+				System.out.println("Write your password please\n>>>");
 				passwd = sc.nextLine();
 			}
 			try {
 				port = Integer.parseInt(hostPort[1]);
 			}
 			catch (NumberFormatException e){
-				logger.log(Level.SEVERE,"Client failed: Invalid serverAddress", e);
+				System.out.println("Client failed: Invalid serverAddress:" + e.toString());
 				sc.close();
 				return;
 			}
-			logger.log(Level.INFO,"Connecting to " + hostPort[0] + " " + port);
+			System.out.println("Connecting to " + hostPort[0] + ":" + port + " ...");
 			Client client = new Client(args[1], passwd, hostPort[0], port);
 			if(client.connect()) {
-				logger.log(Level.INFO,"Connected to the server");
-				//Process command lines
+				System.out.println("Connected to the server");
 				System.out.println("Welcome " + args[1]);
-				parser(client);
+				parser(client); //Process command lines
 			}else{
-				logger.log(Level.INFO,"Login failed");
+				System.out.println("Login failed");
+				sc.close();
+				return;
 			}
-
 			client.disconnect();
-			logger.log(Level.INFO,"Client Disconnected");
+			System.out.println("Disconnected");
 			sc.close();
-		}
-
+		}else {
+			System.out.println("Your args are not correct");
+			System.out.println("Valid args: <serverAddress> <localUserID> [password]");
+			System.out.println("example: 127.0.0.1:23456 fernando pass");
+		}		
 	}
 	/**
 	 * @requires client != null && client.isConnected()
@@ -260,15 +263,16 @@ public class MsgFile {
 							try{
 								if(fileDown.exists()) {
 									fileDown.delete();
-									System.out.println("File will be replaced with the new one that was downloaded");
+									System.out.println("File with a same name already exists");
+									System.out.println("File downloaded will overwrite the old one");
 								}								
 								fileDown.getParentFile().mkdirs(); 
 								fileDown.createNewFile();
 								FileOutputStream fos = new FileOutputStream(fileDown);
 								fos.write(toPrimitives(msgResponse.getArrByte()));
 								fos.close();
-								System.out.println("File downloaded to");
-								System.out.println("File path: " + fileDown.getPath());
+								System.out.println("File downloaded to:");
+								System.out.println(fileDown.getPath());
 							}catch(Exception e){
 								System.out.println("error downloading file");
 								e.printStackTrace();

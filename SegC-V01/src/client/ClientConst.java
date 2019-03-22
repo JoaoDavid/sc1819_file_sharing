@@ -4,7 +4,7 @@ import java.io.File;
 
 public class ClientConst {
 
-	public static final String FOLDER_CLIENT =  System.getProperty("user.home") + File.separator + "MsgFileResources" + File.separator + "client";
+	public static final String FOLDER_CLIENT =  System.getProperty("user.home") + File.separator + "MsgFileG51" + File.separator + "client";
 	
 	public static final String FOLDER_DOWNLOADS = "downloads";
 	

@@ -66,8 +66,10 @@ public class Client {
 				 isConnected = true;
 				 return isConnected;
 			 }else if(response != null && response.getOpCode() == OpCode.ERR_ALREADY_EXISTS){
-				 logger.log(Level.SEVERE, "Error to Connect: Already logged!");
-			 }	 
+				 System.out.println("You are already logged in: Existing Session");
+			 }else if(response != null && response.getOpCode() == OpCode.OP_ERROR) {
+				 System.out.println("Username and password do not match");
+			 }
 		} catch ( IOException | ClassNotFoundException e) {
 			logger.log(Level.SEVERE, "Error to Connect the Client", e);
 		}

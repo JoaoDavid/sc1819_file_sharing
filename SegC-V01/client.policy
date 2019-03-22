@@ -10,9 +10,9 @@ grant codeBase "file:bin${/}-" {
   	//para o utilizador poder enviar qualquer ficheiro na sua máquina para o servidor,
   	// por esta razão é que damos a permissão de read
   	
-  	permission java.io.FilePermission "${user.home}/MsgFileResources", "read,write";
-	permission java.io.FilePermission "${user.home}/MsgFileResources/client", "read,write";
-	permission java.io.FilePermission "${user.home}/MsgFileResources/client/-", "read,write,delete";
+  	permission java.io.FilePermission "${user.home}/MsgFileG51", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileG51/client", "read,write";
+	permission java.io.FilePermission "${user.home}/MsgFileG51/client/-", "read,write,delete";
 	//é dada a permissao de delete porque ao existir um ficheiro com aquele nome apagamos o antigo substituindo pelo novo
 	//poderiamos tambem ter modificado o nome mas optamos por esta solução
 	
