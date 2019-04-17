@@ -16,10 +16,11 @@ private FileManager fileMan;
 	}
 	
 	public String[] listFiles(String username) throws ApplicationException {
-		File userFiles = fileMan.acquireFile(FilePaths.FOLDER_SERVER_USERS + File.separator + username 
-				+ File.separator + FilePaths.FOLDER_FILES);
-
+		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + username 
+				+ File.separator + FilePaths.FOLDER_FILES;
+		File userFiles = fileMan.acquireFile(filePath);
 		String[] result = userFiles.list();
+		fileMan.acquireFile(filePath);
 		if(result == null) {
 			throw new ApplicationException("Path not found");
 		}
