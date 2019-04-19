@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.rmi.server.RemoteRef;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -109,13 +110,22 @@ public class MsgFileDM {
 			case "list":
 				if(parsedInput.length == 1) {
 					List<String> result = this.stub.remoteList();
+					for(String curr : result) {
+						System.out.println(curr);
+					}
 				}else {
 					incompleteCommand();
 				}
 				break;
 			case "remove": //remove <files>
 				if(parsedInput.length > 1) {
-
+					List<String> files = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
+					List<String> res = this.stub.remoteRemoveFiles(files);
+					//files and res must have the same size
+					//just to avoid nullPointerException, use min
+					for(int i = 0; i < Math.min(files.size(), res.size()); i++) {
+						System.out.println(files.get(i) + " : " + res.get(i));
+					}
 				}else {
 					incompleteCommand();
 				}

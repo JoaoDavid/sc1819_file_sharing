@@ -8,9 +8,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import communication.Network;
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
@@ -54,7 +56,7 @@ public class Skeleton {
 
 				break;
 			case REMOVE_FILES: //remove <files>
-
+				this.removeFiles();
 				break;
 			case USERS: //users
 
@@ -91,17 +93,37 @@ public class Skeleton {
 		
 	}
 	
+	private void removeFiles() {
+		try {
+			List<String> files = Network.bufferToList(socket);
+			List<String> res = new ArrayList<String>();
+			for(String curr : files) {
+				boolean deleted = fileService.removeFile(this.userName, curr);
+				if(deleted) {
+					res.add("DELETED");
+				}else {
+					res.add("error");
+				}
+			}
+			Network.listToBuffer(res, socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
 	private void listFiles() throws ApplicationException {
-		String[] list = fileService.listFiles(this.userName);
+		String[] arr = fileService.listFiles(this.userName);
 		
 		try {
-			//BufferedOutputStream outBuff = new BufferedOutputStream(socket.getOutputStream());
+			/*//BufferedOutputStream outBuff = new BufferedOutputStream(socket.getOutputStream());
 
 			byte[] result;
 			ByteArrayOutputStream result2 = new ByteArrayOutputStream();
 			byte[] listLen = ByteBuffer.allocate(4).putInt(list.length).array();
 			result2.write(listLen);
-			for(String curr : list) {
+			for(String curr : arr) {
 				byte[] byteCurrStr = curr.getBytes();
 				byte[] strByteLen = ByteBuffer.allocate(4).putInt(byteCurrStr.length).array();
 				result2.write(strByteLen);
@@ -113,7 +135,8 @@ public class Skeleton {
 			byte[] bytes = ByteBuffer.allocate(4).putInt(lenBuffer).array();
 			socket.getOutputStream().write(bytes);
 			//Then sends those bytes
-			socket.getOutputStream().write(result);
+			socket.getOutputStream().write(result);*/
+			Network.listToBuffer(Arrays.asList(arr), socket);
 		} catch (IOException e) {
 			throw new ApplicationException("Error sending list of files");
 		}

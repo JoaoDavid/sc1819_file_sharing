@@ -4,11 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import communication.Network;
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
 
@@ -87,10 +85,9 @@ public class Stub {
 	}
 	
 	public List<String> remoteList() throws ApplicationException {
-		try {
-			List<String> result = new ArrayList<String>();			
-			outObj.writeObject(OpCode.LIST_FILES);
-			
+		try {					
+			outObj.writeObject(OpCode.LIST_FILES);	
+			/*
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
@@ -119,12 +116,25 @@ public class Stub {
 				result2[index] = str;
 				index++;
 			}
-			return result;
+			return result;*/
+			return Network.bufferToList(socket);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;//FAZER
+		return null;
+	}
+	
+	public List<String> remoteRemoveFiles(List<String> files) {
+		try {
+			outObj.writeObject(OpCode.REMOVE_FILES);
+			Network.listToBuffer(files, socket);
+			return Network.bufferToList(socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }
