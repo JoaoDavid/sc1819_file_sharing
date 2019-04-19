@@ -4,8 +4,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import communication.OpCode;
+import facade.exceptions.ApplicationException;
 
 public class Stub {
 	
@@ -81,8 +86,45 @@ public class Stub {
 		return isConnected;
 	}
 	
-	public void remoteList() {
-		
+	public List<String> remoteList() throws ApplicationException {
+		try {
+			List<String> result = new ArrayList<String>();			
+			outObj.writeObject(OpCode.LIST_FILES);
+			
+			byte[] buffLenByte = new byte[4];
+			socket.getInputStream().read(buffLenByte);
+			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
+			System.out.println("buffLen:" +buffLen);
+			
+			byte[] buff = new byte[buffLen];
+			int read = socket.getInputStream().read(buff);
+			if(read != buffLen) {//information lost
+				throw new ApplicationException("Information incomplete");
+			}
+			
+			int i = 0;
+			byte[] strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
+			int nStrs = ByteBuffer.wrap(strLenBytes).getInt();
+			System.out.println("num strings:"+nStrs);
+			i+=4;
+			String[] result2 = new String[nStrs];
+			int index = 0;
+			while(i < buffLen) {
+				strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
+				int currStrNumBytes = ByteBuffer.wrap(strLenBytes).getInt();
+				i+=4;
+				String str = new String(Arrays.copyOfRange(buff, i, i+currStrNumBytes));
+				System.out.println(str);
+				i+=currStrNumBytes;
+				result2[index] = str;
+				index++;
+			}
+			return result;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;//FAZER
 	}
 
 }

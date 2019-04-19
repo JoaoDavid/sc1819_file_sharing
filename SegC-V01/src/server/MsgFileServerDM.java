@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import communication.OpCode;
+import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
 import facade.startup.MsgFileServerApp;
@@ -28,16 +30,28 @@ public class MsgFileServerDM{
 	}
 
 	public static void main(String[] args) {
-		System.out.println("servidor: main");
-		MsgFileServerDM server = new MsgFileServerDM();
-		server.startServer();
+		if(args.length == 1) {
+			int port;
+			try {
+				port = Integer.parseInt(args[0]);
+			}
+			catch (NumberFormatException e){
+				System.out.println( "Server failed: Invalid port");
+				return;
+			}
+			System.out.println("Initializing server on port: " + args[0]);
+			MsgFileServerDM server = new MsgFileServerDM();
+			server.startServer(port);
+		}else {
+			System.out.println("Server failed: <port> is the only argument required");
+		}
 	}
 
-	public void startServer (){
+	public void startServer (int port){
 		ServerSocket sSoc = null;
         
 		try {
-			sSoc = new ServerSocket(23456);
+			sSoc = new ServerSocket(port);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
@@ -79,6 +93,8 @@ public class MsgFileServerDM{
 				try {
 					user = (String)inStream.readObject();
 					passwd = (String)inStream.readObject();
+					System.out.println(user);
+					System.out.println(passwd);
 					System.out.println("thread: depois de receber a password e o user");
 				}catch (ClassNotFoundException e1) {
 					e1.printStackTrace();
@@ -88,18 +104,25 @@ public class MsgFileServerDM{
 				//este codigo apenas exemplifica a comunicacao entre o cliente e o servidor
 				//nao faz qualquer tipo de autenticacao
 				if (user.length() != 0){
-					outStream.writeObject(new Boolean(true));
+					outStream.writeObject(OpCode.OP_SUCCESSFUL);
 				}
 				else {
-					outStream.writeObject(new Boolean(false));
+					outStream.writeObject(OpCode.OP_ERROR);
+				}
+				Skeleton skel = new Skeleton(user, socket, fileService, msgService);
+				while(true) {
+					skel.communicate(outStream, inStream);
 				}
 
-				outStream.close();
-				inStream.close();
+				//outStream.close();
+				//inStream.close();
  			
-				socket.close();
+				//socket.close();
 
 			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ApplicationException e) {//remover
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

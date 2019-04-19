@@ -1,12 +1,15 @@
 package server;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
@@ -31,9 +34,8 @@ public class Skeleton {
 		this.msgService = msgService;
 	}
 
-	public void communicate() throws ApplicationException {
+	public void communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException {
 		try {
-			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 			Object obj = inStream.readObject();
 			OpCode opcode;
 			if(obj == null || !(obj instanceof OpCode)) {
@@ -47,6 +49,7 @@ public class Skeleton {
 
 				break;
 			case LIST_FILES: //list
+				System.out.println("entrei");
 				this.listFiles();
 
 				break;
@@ -79,7 +82,8 @@ public class Skeleton {
 				break;
 			}
 		} catch (IOException e) {
-			throw new ApplicationException("IOException on communicate");
+			e.printStackTrace();
+			//throw new ApplicationException("IOException on communicate");
 		} catch (ClassNotFoundException e) {
 			throw new ApplicationException("ClassNotFoundException on communicate");
 		}
@@ -92,19 +96,24 @@ public class Skeleton {
 		
 		try {
 			//BufferedOutputStream outBuff = new BufferedOutputStream(socket.getOutputStream());
-			//List<Byte[]> listByte = new ArrayList<Byte[]>();
-			socket.getOutputStream().write(ByteBuffer.allocate(4).putInt(list.length).array());
-			//for(String curr : list) {
-			//	byte[] byteCurrStr = curr.getBytes();
-			//	outBuff.write(ByteBuffer.allocate(4).putInt(byteCurrStr.length).array());
-			//	outBuff.write(byteCurrStr);
-			//}
-			//int lenBuffer = 1337;//calcular
-			//socket.getOutputStream().write(list.length);
+
+			byte[] result;
+			ByteArrayOutputStream result2 = new ByteArrayOutputStream();
+			byte[] listLen = ByteBuffer.allocate(4).putInt(list.length).array();
+			result2.write(listLen);
+			for(String curr : list) {
+				byte[] byteCurrStr = curr.getBytes();
+				byte[] strByteLen = ByteBuffer.allocate(4).putInt(byteCurrStr.length).array();
+				result2.write(strByteLen);
+				result2.write(byteCurrStr);
+			}
+			result = result2.toByteArray();
+			int lenBuffer = result.length;//calcular
 			//First send the number of bytes that will be sent
-			//byte[] bytes = ByteBuffer.allocate(4).putInt(lenBuffer).array();
-			//socket.getOutputStream().write(bytes);
+			byte[] bytes = ByteBuffer.allocate(4).putInt(lenBuffer).array();
+			socket.getOutputStream().write(bytes);
 			//Then sends those bytes
+			socket.getOutputStream().write(result);
 		} catch (IOException e) {
 			throw new ApplicationException("Error sending list of files");
 		}

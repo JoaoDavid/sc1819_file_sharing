@@ -7,12 +7,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.Message;
 import communication.OpCode;
+import facade.exceptions.ApplicationException;
 
 
 public class MsgFileDM {
@@ -25,20 +27,20 @@ public class MsgFileDM {
 	private Stub stub;
 	
 	
-	public MsgFileDM(String userName, Stub stub) {
+	public MsgFileDM(String userName, String host, int port) {
 		this.userName = userName;
-		this.stub = stub;
+		this.stub = new Stub(userName, host, port);
 	}
 	
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ApplicationException {
 		Scanner sc = new Scanner(System.in);
 		if(args.length == 2 || args.length == 3) {
 			String[] hostPort = args[0].split(":");
 			//System.out.print(hostPort[0] + hostPort[1]);
 			int port;
-			String passwd = null;
+			String passwd;
 
 			if(args.length == 3) {
 				passwd = args[2];
@@ -55,11 +57,11 @@ public class MsgFileDM {
 				return;
 			}
 			System.out.println("Connecting to " + hostPort[0] + ":" + port + " ...");
-			MsgFileDM app = new MsgFileDM(args[1], new Stub(args[1], hostPort[0], port));
+			MsgFileDM app = new MsgFileDM(args[1], hostPort[0], port);
 			if(app.connect(passwd)) {
 				System.out.println("Connected to the server");
 				System.out.println("Welcome " + args[1]);
-				
+				app.startParser();
 			}else{
 				System.out.println("Login failed");
 				sc.close();
@@ -86,8 +88,9 @@ public class MsgFileDM {
 	/**
 	 * @requires client != null && client.isConnected()
 	 * @param client
+	 * @throws ApplicationException 
 	 */
-	public void startParser() {
+	public void startParser() throws ApplicationException {
 		Scanner sc = new Scanner(System.in);
 		boolean onLoop = true;
 		while(onLoop) {
@@ -105,7 +108,7 @@ public class MsgFileDM {
 				break;
 			case "list":
 				if(parsedInput.length == 1) {
-					this.stub.remoteList();
+					List<String> result = this.stub.remoteList();
 				}else {
 					incompleteCommand();
 				}
