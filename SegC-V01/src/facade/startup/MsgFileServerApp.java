@@ -10,19 +10,18 @@ import server.business.handlers.TrustUsersHandler;
 import server.business.handlers.UntrustUsersHandler;
 import server.business.util.FileManager;
 
-public class MsgFileServer {
+public class MsgFileServerApp {
 
-	// the catalogs
+
 	private FileManager fileManager;
 
 	/**
 	 * Performs the start up use case
 	 */
-	public MsgFileServer() {
+	public MsgFileServerApp() {
 		this.fileManager = FileManager.getInstance();
 	}
 
-	/* Create Reservation Request Handler */
 	public CollectMessagesHandler getCollectMessagesHandler() {
 		return new CollectMessagesHandler(fileManager);
 	}
@@ -55,10 +54,6 @@ public class MsgFileServer {
 		return new UntrustUsersHandler(fileManager);
 	}
 
-	public static void main(String[] args) {
-		MsgFileServer app = new MsgFileServer();
-	}
-	
 
 }
 
