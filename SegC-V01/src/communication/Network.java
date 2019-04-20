@@ -1,6 +1,7 @@
 package communication;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -65,5 +66,9 @@ public class Network {
 			result.add(str);
 		}
 		return result;
+	}
+	
+	public static void sendFile(File file, Socket socket) {
+		
 	}
 }

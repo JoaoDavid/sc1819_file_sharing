@@ -1,6 +1,6 @@
 package facade.services;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import facade.exceptions.ApplicationException;
 import server.business.handlers.CollectMessagesHandler;
@@ -16,7 +16,7 @@ public class MessageService {
 		this.sendMessageHandler = sendMessageHandler;
 	}
 	
-	public ArrayList<String> collectMessages(String userName) throws ApplicationException {//collect
+	public List<String> collectMessages(String userName) throws ApplicationException {
 		return collectMessagesHandler.collectMessages(userName);
 	}
 	

@@ -23,16 +23,15 @@ public class UntrustUsersHandler {
 	public boolean untrustUser(String userName, String userNameUntrusted) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
-
 		File untrustedFile = fileMan.acquireFile(filePath);
 		ArrayList<String> fileContent = new ArrayList<String>();
 		boolean untrusted = false;
 		try (BufferedReader br = new BufferedReader(new FileReader(untrustedFile));){
 			String st; 
 			while ((st = br.readLine()) != null) {
-				if(!st.equals(userNameUntrusted)) {
-					fileContent.add(st);
-				}
+
+				fileContent.add(st);
+
 			}
 			untrusted = fileContent.remove(userNameUntrusted);
 			if(untrusted) { //userNameUntrusted exists in the file

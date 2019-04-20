@@ -29,7 +29,7 @@ public class MsgFileServerDM{
 				app.getStoreFileHandler());
 		this.msgService = new MessageService(app.getCollectMessagesHandler(), 
 				app.getSendMessageHandler());
-		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler());
+		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler(), app.getListUsersHandler());
 	}
 
 	public static void main(String[] args) {
@@ -113,14 +113,15 @@ public class MsgFileServerDM{
 					outStream.writeObject(OpCode.OP_ERROR);
 				}
 				Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService);
-				while(true) {
-					skel.communicate(outStream, inStream);
+				boolean connected = true;
+				while(connected) {
+					connected = skel.communicate(outStream, inStream);
 				}
-
-				//outStream.close();
-				//inStream.close();
+				System.out.println("SAIU");
+				outStream.close();
+				inStream.close();
  			
-				//socket.close();
+				socket.close();
 
 			} catch (IOException e) {
 				e.printStackTrace();

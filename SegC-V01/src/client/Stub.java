@@ -84,72 +84,8 @@ public class Stub {
 		return isConnected;
 	}
 	
-	public List<String> remoteList() throws ApplicationException {
-		try {					
-			outObj.writeObject(OpCode.LIST_FILES);	
-			/*
-			byte[] buffLenByte = new byte[4];
-			socket.getInputStream().read(buffLenByte);
-			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
-			System.out.println("buffLen:" +buffLen);
-			
-			byte[] buff = new byte[buffLen];
-			int read = socket.getInputStream().read(buff);
-			if(read != buffLen) {//information lost
-				throw new ApplicationException("Information incomplete");
-			}
-			
-			int i = 0;
-			byte[] strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
-			int nStrs = ByteBuffer.wrap(strLenBytes).getInt();
-			System.out.println("num strings:"+nStrs);
-			i+=4;
-			String[] result2 = new String[nStrs];
-			int index = 0;
-			while(i < buffLen) {
-				strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
-				int currStrNumBytes = ByteBuffer.wrap(strLenBytes).getInt();
-				i+=4;
-				String str = new String(Arrays.copyOfRange(buff, i, i+currStrNumBytes));
-				System.out.println(str);
-				i+=currStrNumBytes;
-				result2[index] = str;
-				index++;
-			}
-			return result;*/
-			return Network.bufferToList(socket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
-	public List<String> remoteRemoveFiles(List<String> files) {
-		try {
-			outObj.writeObject(OpCode.REMOVE_FILES);
-			Network.listToBuffer(files, socket);
-			return Network.bufferToList(socket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	public List<String> remoteTrustUsers(List<String> users) {
-		try {
-			outObj.writeObject(OpCode.TRUST_USERS);
-			Network.listToBuffer(users, socket);
-			return Network.bufferToList(socket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	public List<String> remoteProcedureCall(OpCode opcode, List<String> list) {
+	public List<String> rpcSendReceiveList(OpCode opcode, List<String> list) {
 		try {
 			outObj.writeObject(opcode);
 			Network.listToBuffer(list, socket);
@@ -160,6 +96,28 @@ public class Stub {
 		}
 		return null;
 	}
+	
+	public List<String> rpcReceiveList(OpCode opcode) {
+		try {
+			outObj.writeObject(opcode);
+			return Network.bufferToList(socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public void rpcEndConnectiont() {
+		try {
+			outObj.writeObject(OpCode.END_CONNECTION);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
 
 
 }

@@ -6,8 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-
+import java.util.List;
 import facade.exceptions.ApplicationException;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
@@ -21,7 +20,7 @@ public class CollectMessagesHandler {
 		this.fileMan = fileMan;
 	}
 	
-	public ArrayList<String> collectMessages(String userName) throws ApplicationException {//collect
+	public List<String> collectMessages(String userName) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator 
 				+ userName + File.separator + FilePaths.FILE_NAME_MSG;
 		File userMsgs = fileMan.acquireFile(filePath);

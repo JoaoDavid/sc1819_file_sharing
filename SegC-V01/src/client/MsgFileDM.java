@@ -63,6 +63,7 @@ public class MsgFileDM {
 				System.out.println("Connected to the server");
 				System.out.println("Welcome " + args[1]);
 				app.startParser();
+				app.disconnect();
 			}else{
 				System.out.println("Login failed");
 				sc.close();
@@ -109,7 +110,7 @@ public class MsgFileDM {
 				break;
 			case "list":
 				if(parsedInput.length == 1) {
-					List<String> result = this.stub.remoteList();
+					List<String> result = this.stub.rpcReceiveList(OpCode.LIST_FILES);
 					for(String curr : result) {
 						System.out.println(curr);
 					}
@@ -120,7 +121,7 @@ public class MsgFileDM {
 			case "remove": //remove <files>
 				if(parsedInput.length > 1) {
 					List<String> files = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.remoteRemoveFiles(files);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.REMOVE_FILES, files);
 					//files and res must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(files.size(), res.size()); i++) {
@@ -132,7 +133,10 @@ public class MsgFileDM {
 				break;
 			case "users":
 				if(parsedInput.length == 1) {
-						            	
+					List<String> res = this.stub.rpcReceiveList(OpCode.USERS);
+					for(String curr : res) {
+						System.out.println(curr);
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -140,7 +144,7 @@ public class MsgFileDM {
 			case "trusted": //trusted <trustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.remoteProcedureCall(OpCode.TRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.TRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -153,7 +157,7 @@ public class MsgFileDM {
 			case "untrusted": //untrusted <untrustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.remoteProcedureCall(OpCode.UNTRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.UNTRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -174,14 +178,25 @@ public class MsgFileDM {
 			case "msg": //msg <userID> <msg>
 				logger.log(Level.CONFIG, "msg");
 				if(parsedInput.length >= 3) {
-					
+					String userReceiver = parsedInput[1];
+					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length());
+					List<String> recMsg = new ArrayList<String>();
+					recMsg.add(userReceiver);
+					recMsg.add(msg);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.SEND_MSG, recMsg);
+					for(String curr : res) {
+						System.out.println(curr);
+					}
 				}else {
 					incompleteCommand();
 				}
 				break;
 			case "collect":
 				if(parsedInput.length == 1) {
-					
+					List<String> res = this.stub.rpcReceiveList(OpCode.COLLECT_MSG);
+					for(String curr : res) {
+						System.out.println(curr);
+					}
 				}else {
 					incompleteCommand();
 				}
@@ -203,7 +218,10 @@ public class MsgFileDM {
 				break;
 			case "exit":
 				if(parsedInput.length == 1) {
-		            	
+					this.stub.rpcEndConnectiont();
+					//disconnect();
+					sc.close();
+		            return;
 				}else {
 					incompleteCommand();
 				}
@@ -215,9 +233,11 @@ public class MsgFileDM {
 		}
 		sc.close();
 	}
+	
 	public static void incompleteCommand() {
 		System.out.println("ERROR: incomplete command line");
 	}
+	
 	public static Byte[] toObjects(byte[] bytesPrim) {
 		Byte[] bytes = new Byte[bytesPrim.length];
 		int i = 0;
@@ -226,6 +246,7 @@ public class MsgFileDM {
 		}
 		return bytes;
 	}
+	
 	/**
 	 * Turn array of Byte[] to byte[]
 	 * @param oBytes
@@ -238,6 +259,5 @@ public class MsgFileDM {
 			bytes[i] = oBytes[i];
 		}
 		return bytes;
-
 	}
 }

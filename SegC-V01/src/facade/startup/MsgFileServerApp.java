@@ -3,6 +3,7 @@ package facade.startup;
 import server.business.handlers.CollectMessagesHandler;
 import server.business.handlers.DownloadFileHandler;
 import server.business.handlers.ListFilesHandler;
+import server.business.handlers.ListUsersHandler;
 import server.business.handlers.RemoveFilesHandler;
 import server.business.handlers.SendMessageHandler;
 import server.business.handlers.StoreFileHandler;
@@ -52,6 +53,10 @@ public class MsgFileServerApp {
 	
 	public UntrustUsersHandler getUntrustUsersHandler() {
 		return new UntrustUsersHandler(fileManager);
+	}
+	
+	public ListUsersHandler getListUsersHandler() {
+		return new ListUsersHandler(fileManager);
 	}
 
 

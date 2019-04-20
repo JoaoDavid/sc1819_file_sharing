@@ -39,7 +39,8 @@ public class Skeleton {
 		this.userService = userService;
 	}
 
-	public void communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException {
+	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException {
+		boolean connected = true;
 		try {
 			Object obj = inStream.readObject();
 			OpCode opcode;
@@ -56,13 +57,12 @@ public class Skeleton {
 			case LIST_FILES: //list
 				System.out.println("entrei");
 				this.listFiles();
-
 				break;
 			case REMOVE_FILES: //remove <files>
 				this.removeFiles();
 				break;
 			case USERS: //users
-
+				this.listUsers();
 				break;
 			case TRUST_USERS: //trusted <trustedUserIDs>
 				this.trustUsers();
@@ -74,26 +74,39 @@ public class Skeleton {
 
 				break;
 			case SEND_MSG: //msg <userID> <msg>
-
+				this.storeMessage();
 				break;
 			case COLLECT_MSG: //collect
-
+				this.collectMsg();
 				break;
 			case END_CONNECTION:
-
+				connected = false;
 				break;
 			default:
 
 				break;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-			//throw new ApplicationException("IOException on communicate");
+			connected = false;
+			throw new ApplicationException("Lost connection with client");
 		} catch (ClassNotFoundException e) {
+			connected = false;
 			throw new ApplicationException("ClassNotFoundException on communicate");
 		}
+		return connected;
+	}
 
 
+
+	
+
+	private void endConnection() {
+		try {
+			socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void removeFiles() {
@@ -114,6 +127,15 @@ public class Skeleton {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private void listUsers() throws ApplicationException {
+		String[] arr = userService.listUsers();
+		try {
+			Network.listToBuffer(Arrays.asList(arr), socket);
+		} catch (IOException e) {
+			throw new ApplicationException("Error sending list of files");
+		}
 	}
 
 	private void listFiles() throws ApplicationException {
@@ -143,7 +165,7 @@ public class Skeleton {
 			throw new ApplicationException("Error trusting users");
 		}
 	}
-	
+
 	private void untrustUsers() throws ApplicationException {
 		try {
 			List<String> users = Network.bufferToList(socket);
@@ -159,6 +181,31 @@ public class Skeleton {
 			Network.listToBuffer(res, socket);
 		} catch (IOException e) {
 			throw new ApplicationException("Error untrusting users");
+		}
+	}
+
+	private void storeMessage() throws ApplicationException {
+		try {
+			List<String> msg = Network.bufferToList(socket);
+			boolean stored = msgService.storeMsg(this.userName, msg.get(0), msg.get(1));
+			List<String> res = new ArrayList<String>();
+			if(stored) {
+				res.add("OK");
+			}else {
+				res.add("error");
+			}
+			Network.listToBuffer(res, socket);
+		} catch (IOException e) {
+			throw new ApplicationException("Error collecting messages");
+		}
+	}
+	
+	private void collectMsg() throws ApplicationException {
+		try {
+			List<String> msg = msgService.collectMessages(this.userName);
+			Network.listToBuffer(msg, socket);
+		} catch (IOException e) {
+			throw new ApplicationException("Error collecting messages");
 		}
 	}
 
