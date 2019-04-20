@@ -10,6 +10,7 @@ import communication.OpCode;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
+import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
 
 //Servidor myServer
@@ -19,6 +20,7 @@ public class MsgFileServerDM{
 	private MsgFileServerApp app;
 	private FileService fileService;
 	private MessageService msgService;
+	private UserService userService;
 	
 	public MsgFileServerDM() {
 		this.app = new MsgFileServerApp();
@@ -27,6 +29,7 @@ public class MsgFileServerDM{
 				app.getStoreFileHandler());
 		this.msgService = new MessageService(app.getCollectMessagesHandler(), 
 				app.getSendMessageHandler());
+		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler());
 	}
 
 	public static void main(String[] args) {
@@ -109,7 +112,7 @@ public class MsgFileServerDM{
 				else {
 					outStream.writeObject(OpCode.OP_ERROR);
 				}
-				Skeleton skel = new Skeleton(user, socket, fileService, msgService);
+				Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService);
 				while(true) {
 					skel.communicate(outStream, inStream);
 				}

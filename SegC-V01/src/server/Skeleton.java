@@ -17,23 +17,26 @@ import communication.OpCode;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
+import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
 
 
 public class Skeleton {
-	
+
 	private String userName;
 	private Socket socket;
 
-	
+
 	private FileService fileService;
 	private MessageService msgService;
-	
-	public Skeleton(String userName, Socket socket, FileService fileService, MessageService msgService) {
+	private UserService userService;
+
+	public Skeleton(String userName, Socket socket, FileService fileService, MessageService msgService, UserService userService) {
 		this.userName = userName;
 		this.socket = socket;
 		this.fileService = fileService;
 		this.msgService = msgService;
+		this.userService = userService;
 	}
 
 	public void communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException {
@@ -45,7 +48,7 @@ public class Skeleton {
 			}else {
 				opcode = (OpCode) obj;
 			}			
-			
+
 			switch (opcode) {
 			case STORE_FILES: //store <files>
 
@@ -62,10 +65,10 @@ public class Skeleton {
 
 				break;
 			case TRUST_USERS: //trusted <trustedUserIDs>
-
+				this.trustUsers();
 				break;
 			case UNTRUST_USERS: //untrusted <untrustedUserIDs>
-
+				this.untrustUsers();
 				break;
 			case DOWNLOAD_FILE: //download <userID> <file>
 
@@ -77,7 +80,7 @@ public class Skeleton {
 
 				break;
 			case END_CONNECTION:
-				
+
 				break;
 			default:
 
@@ -90,9 +93,9 @@ public class Skeleton {
 			throw new ApplicationException("ClassNotFoundException on communicate");
 		}
 
-		
+
 	}
-	
+
 	private void removeFiles() {
 		try {
 			List<String> files = Network.bufferToList(socket);
@@ -110,35 +113,52 @@ public class Skeleton {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void listFiles() throws ApplicationException {
 		String[] arr = fileService.listFiles(this.userName);
-		
-		try {
-			/*//BufferedOutputStream outBuff = new BufferedOutputStream(socket.getOutputStream());
 
-			byte[] result;
-			ByteArrayOutputStream result2 = new ByteArrayOutputStream();
-			byte[] listLen = ByteBuffer.allocate(4).putInt(list.length).array();
-			result2.write(listLen);
-			for(String curr : arr) {
-				byte[] byteCurrStr = curr.getBytes();
-				byte[] strByteLen = ByteBuffer.allocate(4).putInt(byteCurrStr.length).array();
-				result2.write(strByteLen);
-				result2.write(byteCurrStr);
-			}
-			result = result2.toByteArray();
-			int lenBuffer = result.length;//calcular
-			//First send the number of bytes that will be sent
-			byte[] bytes = ByteBuffer.allocate(4).putInt(lenBuffer).array();
-			socket.getOutputStream().write(bytes);
-			//Then sends those bytes
-			socket.getOutputStream().write(result);*/
+		try {
 			Network.listToBuffer(Arrays.asList(arr), socket);
 		} catch (IOException e) {
 			throw new ApplicationException("Error sending list of files");
+		}
+	}
+
+	private void trustUsers() throws ApplicationException {
+		try {
+			List<String> users = Network.bufferToList(socket);
+			List<String> res = new ArrayList<String>();
+			for(String curr : users) {
+				boolean trusted = userService.trustUser(userName, curr);
+				if(trusted) {
+					res.add("TRUSTED");
+				}else {
+					res.add("error");
+				}
+			}
+			Network.listToBuffer(res, socket);
+		} catch (IOException e) {
+			throw new ApplicationException("Error trusting users");
+		}
+	}
+	
+	private void untrustUsers() throws ApplicationException {
+		try {
+			List<String> users = Network.bufferToList(socket);
+			List<String> res = new ArrayList<String>();
+			for(String curr : users) {
+				boolean untrusted = userService.untrustUser(userName, curr);
+				if(untrusted) {
+					res.add("UNTRUSTED");
+				}else {
+					res.add("error");
+				}
+			}
+			Network.listToBuffer(res, socket);
+		} catch (IOException e) {
+			throw new ApplicationException("Error untrusting users");
 		}
 	}
 

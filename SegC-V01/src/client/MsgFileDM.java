@@ -139,14 +139,26 @@ public class MsgFileDM {
 				break;
 			case "trusted": //trusted <trustedUserIDs>
 				if(parsedInput.length > 1) {
-					
+					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
+					List<String> res = this.stub.remoteProcedureCall(OpCode.TRUST_USERS, users);
+					//both lists must have the same size
+					//just to avoid nullPointerException, use min
+					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
+						System.out.println(users.get(i) + " : " + res.get(i));
+					}
 				}else {
 					incompleteCommand();
 				}
 				break;
 			case "untrusted": //untrusted <untrustedUserIDs>
 				if(parsedInput.length > 1) {
-					
+					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
+					List<String> res = this.stub.remoteProcedureCall(OpCode.UNTRUST_USERS, users);
+					//both lists must have the same size
+					//just to avoid nullPointerException, use min
+					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
+						System.out.println(users.get(i) + " : " + res.get(i));
+					}
 				}else {
 					incompleteCommand();
 				}

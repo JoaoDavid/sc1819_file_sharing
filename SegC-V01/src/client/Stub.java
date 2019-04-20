@@ -137,4 +137,29 @@ public class Stub {
 		return null;
 	}
 
+	public List<String> remoteTrustUsers(List<String> users) {
+		try {
+			outObj.writeObject(OpCode.TRUST_USERS);
+			Network.listToBuffer(users, socket);
+			return Network.bufferToList(socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<String> remoteProcedureCall(OpCode opcode, List<String> list) {
+		try {
+			outObj.writeObject(opcode);
+			Network.listToBuffer(list, socket);
+			return Network.bufferToList(socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
 }
