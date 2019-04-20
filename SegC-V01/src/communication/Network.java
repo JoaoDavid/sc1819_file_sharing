@@ -2,9 +2,11 @@ package communication;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.List;
 import facade.exceptions.ApplicationException;
 
 public class Network {
+
+	public static final int MAX_SIZE_BUFFER = 1024;
 
 
 	public static void listToBuffer(List<String> list, Socket socket) throws IOException {
@@ -33,21 +37,21 @@ public class Network {
 		//Then sends those bytes
 		socket.getOutputStream().write(result);
 	}
-	
+
 	public static List<String> bufferToList(Socket socket) throws IOException {
 		List<String> result = new ArrayList<String>();			
-		
+
 		byte[] buffLenByte = new byte[4];
 		socket.getInputStream().read(buffLenByte);
 		int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
 		System.out.println("buffLen:" +buffLen);
-		
+
 		byte[] buff = new byte[buffLen];
 		int read = socket.getInputStream().read(buff);
 		if(read != buffLen) {//information lost
 			throw new IOException("Information incomplete");
 		}
-		
+
 		int i = 0;
 		byte[] strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
 		int nStrs = ByteBuffer.wrap(strLenBytes).getInt();
@@ -67,8 +71,65 @@ public class Network {
 		}
 		return result;
 	}
-	
+
 	public static void sendFile(File file, Socket socket) {
-		
+		int buffSize = (int)file.length();
+		byte[] buff;
+		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
+		try {
+			//First send the size of the buffer
+			//including fileNameLen in bytes, fileName and finally fileBytes
+			byte[] byteName = file.getName().getBytes();
+			buffSize += byteName.length + 4;
+			firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
+			socket.getOutputStream().write(firstArrByte.toByteArray());
+			firstArrByte.reset();
+			//sending the buffer
+			if(buffSize > MAX_SIZE_BUFFER) {
+				//cycle
+			}else {//<=
+				byte [] buffFile = Files.readAllBytes(file.toPath());
+				firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
+				firstArrByte.write(byteName);
+				firstArrByte.write(buffFile);
+				socket.getOutputStream().write(firstArrByte.toByteArray());
+			}
+		} catch(IOException e) {
+
+		}
+
+
+	}
+
+	public static void receiveFile(String path, Socket socket) {
+
+		try {
+			byte[] buffLenByte = new byte[4];
+			socket.getInputStream().read(buffLenByte);
+			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
+			System.out.println("buffLen:" +buffLen);
+
+			byte[] buff = new byte[buffLen];
+			int read = socket.getInputStream().read(buff);
+			if(read != buffLen) {//information lost
+				throw new IOException("Information incomplete");
+			}
+			
+			int i = 0;			
+			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
+			i+=4;
+			int strLen = ByteBuffer.wrap(strLenByte).getInt();
+			String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
+			i+=strLen;
+			File file = new File(fileName);
+			file.createNewFile();
+			FileOutputStream fos = new FileOutputStream(file);
+			fos.write(buff, i, buffLen - i);
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 }

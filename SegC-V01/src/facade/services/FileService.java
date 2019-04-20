@@ -1,5 +1,7 @@
 package facade.services;
 
+import java.net.Socket;
+
 import facade.exceptions.ApplicationException;
 import server.business.handlers.DownloadFileHandler;
 import server.business.handlers.ListFilesHandler;
@@ -31,6 +33,10 @@ public class FileService {
 
 	public boolean removeFile(String userName, String fileName) {
 		return removeFilesHandler.removeFile(userName, fileName);
+	}
+	
+	public void clientDownloadFile(String userName, String fileName, Socket socket) {
+		downloadFileHandler.clientDownloadFile(userName, fileName, socket);
 	}
 	
 }

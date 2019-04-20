@@ -71,7 +71,7 @@ public class Skeleton {
 				this.untrustUsers();
 				break;
 			case DOWNLOAD_FILE: //download <userID> <file>
-
+				this.downloadFile();
 				break;
 			case SEND_MSG: //msg <userID> <msg>
 				this.storeMessage();
@@ -99,6 +99,19 @@ public class Skeleton {
 
 
 	
+
+	private void downloadFile() {
+		try {
+			List<String> msg = Network.bufferToList(socket);
+			String userOwner = msg.get(0);
+			String fileName = msg.get(1);
+			System.out.println(userOwner + " " + fileName);
+			fileService.clientDownloadFile(userOwner, fileName, socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
 
 	private void endConnection() {
 		try {

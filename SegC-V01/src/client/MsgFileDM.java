@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.Message;
+import communication.Network;
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
 
@@ -170,7 +171,12 @@ public class MsgFileDM {
 			case "download": //download <userID> <file>
 				logger.log(Level.CONFIG, "download");
 				if(parsedInput.length == 3) {
-					
+					List<String> msg = new ArrayList<String>();
+					String userOwner = parsedInput[1];//users name account that has the file
+					String fileName = parsedInput[2];//name of the file
+					msg.add(userOwner);
+					msg.add(fileName);
+					this.stub.rpcDownloadFileFromServer(msg);
 				}else {
 					incompleteCommand();
 				}
