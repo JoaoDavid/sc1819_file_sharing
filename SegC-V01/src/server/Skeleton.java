@@ -52,7 +52,7 @@ public class Skeleton {
 
 			switch (opcode) {
 			case STORE_FILES: //store <files>
-
+				this.uploadFile();
 				break;
 			case LIST_FILES: //list
 				System.out.println("entrei");
@@ -99,6 +99,10 @@ public class Skeleton {
 
 
 	
+
+	private void uploadFile() {
+		fileService.storeFile(userName, socket);
+	}
 
 	private void downloadFile() {
 		try {

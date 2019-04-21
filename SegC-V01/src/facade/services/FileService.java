@@ -39,4 +39,8 @@ public class FileService {
 		downloadFileHandler.clientDownloadFile(userName, fileName, socket);
 	}
 	
+	public void storeFile(String userName, Socket socket) {
+		storeFilesHandler.storeFile(userName, socket);
+	}
+	
 }

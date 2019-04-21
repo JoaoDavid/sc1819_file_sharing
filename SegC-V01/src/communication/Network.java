@@ -18,6 +18,12 @@ public class Network {
 	public static final int MAX_SIZE_BUFFER = 1024;
 
 
+
+	public static void sendInt(int num, Socket socket) throws IOException {
+		byte[] byeNum = ByteBuffer.allocate(4).putInt(num).array();
+		socket.getOutputStream().write(byeNum);
+	}
+
 	public static void listToBuffer(List<String> list, Socket socket) throws IOException {
 		byte[] result;
 		ByteArrayOutputStream result2 = new ByteArrayOutputStream();
@@ -101,8 +107,7 @@ public class Network {
 
 	}
 
-	public static void receiveFile(String path, Socket socket) {
-
+	public static boolean receiveFile(String path, Socket socket, boolean replace) {
 		try {
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
@@ -114,22 +119,26 @@ public class Network {
 			if(read != buffLen) {//information lost
 				throw new IOException("Information incomplete");
 			}
-			
+
 			int i = 0;			
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
 			i+=4;
 			int strLen = ByteBuffer.wrap(strLenByte).getInt();
 			String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
 			i+=strLen;
-			File file = new File(fileName);
+			File file = new File(path + fileName);
+			if(file.exists() && !replace) {
+				return false;
+			}
 			file.createNewFile();
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(buff, i, buffLen - i);
 			fos.close();
+			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
-
 	}
 }

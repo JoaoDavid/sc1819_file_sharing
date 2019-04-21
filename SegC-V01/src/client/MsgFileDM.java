@@ -104,7 +104,10 @@ public class MsgFileDM {
 			switch (parsedInput[0]) {
 			case "store": //store <files>
 				if(parsedInput.length > 1) {
-
+					for(int i = 1; i < parsedInput.length ; i++){
+						List<String> res = this.stub.rpcUploadFileToServer(parsedInput[i]);
+						System.out.println(res.get(0));
+					}
 				}else {
 					incompleteCommand();
 				}

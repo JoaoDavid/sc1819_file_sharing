@@ -1,5 +1,6 @@
 package client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -11,18 +12,18 @@ import communication.OpCode;
 import facade.exceptions.ApplicationException;
 
 public class Stub {
-	
+
 	private String username;
 	private Socket socket;
 	private String host;
 	private int port;
-	
+
 	private ObjectInputStream inObj;
 	private ObjectOutputStream outObj;
 	private boolean isConnected;
-	
-	
-	
+
+
+
 	public Stub(String userName, String host, int port) {
 		this.username = userName;
 		this.host = host;
@@ -83,8 +84,8 @@ public class Stub {
 	public boolean isConnected() {
 		return isConnected;
 	}
-	
-	
+
+
 	public List<String> rpcSendReceiveList(OpCode opcode, List<String> list) {
 		try {
 			outObj.writeObject(opcode);
@@ -96,7 +97,7 @@ public class Stub {
 		}
 		return null;
 	}
-	
+
 	public List<String> rpcReceiveList(OpCode opcode) {
 		try {
 			outObj.writeObject(opcode);
@@ -107,7 +108,7 @@ public class Stub {
 		}
 		return null;
 	}
-	
+
 	public void rpcEndConnectiont() {
 		try {
 			outObj.writeObject(OpCode.END_CONNECTION);
@@ -116,20 +117,35 @@ public class Stub {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void rpcDownloadFileFromServer(List<String> msg) {
 		try {
 			outObj.writeObject(OpCode.DOWNLOAD_FILE);
 			Network.listToBuffer(msg, socket);
-			Network.receiveFile("", socket);
+			Network.receiveFile("", socket,true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
-	
-	
+
+	public List<String> rpcUploadFileToServer(String filePath) {
+		try {
+			File file = new File(filePath);
+			if(file.exists()) {
+				outObj.writeObject(OpCode.STORE_FILES);
+				Network.sendFile(file, socket);
+				List<String> res = Network.bufferToList(socket);
+				return res;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
 
 
 }
