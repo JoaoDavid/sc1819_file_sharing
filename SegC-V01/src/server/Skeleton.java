@@ -110,7 +110,7 @@ public class Skeleton {
 			String userOwner = msg.get(0);
 			String fileName = msg.get(1);
 			System.out.println(userOwner + " " + fileName);
-			fileService.clientDownloadFile(userOwner, fileName, socket);
+			fileService.clientDownloadFile(this.userName, userOwner, fileName, socket);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

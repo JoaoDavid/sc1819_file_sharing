@@ -26,7 +26,7 @@ public class StoreFileHandler {
 		if(stored) {
 			res.add("STORED");
 		}else {
-			res.add("NOT STORED");
+			res.add("NOT stored");
 		}
 		try {
 			Network.listToBuffer(res, socket);

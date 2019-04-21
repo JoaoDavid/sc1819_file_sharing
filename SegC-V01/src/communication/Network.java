@@ -15,13 +15,18 @@ import facade.exceptions.ApplicationException;
 
 public class Network {
 
-	public static final int MAX_SIZE_BUFFER = 1024;
+	public static final int MAX_SIZE_BUFFER = 2048;
 
 
 
-	public static void sendInt(int num, Socket socket) throws IOException {
+	public static void sendInt(int num, Socket socket) {
 		byte[] byeNum = ByteBuffer.allocate(4).putInt(num).array();
-		socket.getOutputStream().write(byeNum);
+		try {
+			socket.getOutputStream().write(byeNum);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void listToBuffer(List<String> list, Socket socket) throws IOException {
@@ -113,7 +118,10 @@ public class Network {
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
 			System.out.println("buffLen:" +buffLen);
-
+			if(buffLen < 0) {
+				return false;
+			}
+			
 			byte[] buff = new byte[buffLen];
 			int read = socket.getInputStream().read(buff);
 			if(read != buffLen) {//information lost

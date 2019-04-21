@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import facade.exceptions.ApplicationException;
 import server.business.util.FilePaths;
+import server.business.util.UserValidation;
 import server.ServerConst;
 import server.business.util.FileManager;
 
@@ -24,7 +25,7 @@ public class SendMessageHandler {
 	public boolean storeMsg(String userSender, String userReceiver, String msg) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userReceiver 
 				+ File.separator + FilePaths.FILE_NAME_MSG;
-		boolean trusted = isTrusted(userReceiver, userSender);
+		boolean trusted = UserValidation.isTrusted(fileMan, userReceiver, userSender);
 		if(trusted) {
 			try {
 				File msgFile = fileMan.acquireFile(filePath);
@@ -43,24 +44,6 @@ public class SendMessageHandler {
 		}
 	}
 
-	private boolean isTrusted(String userName, String userToBeChecked) {
-		String filePath = ServerConst.FOLDER_SERVER_USERS + File.separator + userName + File.separator + ServerConst.FILE_NAME_TRUSTED;
-		File trustedFile = fileMan.acquireFile(filePath);
-		try (BufferedReader br = new BufferedReader(new FileReader(trustedFile))){
-			String st; 
-			while ((st = br.readLine()) != null) {
-				if(st.equals(userToBeChecked)) {
-					return true;
-				}
-			}
-		} catch (FileNotFoundException e) {
-
-		} catch (IOException e) {
-
-		} finally {
-			fileMan.releaseFile(filePath);
-		}
-		return false;
-	}
+	
 
 }

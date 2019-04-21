@@ -106,7 +106,7 @@ public class MsgFileDM {
 				if(parsedInput.length > 1) {
 					for(int i = 1; i < parsedInput.length ; i++){
 						List<String> res = this.stub.rpcUploadFileToServer(parsedInput[i]);
-						System.out.println(res.get(0));
+						System.out.println(parsedInput[i] + ":" + res.get(0));
 					}
 				}else {
 					incompleteCommand();
