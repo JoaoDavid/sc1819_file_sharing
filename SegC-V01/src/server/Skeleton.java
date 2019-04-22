@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import communication.Network;
 import communication.OpCode;
+import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
@@ -39,7 +40,7 @@ public class Skeleton {
 		this.userService = userService;
 	}
 
-	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException {
+	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream){
 		boolean connected = true;
 		try {
 			Object obj = inStream.readObject();
@@ -88,10 +89,12 @@ public class Skeleton {
 			}
 		} catch (IOException e) {
 			connected = false;
-			throw new ApplicationException("Lost connection with client");
+			System.out.println("Lost connection with client");
 		} catch (ClassNotFoundException e) {
 			connected = false;
-			throw new ApplicationException("ClassNotFoundException on communicate");
+			System.out.println("ClassNotFoundException on communicate");
+		} catch (ApplicationException e) {
+			// TODO: handle exception
 		}
 		return connected;
 	}
@@ -148,21 +151,13 @@ public class Skeleton {
 	
 	private void listUsers() throws ApplicationException {
 		String[] arr = userService.listUsers();
-		try {
-			Network.listToBuffer(Arrays.asList(arr), socket);
-		} catch (IOException e) {
-			throw new ApplicationException("Error sending list of files");
-		}
+		Network.listToBuffer(Arrays.asList(arr), socket);
 	}
 
 	private void listFiles() throws ApplicationException {
 		String[] arr = fileService.listFiles(this.userName);
 
-		try {
-			Network.listToBuffer(Arrays.asList(arr), socket);
-		} catch (IOException e) {
-			throw new ApplicationException("Error sending list of files");
-		}
+		Network.listToBuffer(Arrays.asList(arr), socket);
 	}
 
 	private void trustUsers() throws ApplicationException {
@@ -204,26 +199,18 @@ public class Skeleton {
 	private void storeMessage() throws ApplicationException {
 		try {
 			List<String> msg = Network.bufferToList(socket);
-			boolean stored = msgService.storeMsg(this.userName, msg.get(0), msg.get(1));
-			List<String> res = new ArrayList<String>();
-			if(stored) {
-				res.add("OK");
-			}else {
-				res.add("error");
-			}
-			Network.listToBuffer(res, socket);
+			msgService.storeMsg(this.userName, msg.get(0), msg.get(1));
+			Network.sendInt(OpResult.SUCCESS, socket);
 		} catch (IOException e) {
-			throw new ApplicationException("Error collecting messages");
+			Network.sendInt(OpResult.ERROR, socket);
+		} catch (ApplicationException e) {
+			Network.sendInt(e.getCode(), socket);
 		}
 	}
 	
 	private void collectMsg() throws ApplicationException {
-		try {
-			List<String> msg = msgService.collectMessages(this.userName);
-			Network.listToBuffer(msg, socket);
-		} catch (IOException e) {
-			throw new ApplicationException("Error collecting messages");
-		}
+		List<String> msg = msgService.collectMessages(this.userName);
+		Network.listToBuffer(msg, socket);
 	}
 
 }

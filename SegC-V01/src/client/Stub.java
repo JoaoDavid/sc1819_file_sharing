@@ -145,6 +145,20 @@ public class Stub {
 		return null;
 	}
 
+	public void rpcSendList(OpCode opcode, List<String> list) {
+		try {
+			outObj.writeObject(opcode);
+			Network.listToBuffer(list, socket);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+	}
+	
+	public int rpcReceiveInt() throws IOException {
+		return Network.receiveInt(socket);
+	}
+
 
 
 

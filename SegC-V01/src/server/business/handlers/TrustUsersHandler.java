@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
@@ -28,10 +29,10 @@ public class TrustUsersHandler {
 			File trustedFile = fileMan.acquireFile(filePath);
 			try (FileWriter fileWriter = new FileWriter(trustedFile,true);
 					BufferedReader br = new BufferedReader(new FileReader(trustedFile));){
-				String st; 
-				while ((st = br.readLine()) != null) {
-					if(st.equals(userNameTrusted)) {
-						return false;
+				String currLine; 
+				while ((currLine = br.readLine()) != null) {
+					if(currLine.equals(userNameTrusted)) {
+						throw new ApplicationException(OpResult.ALREADY_EXISTS);
 					}
 				}
 				fileWriter.write(userNameTrusted + System.getProperty("line.separator"));

@@ -28,11 +28,6 @@ public class StoreFileHandler {
 		}else {
 			res.add("NOT stored");
 		}
-		try {
-			Network.listToBuffer(res, socket);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Network.listToBuffer(res, socket);
 	}
 }

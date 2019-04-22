@@ -1,28 +1,46 @@
 package communication;
 
 public enum ErrorCode {
-	OP_ERROR("error",-1),
-	ERR_NOT_REGISTERED("not registered in the server", -2),	
-	ERR_NOT_TRUSTED("not trusted",-3),
-	ERR_ALREADY_EXISTS("already exists",-4),
-	ERR_NOT_FOUND("not found",-5);
-	
-	private final String desig;
+	OP_ERROR(-1),
+	ERR_NOT_REGISTERED(-2),	
+	ERR_NOT_TRUSTED(-3),
+	ERR_ALREADY_EXISTS(-4),
+	ERR_NOT_FOUND(-5);
+
 	private final int id;
 	/**
      * @param text
      */
 	ErrorCode(int id) {
-        this.desig = desig;
         this.id = id;
 	}
-	
-	public String getDesig() {
-		return this.desig;
-	}
+
 	
 	public int getId() {
 		return this.id;
 	}
 	
+	public static String getDesig(ErrorCode errorCode) {
+		switch(errorCode) {
+		case OP_ERROR:
+			return "error";
+			//break;
+		case ERR_NOT_REGISTERED:
+			return "not registered in the server";
+			//break;
+		case ERR_NOT_TRUSTED:
+			return "not trusted";
+			//break;
+		case ERR_ALREADY_EXISTS:
+			return "already exists";
+			//break;
+		case ERR_NOT_FOUND:
+			return "not found";
+			//break;
+		default:
+			break;
+		
+		}
+		return null;
+	}
 }

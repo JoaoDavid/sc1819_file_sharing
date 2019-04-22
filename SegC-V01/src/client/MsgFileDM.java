@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import communication.Message;
 import communication.Network;
 import communication.OpCode;
+import communication.OpResult;
 import facade.exceptions.ApplicationException;
 
 
@@ -192,9 +193,13 @@ public class MsgFileDM {
 					List<String> recMsg = new ArrayList<String>();
 					recMsg.add(userReceiver);
 					recMsg.add(msg);
-					List<String> res = this.stub.rpcSendReceiveList(OpCode.SEND_MSG, recMsg);
-					for(String curr : res) {
-						System.out.println(curr);
+					this.stub.rpcSendList(OpCode.SEND_MSG, recMsg);
+					try {
+						int resCode = this.stub.rpcReceiveInt();
+						System.out.println(OpResult.getDesig(resCode));
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}else {
 					incompleteCommand();

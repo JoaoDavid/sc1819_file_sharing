@@ -51,6 +51,12 @@ public class FileManager {
 		return INSTANCE;
 	}
 	
+	/**
+	 * Acquires the file in filePath
+	 * 
+	 * @param filePath
+	 * @return
+	 */
 	public File acquireFile(String filePath) {
 		FileCounter fc = map.get(filePath);
 		if(fc == null) {

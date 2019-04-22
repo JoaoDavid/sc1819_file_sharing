@@ -29,24 +29,34 @@ public class Network {
 		}
 	}
 
-	public static void listToBuffer(List<String> list, Socket socket) throws IOException {
-		byte[] result;
-		ByteArrayOutputStream result2 = new ByteArrayOutputStream();
-		byte[] listLen = ByteBuffer.allocate(4).putInt(list.size()).array();
-		result2.write(listLen);
-		for(String curr : list) {
-			byte[] byteCurrStr = curr.getBytes();
-			byte[] strByteLen = ByteBuffer.allocate(4).putInt(byteCurrStr.length).array();
-			result2.write(strByteLen);
-			result2.write(byteCurrStr);
+	public static int receiveInt(Socket socket) throws IOException {
+		byte[] buffLenByte = new byte[4];
+		socket.getInputStream().read(buffLenByte);
+		return ByteBuffer.wrap(buffLenByte).getInt();
+	}
+
+	public static void listToBuffer(List<String> list, Socket socket) {
+		try {
+			byte[] result;
+			ByteArrayOutputStream result2 = new ByteArrayOutputStream();
+			byte[] listLen = ByteBuffer.allocate(4).putInt(list.size()).array();
+			result2.write(listLen);
+			for(String curr : list) {
+				byte[] byteCurrStr = curr.getBytes();
+				byte[] strByteLen = ByteBuffer.allocate(4).putInt(byteCurrStr.length).array();
+				result2.write(strByteLen);
+				result2.write(byteCurrStr);
+			}
+			result = result2.toByteArray();
+
+			//First send the number of bytes that will be sent
+			Network.sendInt(result.length, socket);
+			//Then sends those bytes
+			socket.getOutputStream().write(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		result = result2.toByteArray();
-		int lenBuffer = result.length;
-		//First send the number of bytes that will be sent
-		byte[] bytes = ByteBuffer.allocate(4).putInt(lenBuffer).array();
-		socket.getOutputStream().write(bytes);
-		//Then sends those bytes
-		socket.getOutputStream().write(result);
 	}
 
 	public static List<String> bufferToList(Socket socket) throws IOException {
@@ -121,7 +131,7 @@ public class Network {
 			if(buffLen < 0) {
 				return false;
 			}
-			
+
 			byte[] buff = new byte[buffLen];
 			int read = socket.getInputStream().read(buff);
 			if(read != buffLen) {//information lost

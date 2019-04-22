@@ -125,9 +125,6 @@ public class MsgFileServerDM{
 
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch (ApplicationException e) {//remover
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

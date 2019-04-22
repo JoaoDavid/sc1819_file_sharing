@@ -10,6 +10,8 @@ public class ApplicationException extends Exception {
      * The serial version id (generated automatically by Eclipse)
      */
     private static final long serialVersionUID = -3416001628323171383L;
+    
+    private int code;
 
 
     /**
@@ -31,5 +33,18 @@ public class ApplicationException extends Exception {
     public ApplicationException(String message, Exception e) {
         super(message, e);
     }
+
+
+	public ApplicationException(int code) {
+		super();
+		this.code = code;
+	}
+
+
+	public int getCode() {
+		return code;
+	}
+	
+	
 
 }

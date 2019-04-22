@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.Socket;
 
 import communication.Network;
-import facade.services.UserService;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;

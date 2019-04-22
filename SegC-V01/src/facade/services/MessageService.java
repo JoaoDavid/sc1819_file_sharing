@@ -20,7 +20,7 @@ public class MessageService {
 		return collectMessagesHandler.collectMessages(userName);
 	}
 	
-	public boolean storeMsg(String userSender, String userReceiver, String msg) throws ApplicationException {
-		return sendMessageHandler.storeMsg(userSender, userReceiver, msg);
+	public void storeMsg(String userSender, String userReceiver, String msg) throws ApplicationException {
+		sendMessageHandler.storeMsg(userSender, userReceiver, msg);
 	}
 }
