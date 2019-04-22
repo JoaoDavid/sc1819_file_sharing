@@ -4,6 +4,8 @@ import java.io.File;
 
 public class ServerConst {
 	public static final String FILE_NAME_USERS_PASSWORDS = "usersInfo.txt";
+	
+	public static final String FILE_NAME_USERS_PASSWORDS_MAC = "usersInfoMAC.txt";
 
 	public static final String FOLDER_SERVER = System.getProperty("user.home") + File.separator + "MsgFileG51" + File.separator + "server";
 	
@@ -17,4 +19,6 @@ public class ServerConst {
 
 	public static final String FILE_USERS_PASSWORDS = FOLDER_SERVER + File.separator + FILE_NAME_USERS_PASSWORDS;
 	
+	public static final String FILE_USERS_PASSWORDS_MAC = FOLDER_SERVER + File.separator + FILE_NAME_USERS_PASSWORDS_MAC;
+
 }
