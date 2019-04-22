@@ -11,6 +11,7 @@ import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
+import users.UserManagerHandler;
 import server.business.util.FileManager;
 
 public class TrustUsersHandler {
@@ -25,7 +26,7 @@ public class TrustUsersHandler {
 	public boolean trustUser(String userName, String userNameTrusted) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
-		if(UserValidation.isRegistered(fileMan, userNameTrusted)) {
+		if(!UserManagerHandler.isDeactivatedUser(userNameTrusted) && UserManagerHandler.userNameRegistered(userName)) {
 			File trustedFile = fileMan.acquireFile(filePath);
 			try (FileWriter fileWriter = new FileWriter(trustedFile,true);
 					BufferedReader br = new BufferedReader(new FileReader(trustedFile));){

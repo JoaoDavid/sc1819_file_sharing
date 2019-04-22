@@ -5,11 +5,11 @@ import java.util.Scanner;
 
 public class UserManager {
 
-	private Handler handler;
+	private UserManagerHandler handler;
 
 
 	public UserManager(String alias, String password, String keystoreLocation, String keystorePassword) throws Exception {
-		this.handler = new Handler(alias, password, keystoreLocation, keystorePassword);
+		this.handler = new UserManagerHandler(alias, password, keystoreLocation, keystorePassword);
 	}
 
 	public static void main(String[] args) throws Exception {//eliminar
@@ -29,12 +29,10 @@ public class UserManager {
 		Scanner sc = new Scanner(System.in);
 		boolean onLoop = true;
 		while(onLoop) {
-			System.out.print(">>>");
+			try {
+				System.out.print(">>>");
 			String rawInput = sc.nextLine();
 			String[] parsedInput = rawInput.split("(\\s)+");
-			for(String curr : parsedInput) {
-				System.out.println(curr);
-			}
 			String userName;
 			String password;
 			//fazer try aqui
@@ -44,15 +42,17 @@ public class UserManager {
 					userName = parsedInput[1];
 					password = parsedInput[2];
 					this.createUser(userName, password);
+					System.out.println("OK");
 				}else {
 
 				}
 				break;
 
 			case "remove":
-				if(parsedInput.length == 3) {
-					userName = parsedInput[0];
+				if(parsedInput.length == 2) {
+					userName = parsedInput[1];
 					this.removeUser(userName);
+					System.out.println("OK");
 				}else {
 
 				}
@@ -60,9 +60,10 @@ public class UserManager {
 
 			case "update":
 				if(parsedInput.length == 3) {
-					userName = parsedInput[0];
-					password = parsedInput[1];
+					userName = parsedInput[1];
+					password = parsedInput[2];
 					this.updateUser(userName, password);
+					System.out.println("OK");
 				}else {
 
 				}
@@ -78,6 +79,10 @@ public class UserManager {
 				System.out.println("Command is not recognized");
 				break;
 			}
+			}catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+			
 		}
 		sc.close();
 	}
@@ -88,12 +93,12 @@ public class UserManager {
 
 	}
 	
-	private void removeUser(String userName) {
+	private void removeUser(String userName) throws Exception {
 		this.handler.removeUser(userName);
 
 	}
 	
-	private void updateUser(String userName, String password) {
+	private void updateUser(String userName, String password) throws Exception {
 		this.handler.updateUser(userName, password);
 	}
 }

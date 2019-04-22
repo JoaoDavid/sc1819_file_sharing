@@ -42,9 +42,7 @@ public class UserValidation {
 		return false;
 	}
 
-	public static boolean isRegistered(FileManager fileMan, String userName) {
-		return true;//fazer
-	}
+	
 
 
 }
