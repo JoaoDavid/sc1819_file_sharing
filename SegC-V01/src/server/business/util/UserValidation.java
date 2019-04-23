@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import server.ServerConst;
+
 
 /**
  * The purpouse of this class is to validate user's
@@ -23,7 +23,7 @@ public class UserValidation {
 	 * @return true:userToBeChecked is trusted by userName
 	 */
 	public static boolean isTrusted(FileManager fileMan, String userName, String userToBeChecked) {
-		String filePath = ServerConst.FOLDER_SERVER_USERS + File.separator + userName + File.separator + ServerConst.FILE_NAME_TRUSTED;
+		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED;
 		File trustedFile = fileMan.acquireFile(filePath);
 		try (BufferedReader br = new BufferedReader(new FileReader(trustedFile))){
 			String st; 

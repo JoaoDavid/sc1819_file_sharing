@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.OpCode;
+import server.business.util.FilePaths;
 
 public class Manager {
 	//** Log **//
@@ -31,7 +32,7 @@ public class Manager {
 	private Manager() {
 		sempManager = new ConcurrentManager();
 		users = new HashMap<>();
-		usersFile = new File(ServerConst.FILE_USERS_PASSWORDS);
+		usersFile = new File(FilePaths.FILE_USERS_PASSWORDS);
 		if(!usersFile.exists()) {
 			try {
 				usersFile.getParentFile().mkdirs();
@@ -56,7 +57,7 @@ public class Manager {
 				logger.log(Level.SEVERE, "IO Exception", e);
 			}
 		}
-		File file = new File(ServerConst.FOLDER_SERVER_USERS);
+		File file = new File(FilePaths.FOLDER_SERVER_USERS);
 		File temp;
 		if(file.exists()){
 			for(String paths: file.list()){
@@ -79,7 +80,7 @@ public class Manager {
 		for(String path: file.list()){
 			temp = new File(file.getPath() + File.separator +path);
 			if(temp.exists()){
-				if(ServerConst.FILE_NAME_TRUSTED.equals(temp.getName())){
+				if(FilePaths.FILE_NAME_TRUSTED.equals(temp.getName())){
 					continue;
 				}else if(temp.isFile()){
 					sempManager.addSem(temp.getPath());
@@ -117,21 +118,21 @@ public class Manager {
 				users.put(username, password);
 				fileWriter.close();
 			}
-			String path = ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FOLDER_FILES;
+			String path = FilePaths.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + FilePaths.FOLDER_FILES;
 			File userFiles = new File(path);
 			userFiles.getParentFile().mkdirs(); 
 			userFiles.mkdir();
 			//it is a folder do not need semaphore
 			//sempManager.addSem(username, path);
-			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_TRUSTED;
+			path = FilePaths.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + FilePaths.FILE_NAME_TRUSTED;
 			File userTrusted = new File(path);
 			userTrusted.getParentFile().mkdirs(); 
 			userTrusted.createNewFile();
 			//sempManager.addSem(username, path);
-			path = ServerConst.FOLDER_SERVER_USERS + File.separator 
-					+ username + File.separator + ServerConst.FILE_NAME_MSG;
+			path = FilePaths.FOLDER_SERVER_USERS + File.separator 
+					+ username + File.separator + FilePaths.FILE_NAME_MSG;
 			File userMsg = new File(path);
 			userMsg.getParentFile().mkdirs(); 
 			userMsg.createNewFile();
@@ -196,8 +197,8 @@ public class Manager {
 		String path;
 		OpCode[] result = new OpCode[nameFiles.size()];
 		for(int i = 0; i < nameFiles.size();i++){
-			path = ServerConst.FOLDER_SERVER_USERS + File.separator + connectedUser 
-					+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFiles.get(i);
+			path = FilePaths.FOLDER_SERVER_USERS + File.separator + connectedUser 
+					+ File.separator + FilePaths.FOLDER_FILES + File.separator + nameFiles.get(i);
 			file = new File(path);
 			if(file.exists()){
 				result[i] = OpCode.ERR_ALREADY_EXISTS;
@@ -239,8 +240,8 @@ public class Manager {
 	 * @return lista os ficheiros que o utilizador local (localUserID) tem no servidor.
 	 */
 	public String[] listFiles(String localUser) { //list
-		File userFiles = new File(ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
-				+ File.separator + ServerConst.FOLDER_FILES);
+		File userFiles = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + FilePaths.FOLDER_FILES);
 		return userFiles.list();
 	}
 	/**
@@ -251,8 +252,8 @@ public class Manager {
 	 * @return
 	 */
 	public boolean deleteFile(String user, String fileName) {
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + user + 
-				File.separator +  ServerConst.FOLDER_FILES + File.separator + fileName;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + user + 
+				File.separator +  FilePaths.FOLDER_FILES + File.separator + fileName;
 		logger.log(Level.CONFIG, "Patg to delete: " + path);
 		StampedLock sem = sempManager.getSem(path);
 		if(sem == null){
@@ -293,7 +294,7 @@ public class Manager {
 	 * @return localUser is friend of otherUser
 	 */
 	public boolean friends(String localUser, String otherUser) {
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + otherUser + File.separator + ServerConst.FILE_NAME_TRUSTED;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + otherUser + File.separator + FilePaths.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
 		BufferedReader br;
 		if(trustedFile.exists()) {
@@ -326,8 +327,8 @@ public class Manager {
 	 * @return vetor de opcode ou null em caso de erro
 	 */
 	public OpCode[] trusted(String localUser, String[] trustedUserID) { //trusted <trustedUserIDs>
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
-				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
 		File trustedFile = new File(path);
 		OpCode[] result = new OpCode[trustedUserID.length];
 		BufferedReader br;
@@ -372,8 +373,8 @@ public class Manager {
 	 * @return
 	 */
 	public OpCode[] untrusted(String localUser, String[] untrustedUserID) { //trusted <trustedUserIDs>
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + localUser 
-				+ File.separator + ServerConst.FILE_NAME_TRUSTED;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + localUser 
+				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
 		OpCode[] result = new OpCode[untrustedUserID.length];
 		File trustedFile = new File(path);
 		BufferedReader br;
@@ -426,8 +427,8 @@ public class Manager {
 	 * @return
 	 */
 	public Byte[] sendFileToClient(String userOwner, String nameFile) {//download <userID> <file>
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + userOwner 
-				+ File.separator + ServerConst.FOLDER_FILES + File.separator + nameFile;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
+				+ File.separator + FilePaths.FOLDER_FILES + File.separator + nameFile;
 		File file = new File(path);
 		if(file.exists()){
 			StampedLock sem = sempManager.getSem(path);
@@ -462,8 +463,8 @@ public class Manager {
 	 * @return true if it is success 
 	 */
 	public boolean storeMsg(String userSender, String userReceiver, String msg) {//msg <userID> <msg>
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator + userReceiver 
-				+ File.separator + ServerConst.FILE_NAME_MSG;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator + userReceiver 
+				+ File.separator + FilePaths.FILE_NAME_MSG;
 		File userMsgs = new File(path);
 		StampedLock sem = sempManager.getSem(path);
 		if(sem == null){
@@ -489,8 +490,8 @@ public class Manager {
 	 * @return list with all messages -> null if empty
 	 */
 	public ArrayList<String> collectMsg(String user) {//collect
-		String path = ServerConst.FOLDER_SERVER_USERS + File.separator 
-				+ user + File.separator + ServerConst.FILE_NAME_MSG;
+		String path = FilePaths.FOLDER_SERVER_USERS + File.separator 
+				+ user + File.separator + FilePaths.FILE_NAME_MSG;
 		ArrayList<String> result = new ArrayList<String>();
 		File userMsgs = new File(path);
 		StampedLock sem = sempManager.getSem(path);

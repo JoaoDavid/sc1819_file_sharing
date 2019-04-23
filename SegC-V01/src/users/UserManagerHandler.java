@@ -27,8 +27,8 @@ import javax.crypto.spec.PBEKeySpec;
 
 import security.ContentCipher;
 import security.MacManager;
-import server.ServerConst;
 import server.business.util.FileManager;
+import server.business.util.FilePaths;
 
 public class UserManagerHandler {
 
@@ -61,13 +61,20 @@ public class UserManagerHandler {
 	 * @throws Exception 
 	 */
 	public void createUser(String userName, String password) throws Exception {
-		if(macM.validRegistFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC)) {
+		if(macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
 			if(!userNameRegistered(userName)) {
-				FileOutputStream usersFile = new FileOutputStream(ServerConst.FILE_USERS_PASSWORDS,true);
+				FileOutputStream usersFile = new FileOutputStream(FilePaths.FILE_USERS_PASSWORDS,true);
 				String data = userName + ":" + getSaltAndPassword(password) + System.getProperty("line.separator");
 				usersFile.write(data.getBytes());
 				usersFile.close();
-				macM.updateMacFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC);
+				macM.updateMacFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
+				File userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator +  FilePaths.FOLDER_FILES);
+				userFiles.mkdirs();
+				userFiles.mkdir();
+				userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG);
+				userFiles.createNewFile();
+				userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED);
+				userFiles.createNewFile();
 			}else {
 				throw new Exception("userName is taken");
 			}
@@ -88,7 +95,7 @@ public class UserManagerHandler {
 		return md.digest();
 
 	}
-	
+
 	private String getSaltAndPassword(String password) {
 		byte[] salt = getSalt() ;
 		byte[] hash = getSaltedPassword(password, salt);
@@ -121,9 +128,9 @@ public class UserManagerHandler {
 	 * @throws Exception 
 	 */
 	public void removeUser(String userName) throws Exception {
-		if(macM.validRegistFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC)) {
+		if(macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
 			if(!isDeactivatedUser(userName)) {
-				String filePath = ServerConst.FILE_USERS_PASSWORDS;
+				String filePath = FilePaths.FILE_USERS_PASSWORDS;
 				File userRegistFile = new File(filePath);
 				try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
 					List<String> fileContent = new ArrayList<String>();
@@ -131,7 +138,7 @@ public class UserManagerHandler {
 					while ((curr = br.readLine()) != null) {
 						String[] userInfo = curr.split(":");
 						if(userInfo[0].equals(userName)) {
-							fileContent.add(curr + ":" + ServerConst.DEACTIVATED_USER);
+							fileContent.add(curr + ":" + FilePaths.DEACTIVATED_USER);
 						}else {
 							fileContent.add(curr);
 						}
@@ -145,7 +152,7 @@ public class UserManagerHandler {
 						fileWriter.write(currLine + System.getProperty("line.separator"));
 					}
 					fileWriter.close();
-					macM.updateMacFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC);
+					macM.updateMacFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 				} catch (IOException e) {
 				}
 			}else {
@@ -161,9 +168,9 @@ public class UserManagerHandler {
 	 * @throws Exception 
 	 */
 	public void updateUser(String userName, String password) throws Exception {
-		if(macM.validRegistFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC)) {
+		if(macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
 			if(!isDeactivatedUser(userName)) {
-				String filePath = ServerConst.FILE_USERS_PASSWORDS;
+				String filePath = FilePaths.FILE_USERS_PASSWORDS;
 				File userRegistFile = new File(filePath);
 				try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
 					List<String> fileContent = new ArrayList<String>();
@@ -187,7 +194,7 @@ public class UserManagerHandler {
 						fileWriter.write(currLine + System.getProperty("line.separator"));
 					}
 					fileWriter.close();
-					macM.updateMacFile(ServerConst.FILE_USERS_PASSWORDS, ServerConst.FILE_USERS_PASSWORDS_MAC);
+					macM.updateMacFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 				} catch (IOException e) {
 				}
 			}else {
@@ -198,17 +205,17 @@ public class UserManagerHandler {
 		}
 	}
 
-	
+
 
 	public static boolean isDeactivatedUser(String userName) {
-		String filePath = ServerConst.FILE_USERS_PASSWORDS;
+		String filePath = FilePaths.FILE_USERS_PASSWORDS;
 		File userRegistFile = new File(filePath);
 		try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
 			String st; 
 			while ((st = br.readLine()) != null) {
 				String[] userInfo = st.split(":");
-				if(userInfo.length == 4 && userInfo[0].equals(userName)) {
-					return userInfo[3].equals(ServerConst.DEACTIVATED_USER);
+				if(userInfo[0].equals(userName)) {
+					return isDeactivatedUserLine(st);
 				}
 			}
 		} catch (IOException e) {
@@ -216,8 +223,13 @@ public class UserManagerHandler {
 		return false;
 	}
 
+	private static boolean isDeactivatedUserLine(String line) {
+		String[] userInfo = line.split(":");
+		return userInfo.length == 4 && userInfo[3].equals(FilePaths.DEACTIVATED_USER);
+	}
+
 	public static boolean userNameRegistered(String userName) {
-		String filePath = ServerConst.FILE_USERS_PASSWORDS;
+		String filePath = FilePaths.FILE_USERS_PASSWORDS;
 		File userRegistFile = new File(filePath);
 		try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
 			String st; 
@@ -233,20 +245,46 @@ public class UserManagerHandler {
 	}
 
 	public boolean validLogin(String userName, String password) {
-		File userRegistFile = new File(ServerConst.FILE_USERS_PASSWORDS);
+		File userRegistFile = new File(FilePaths.FILE_USERS_PASSWORDS);
 		try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
-			String st; 
-			while ((st = br.readLine()) != null) {
-				String[] userInfo = st.split(":");
+			String curr; 
+			while ((curr = br.readLine()) != null) {
+				String[] userInfo = curr.split(":");
 				if(userInfo[0].equals(userName)) {
-					Base64.Decoder dec = Base64.getDecoder();
-					byte[] passwordCalculated = getSaltedPassword(password, dec.decode(userInfo[1]));
-					return MessageDigest.isEqual(passwordCalculated, dec.decode(userInfo[2]));
+					if(!isDeactivatedUserLine(curr)) {
+						Base64.Decoder dec = Base64.getDecoder();
+						byte[] passwordCalculated = getSaltedPassword(password, dec.decode(userInfo[1]));
+						return MessageDigest.isEqual(passwordCalculated, dec.decode(userInfo[2]));
+					}else {
+						return false;
+					}				
 				}
 			}
 		} catch (IOException e) {
 		}
 		return false;
+	}
+
+
+	public boolean boot() {
+		File folder = new File(FilePaths.FOLDER_SERVER_USERS);
+		if(!folder.exists()) {
+			folder.getParentFile().mkdirs();
+			folder.mkdir();
+		}
+		File userInfo = new File(FilePaths.FILE_USERS_PASSWORDS);
+		File userInfoMac = new File(FilePaths.FILE_USERS_PASSWORDS_MAC);
+		if(!userInfo.exists() || !userInfoMac.exists()) {
+			try {
+				userInfo.createNewFile();
+				userInfoMac.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 	}
 
 

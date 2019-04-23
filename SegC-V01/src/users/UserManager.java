@@ -1,6 +1,9 @@
 package users;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Scanner;
+
 
 
 public class UserManager {
@@ -13,14 +16,18 @@ public class UserManager {
 	}
 
 	public static void main(String[] args) throws Exception {//eliminar
-		for(String curr : args) {
+		/*for(String curr : args) {
 			System.out.println(curr);
-		}
+		}*/
 		if(args.length == 4) {
 			UserManager userManager = new UserManager(args[0],args[1],args[2],args[3]);
-			userManager.startParser();			
+			if(userManager.boot()) {
+				userManager.startParser();	
+			}else {
+				System.out.println("ERROR BOOTING UP : FILE CONTAINING USER LOGIN INFO WAS CORRUPTED");
+			}					
 		}else {
-			System.out.println("args: <alias> <password> <keystore location> <keystore password>");
+			System.out.println("valid args: <alias> <password> <keystore location> <keystore password>");
 		}
 
 	}
@@ -28,8 +35,9 @@ public class UserManager {
 	public void startParser() throws Exception {
 		Scanner sc = new Scanner(System.in);
 		boolean onLoop = true;
+		System.out.println("USER MANAGEMENT   use help for the list of possible commands");
 		while(onLoop) {
-			try {
+			try {				
 				System.out.print(">>>");
 				String rawInput = sc.nextLine();
 				String[] parsedInput = rawInput.split("(\\s)+");
@@ -64,13 +72,21 @@ public class UserManager {
 						password = parsedInput[2];
 						this.updateUser(userName, password);
 						System.out.println("OK");
-					}else {
-
 					}
 					break;
 				case "exit":
 					if(parsedInput.length == 1) {
 						onLoop = false;
+					}else {
+
+					}
+					break;
+				case "help":
+					if(parsedInput.length == 1) {
+						System.out.println("create <user> <password>");
+						System.out.println("remove <user>");
+						System.out.println("update <user> <password>");
+						System.out.println("login <user> <password>");
 					}else {
 
 					}
@@ -94,6 +110,10 @@ public class UserManager {
 
 		}
 		sc.close();
+	}
+	
+	private boolean boot() {
+		return handler.boot();
 	}
 
 
