@@ -31,73 +31,86 @@ public class UserManager {
 		while(onLoop) {
 			try {
 				System.out.print(">>>");
-			String rawInput = sc.nextLine();
-			String[] parsedInput = rawInput.split("(\\s)+");
-			String userName;
-			String password;
-			//fazer try aqui
-			switch (parsedInput[0]) {//command <user> <password>
-			case "create":
-				if(parsedInput.length == 3) {
-					userName = parsedInput[1];
-					password = parsedInput[2];
-					this.createUser(userName, password);
-					System.out.println("OK");
-				}else {
+				String rawInput = sc.nextLine();
+				String[] parsedInput = rawInput.split("(\\s)+");
+				String userName;
+				String password;
+				//fazer try aqui
+				switch (parsedInput[0]) {//command <user> <password>
+				case "create":
+					if(parsedInput.length == 3) {
+						userName = parsedInput[1];
+						password = parsedInput[2];
+						this.createUser(userName, password);
+						System.out.println("OK");
+					}else {
 
+					}
+					break;
+
+				case "remove":
+					if(parsedInput.length == 2) {
+						userName = parsedInput[1];
+						this.removeUser(userName);
+						System.out.println("OK");
+					}else {
+
+					}
+					break;
+
+				case "update":
+					if(parsedInput.length == 3) {
+						userName = parsedInput[1];
+						password = parsedInput[2];
+						this.updateUser(userName, password);
+						System.out.println("OK");
+					}else {
+
+					}
+					break;
+				case "exit":
+					if(parsedInput.length == 1) {
+						onLoop = false;
+					}else {
+
+					}
+					break;
+				case "login":
+					if(parsedInput.length == 3) {
+						userName = parsedInput[1];
+						password = parsedInput[2];
+						System.out.println(this.loginUser(userName, password));
+					}else {
+
+					}
+					break;
+				default:
+					System.out.println("Command is not recognized");
+					break;
 				}
-				break;
-
-			case "remove":
-				if(parsedInput.length == 2) {
-					userName = parsedInput[1];
-					this.removeUser(userName);
-					System.out.println("OK");
-				}else {
-
-				}
-				break;
-
-			case "update":
-				if(parsedInput.length == 3) {
-					userName = parsedInput[1];
-					password = parsedInput[2];
-					this.updateUser(userName, password);
-					System.out.println("OK");
-				}else {
-
-				}
-				break;
-			case "exit":
-				if(parsedInput.length == 1) {
-					onLoop = false;
-				}else {
-
-				}
-				break;
-			default:
-				System.out.println("Command is not recognized");
-				break;
-			}
 			}catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
-			
+
 		}
 		sc.close();
 	}
 
 
+	private boolean loginUser(String userName, String password) {
+		return this.handler.validLogin(userName, password);
+	}
+
 	private void createUser(String userName, String password) throws Exception {
 		this.handler.createUser(userName, password);
 
 	}
-	
+
 	private void removeUser(String userName) throws Exception {
 		this.handler.removeUser(userName);
 
 	}
-	
+
 	private void updateUser(String userName, String password) throws Exception {
 		this.handler.updateUser(userName, password);
 	}
