@@ -81,7 +81,7 @@ public class Network {
 		byte[] buffLenByte = new byte[4];
 		socket.getInputStream().read(buffLenByte);
 		int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
-		System.out.println("buffLen:" +buffLen);
+		//System.out.println("buffLen:" +buffLen);
 
 		byte[] buff = new byte[buffLen];
 		int read = socket.getInputStream().read(buff);
@@ -92,7 +92,7 @@ public class Network {
 		int i = 0;
 		byte[] strLenBytes = Arrays.copyOfRange(buff, i, i + 4);
 		int nStrs = ByteBuffer.wrap(strLenBytes).getInt();
-		System.out.println("num strings:"+nStrs);
+		//System.out.println("num strings:"+nStrs);
 		i+=4;
 		String[] result2 = new String[nStrs];
 		int index = 0;
@@ -138,7 +138,7 @@ public class Network {
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
-			System.out.println("buffLen:" +buffLen);
+			//System.out.println("buffLen:" +buffLen);
 			if(buffLen < 0) {
 				return false;
 			}
@@ -165,6 +165,7 @@ public class Network {
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(buff, i, buffLen - i);
 			fos.close();
+			System.out.println("File downloaded to " + file.getCanonicalPath());
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -175,12 +176,13 @@ public class Network {
 
 	public static boolean receiveFileAndCipher(String userName, Socket socket, boolean replace, PublicKey pubKey) {
 		try {
+			
 			String path = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 					+ File.separator + FilePaths.FOLDER_FILES + File.separator;
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
-			System.out.println("buffLen:" +buffLen);
+			//System.out.println("buffLen:" +buffLen);
 			if(buffLen < 0) {
 				return false;
 			}
@@ -212,6 +214,7 @@ public class Network {
 			fosK.write(c.wrap(contentCipher.getKey()));
 			fos.close();
 			fosK.close();
+			System.out.println(userName + " uploaded " + fileName);
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

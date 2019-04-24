@@ -46,7 +46,6 @@ public class UserValidation {
 				String inFile = new String(result);
 				List<String> list = Arrays.asList(inFile.split("\n"));
 				for(String currLine : list) {
-					System.out.println("Nomes no ficheiro trusted  " + currLine);
 					if(currLine.equals(userToBeChecked)) {
 						return true;
 					}

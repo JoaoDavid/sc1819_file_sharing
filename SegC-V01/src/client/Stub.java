@@ -146,6 +146,8 @@ public class Stub {
 				Network.sendFile(file, socket);
 				List<String> res = Network.bufferToList(socket);
 				return res;
+			}else {
+				//file not found
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

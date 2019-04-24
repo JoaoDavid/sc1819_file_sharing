@@ -24,9 +24,6 @@ public class UserManager {
 	}
 
 	public static void main(String[] args) throws Exception {//eliminar
-		/*for(String curr : args) {
-			System.out.println(curr);
-		}*/
 		if(args.length == 6) {
 			FileInputStream kfile = new FileInputStream(args[0]);
 			KeyStore keyStore = KeyStore.getInstance(ConstKeyStore.KEYSTORE_TYPE);

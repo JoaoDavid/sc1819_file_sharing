@@ -25,28 +25,29 @@ public class MsgFileDM {
 	private static final String CLASS_NAME = MsgFileDM.class.getName();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
-	
+
 	private String userName;
 	private Stub stub;
-	
-	
+
+
 	public MsgFileDM(String userName, String host, int port) {
 		this.userName = userName;
 		this.stub = new Stub(userName, host, port);
 	}
-	
+
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
-	public static void main(String[] args) throws ApplicationException {
-		System.setProperty("javax.net.ssl.trustStore", "keystore" + File.separator + "myClient.keyStore");
+	public static void main(String[] args) throws ApplicationException {		
 		Scanner sc = new Scanner(System.in);
-		if(args.length == 2 || args.length == 3) {
+		if(args.length == 3 || args.length == 4) {
+			//System.setProperty("javax.net.ssl.trustStore", "keystore" + File.separator + "myClient.keyStore");
+			System.setProperty("javax.net.ssl.trustStore", args[3]);
 			String[] hostPort = args[0].split(":");
 			//System.out.print(hostPort[0] + hostPort[1]);
 			int port;
 			String passwd;
 
-			if(args.length == 3) {
+			if(args.length == 4) {
 				passwd = args[2];
 			}else {
 				System.out.println("Write your password please\n>>>");
@@ -77,19 +78,19 @@ public class MsgFileDM {
 			sc.close();
 		}else {
 			System.out.println("Your args are not correct");
-			System.out.println("Valid args: <serverAddress> <localUserID> [password]");
+			System.out.println("Valid args: <serverAddress> <username> <userPassword> <truststoreLocation>");
 			System.out.println("example: 127.0.0.1:23456 fernando pass");
 		}		
 	}
-	
+
 	public boolean connect(String password) {
 		return this.stub.connect(password);
 	}
-	
+
 	public boolean disconnect() {
 		return this.stub.disconnect();
 	}
-	
+
 	/**
 	 * @requires client != null && client.isConnected()
 	 * @param client
@@ -108,7 +109,11 @@ public class MsgFileDM {
 				if(parsedInput.length > 1) {
 					for(int i = 1; i < parsedInput.length ; i++){
 						List<String> res = this.stub.rpcUploadFileToServer(parsedInput[i]);
-						System.out.println(parsedInput[i] + ":" + res.get(0));
+						if(res == null) {
+							System.out.println(parsedInput[i] + " : File not found");
+						}else {
+							System.out.println(parsedInput[i] + " : " + res.get(0));
+						}
 					}
 				}else {
 					incompleteCommand();
@@ -182,7 +187,7 @@ public class MsgFileDM {
 					msg.add(userOwner);
 					msg.add(fileName);					
 					if(this.stub.rpcDownloadFileFromServer(msg)) {
-						System.out.println("File downloaded");
+						System.out.println("OK");
 					}else {
 						System.out.println("error");
 					}
@@ -213,9 +218,14 @@ public class MsgFileDM {
 			case "collect":
 				if(parsedInput.length == 1) {
 					List<String> res = this.stub.rpcReceiveList(OpCode.COLLECT_MSG);
-					for(String curr : res) {
-						System.out.println(curr);
+					if(res.size() > 0) {
+						for(String curr : res) {
+							System.out.println(curr);
+						}
+					}else {
+						System.out.println("Your inbox is empty");
 					}
+
 				}else {
 					incompleteCommand();
 				}
@@ -240,7 +250,7 @@ public class MsgFileDM {
 					this.stub.rpcEndConnectiont();
 					//disconnect();
 					sc.close();
-		            return;
+					return;
 				}else {
 					incompleteCommand();
 				}
@@ -252,10 +262,10 @@ public class MsgFileDM {
 		}
 		sc.close();
 	}
-	
+
 	public static void incompleteCommand() {
 		System.out.println("ERROR: incomplete command line");
 	}
-	
+
 
 }

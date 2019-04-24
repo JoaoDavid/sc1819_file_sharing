@@ -62,7 +62,6 @@ public class Skeleton {
 				this.uploadFile();
 				break;
 			case LIST_FILES: //list
-				System.out.println("entrei");
 				this.listFiles();
 				break;
 			case REMOVE_FILES: //remove <files>
@@ -95,10 +94,8 @@ public class Skeleton {
 			}
 		} catch (IOException e) {
 			connected = false;
-			System.out.println("Lost connection with client");
 		} catch (ClassNotFoundException e) {
 			connected = false;
-			System.out.println("ClassNotFoundException on communicate");
 		} catch (ApplicationException e) {
 			// TODO: handle exception
 		}
@@ -118,7 +115,6 @@ public class Skeleton {
 			List<String> msg = Network.bufferToList(socket);
 			String userOwner = msg.get(0);
 			String fileName = msg.get(1);
-			System.out.println(userOwner + " " + fileName);
 			fileService.clientDownloadFile(this.userName, userOwner, fileName, socket, privKey, pubKey);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

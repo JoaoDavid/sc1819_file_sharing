@@ -25,7 +25,7 @@ public class StoreFileHandler {
 		if(stored) {
 			res.add("STORED");
 		}else {
-			res.add("NOT stored");
+			res.add("file already exists in the server");
 		}
 		Network.listToBuffer(res, socket);
 	}

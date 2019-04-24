@@ -38,7 +38,6 @@ public class UntrustUsersHandler {
 					List<String> list = Arrays.asList(inFile.split("\n"));
 					ByteArrayOutputStream byteArr = new ByteArrayOutputStream();
 					for(String currLine : list) {
-						System.out.println("CURR TRUSTED:"+currLine+"|");
 						if(currLine.equals(userNameUntrusted)) {
 							untrusted = true;
 						}else {

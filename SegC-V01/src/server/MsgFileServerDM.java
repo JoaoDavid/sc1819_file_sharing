@@ -22,6 +22,7 @@ import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
+import server.business.util.ConstKeyStore;
 import users.UserManagerHandler;
 
 public class MsgFileServerDM{
@@ -31,7 +32,7 @@ public class MsgFileServerDM{
 	private MessageService msgService;
 	private UserService userService;
 	private UserManagerHandler userManagerHandler;
-	
+
 	private SecretKey secKey;
 	private PrivateKey privKey;
 	private PublicKey pubKey;
@@ -56,20 +57,20 @@ public class MsgFileServerDM{
 			int port;
 			MsgFileServerDM server;
 			try {
-				System.setProperty("javax.net.ssl.keyStore", "keystore" + File.separator + "myServer.keyStore");
+				/*System.setProperty("javax.net.ssl.keyStore", "keystore" + File.separator + "myServer.keyStore");
 				System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");
-				System.setProperty("javax.net.ssl.keyStorePassword", "batata");
+				System.setProperty("javax.net.ssl.keyStorePassword", "batata");*/
+				System.setProperty("javax.net.ssl.keyStore", args[1]);
+				System.setProperty("javax.net.ssl.keyStoreType", ConstKeyStore.KEYSTORE_TYPE);
+				System.setProperty("javax.net.ssl.keyStorePassword", args[2]);
 				port = Integer.parseInt(args[0]);
-				
+
 				FileInputStream kfile = new FileInputStream(args[1]);
 				KeyStore kstore = KeyStore.getInstance("JCEKS");
 				kstore.load(kfile, args[2].toCharArray());
 				SecretKey secKey = (SecretKey) kstore.getKey(args[3], args[4].toCharArray());
 				PrivateKey privKey = (PrivateKey) kstore.getKey(args[5], args[6].toCharArray());
 				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
-				System.out.println(privKey == null);
-				System.out.println(pubKey == null);
-				System.out.println(pubKey.toString());
 				server = new MsgFileServerDM(secKey, privKey, pubKey);
 			}
 			catch (NumberFormatException e){
@@ -91,7 +92,7 @@ public class MsgFileServerDM{
 	public void startServer (int port, PrivateKey privKey, PublicKey pubKey){
 		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
 		SSLServerSocket ss = null;
-		
+
 		//ServerSocket sSoc = null;
 
 		try { 
@@ -131,14 +132,16 @@ public class MsgFileServerDM{
 		}
 
 		public void run(){
+			String user = null;
+			String passwd = null;
 			try {
 				ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 				ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
-				String user = null;
-				String passwd = null;
+
 
 				try {
+					//cifrar
 					user = (String)inStream.readObject();
 					passwd = (String)inStream.readObject();
 				}catch (ClassNotFoundException e1) {
@@ -153,19 +156,20 @@ public class MsgFileServerDM{
 					while(connected) {
 						connected = skel.communicate(outStream, inStream);
 					}
+					System.out.println("Client disconnected: " + user + " logged out");
 				}
 				else {
 					System.out.println("Client failed: " + user + " failed to login");
 					outStream.writeObject(OpCode.OP_ERROR);
 				}
-				System.out.println("SAIU");
+
 				outStream.close();
 				inStream.close();
 
 				socket.close();
 
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println("Client disconnected: Connection lost with " + user);
 			}
 		}
 	}

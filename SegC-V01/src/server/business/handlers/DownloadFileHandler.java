@@ -28,9 +28,7 @@ public class DownloadFileHandler {
 	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
-		System.out.println("ENTREI NO DOWNLOAD FILE HANDLER");
 		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
-			System.out.println("É TRUSTED");
 			File file = fileMan.acquireFile(filePath);
 			synchronized(file){
 				File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 

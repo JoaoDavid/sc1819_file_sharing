@@ -33,7 +33,6 @@ public class TrustUsersHandler {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
 		if(UserValidation.userNameRegisteredAndActive(userNameTrusted) && !userName.equals(userNameTrusted)) {
-			System.out.println("ENTROU PARA FAZE TRUST");
 			File trustedFile = fileMan.acquireFile(filePath);
 			try {
 				synchronized(trustedFile){
@@ -44,7 +43,6 @@ public class TrustUsersHandler {
 					List<String> list = Arrays.asList(inFile.split("\n"));
 					ByteArrayOutputStream byteArr = new ByteArrayOutputStream();
 					for(String currLine : list) {
-						System.out.println("CURR TRUSTED:"+currLine+"|");
 						if(currLine.equals(userNameTrusted)) {
 							return false;
 							//throw new ApplicationException(OpResult.ALREADY_EXISTS);
