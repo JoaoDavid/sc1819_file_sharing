@@ -1,6 +1,7 @@
 package communication;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -108,7 +109,8 @@ public class Network {
 	}
 
 	public static void sendFile(File file, Socket socket) throws IOException {
-		int buffSize = (int)file.length();
+		byte [] buffFile = Files.readAllBytes(file.toPath());
+		int buffSize = buffFile.length;
 		byte[] buff;
 		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
 
@@ -120,16 +122,12 @@ public class Network {
 		socket.getOutputStream().write(firstArrByte.toByteArray());
 		firstArrByte.reset();
 		//sending the buffer
-		if(buffSize > MAX_SIZE_BUFFER) {
-			//cycle
-		}else {//<=
-			byte [] buffFile = Files.readAllBytes(file.toPath());
-			firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
-			firstArrByte.write(byteName);
-			firstArrByte.write(buffFile);
-			socket.getOutputStream().write(firstArrByte.toByteArray());
-		}
 
+		
+		firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
+		firstArrByte.write(byteName);
+		firstArrByte.write(buffFile);
+		socket.getOutputStream().write(firstArrByte.toByteArray());
 
 
 	}
@@ -143,12 +141,14 @@ public class Network {
 			if(buffLen < 0) {
 				return false;
 			}
-
+			
+			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
-			int read = socket.getInputStream().read(buff);
-			if(read != buffLen) {//information lost
+			/*int read = socket.getInputStream().read(buff);*/
+			dis.readFully(buff);
+			/*if(read != buffLen) {//information lost
 				throw new IOException("Information incomplete");
-			}
+			}*/
 
 			int i = 0;			
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
@@ -181,12 +181,13 @@ public class Network {
 			if(buffLen < 0) {
 				return false;
 			}
-
+			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
-			int read = socket.getInputStream().read(buff);
-			if(read != buffLen) {//information lost
+			/*int read = socket.getInputStream().read(buff);*/
+			dis.readFully(buff);
+			/*if(read != buffLen) {//information lost
 				throw new IOException("Information incomplete");
-			}
+			}*/
 
 			int i = 0;			
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
@@ -230,7 +231,7 @@ public class Network {
 		}
 		return false;
 	}
-	
+
 	public static void sendFileFromServer(File file, Socket socket, PrivateKey privKey) 
 			throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		int buffSize = 0;
@@ -240,7 +241,7 @@ public class Network {
 		//including fileNameLen in bytes, fileName and finally fileBytes
 		byte[] byteName = file.getName().getBytes();
 		buffSize += byteName.length + 4;
-		
+
 		//sending the buffer
 		if(buffSize > MAX_SIZE_BUFFER && 1==2) {
 			//cycle
@@ -255,11 +256,11 @@ public class Network {
 			byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
 			System.out.println(new String(buffFile));
 			buffSize+=buffFile.length;
-			
+
 			firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
 			socket.getOutputStream().write(firstArrByte.toByteArray());
 			firstArrByte.reset();
-			
+
 			firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
 			firstArrByte.write(byteName);
 			firstArrByte.write(buffFile);
