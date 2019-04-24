@@ -1,6 +1,6 @@
 package communication;
 
-public enum OpCodeDM {
+public enum OpCode {
 	
 	STORE_FILES("store"),
 	LIST_FILES("list"),
@@ -20,7 +20,7 @@ public enum OpCodeDM {
 	/**
      * @param text
      */
-    OpCodeDM(final String val) {
+    OpCode(final String val) {
         this.val = val;
     }
 

@@ -14,14 +14,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import communication.Network;
-import communication.OpCodeDM;
+import communication.OpCode;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
 
 
-public class MsgFileDM {
+public class MsgFile {
 
-	private static final String CLASS_NAME = MsgFileDM.class.getName();
+	private static final String CLASS_NAME = MsgFile.class.getName();
 
 	private final static Logger logger = Logger.getLogger(CLASS_NAME);
 
@@ -29,7 +29,7 @@ public class MsgFileDM {
 	private Stub stub;
 
 
-	public MsgFileDM(String userName, String host, int port) {
+	public MsgFile(String userName, String host, int port) {
 		this.userName = userName;
 		this.stub = new Stub(userName, host, port);
 	}
@@ -61,7 +61,7 @@ public class MsgFileDM {
 				return;
 			}
 			System.out.println("Connecting to " + hostPort[0] + ":" + port + " ...");
-			MsgFileDM app = new MsgFileDM(args[1], hostPort[0], port);
+			MsgFile app = new MsgFile(args[1], hostPort[0], port);
 			if(app.connect(passwd)) {
 				System.out.println("Connected to the server");
 				System.out.println("Welcome " + args[1]);
@@ -120,9 +120,13 @@ public class MsgFileDM {
 				break;
 			case "list":
 				if(parsedInput.length == 1) {
-					List<String> result = this.stub.rpcReceiveList(OpCodeDM.LIST_FILES);
-					for(String curr : result) {
-						System.out.println(curr);
+					List<String> res = this.stub.rpcReceiveList(OpCode.LIST_FILES);
+					if(res.size() > 0) {
+						for(String curr : res) {
+							System.out.println(curr);
+						}
+					}else {
+						System.out.println("You have no files in the server");
 					}
 				}else {
 					incompleteCommand();
@@ -131,7 +135,7 @@ public class MsgFileDM {
 			case "remove": //remove <files>
 				if(parsedInput.length > 1) {
 					List<String> files = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.REMOVE_FILES, files);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.REMOVE_FILES, files);
 					//files and res must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(files.size(), res.size()); i++) {
@@ -143,9 +147,13 @@ public class MsgFileDM {
 				break;
 			case "users":
 				if(parsedInput.length == 1) {
-					List<String> res = this.stub.rpcReceiveList(OpCodeDM.USERS);
-					for(String curr : res) {
-						System.out.println(curr);
+					List<String> res = this.stub.rpcReceiveList(OpCode.USERS);
+					if(res.size() > 0) {
+						for(String curr : res) {
+							System.out.println(curr);
+						}
+					}else {
+						System.out.println("No users registered");
 					}
 				}else {
 					incompleteCommand();
@@ -154,7 +162,7 @@ public class MsgFileDM {
 			case "trusted": //trusted <trustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.TRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.TRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -167,7 +175,7 @@ public class MsgFileDM {
 			case "untrusted": //untrusted <untrustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.UNTRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCode.UNTRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -202,7 +210,7 @@ public class MsgFileDM {
 					List<String> recMsg = new ArrayList<String>();
 					recMsg.add(userReceiver);
 					recMsg.add(msg);
-					this.stub.rpcSendList(OpCodeDM.SEND_MSG, recMsg);
+					this.stub.rpcSendList(OpCode.SEND_MSG, recMsg);
 					try {
 						int resCode = this.stub.rpcReceiveInt();
 						System.out.println(OpResult.getDesig(resCode));
@@ -216,7 +224,7 @@ public class MsgFileDM {
 				break;
 			case "collect":
 				if(parsedInput.length == 1) {
-					List<String> res = this.stub.rpcReceiveList(OpCodeDM.COLLECT_MSG);
+					List<String> res = this.stub.rpcReceiveList(OpCode.COLLECT_MSG);
 					if(res.size() > 0) {
 						for(String curr : res) {
 							System.out.println(curr);
@@ -224,7 +232,6 @@ public class MsgFileDM {
 					}else {
 						System.out.println("Your inbox is empty");
 					}
-
 				}else {
 					incompleteCommand();
 				}

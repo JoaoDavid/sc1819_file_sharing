@@ -12,7 +12,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import communication.Network;
-import communication.OpCodeDM;
+import communication.OpCode;
 import facade.exceptions.ApplicationException;
 
 public class Stub {
@@ -47,8 +47,8 @@ public class Stub {
 			outObj.writeObject(password);
 			try {
 				Object obj = inObj.readObject();
-				if(obj != null && obj instanceof OpCodeDM) {
-					OpCodeDM OpCodeDM = (OpCodeDM) obj;
+				if(obj != null && obj instanceof OpCode) {
+					OpCode OpCodeDM = (OpCode) obj;
 					if(OpCodeDM == OpCodeDM.OP_SUCCESSFUL) {
 						this.isConnected = true;
 						return this.isConnected;
@@ -94,7 +94,7 @@ public class Stub {
 	}
 
 
-	public List<String> rpcSendReceiveList(OpCodeDM OpCodeDM, List<String> list) {
+	public List<String> rpcSendReceiveList(OpCode OpCodeDM, List<String> list) {
 		try {
 			outObj.writeObject(OpCodeDM);
 			Network.listToBuffer(list, socket);
@@ -106,7 +106,7 @@ public class Stub {
 		return null;
 	}
 
-	public List<String> rpcReceiveList(OpCodeDM OpCodeDM) {
+	public List<String> rpcReceiveList(OpCode OpCodeDM) {
 		try {
 			outObj.writeObject(OpCodeDM);
 			return Network.bufferToList(socket);
@@ -119,7 +119,7 @@ public class Stub {
 
 	public void rpcEndConnectiont() {
 		try {
-			outObj.writeObject(OpCodeDM.END_CONNECTION);
+			outObj.writeObject(OpCode.END_CONNECTION);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,7 +128,7 @@ public class Stub {
 
 	public boolean rpcDownloadFileFromServer(List<String> msg) {
 		try {
-			outObj.writeObject(OpCodeDM.DOWNLOAD_FILE);
+			outObj.writeObject(OpCode.DOWNLOAD_FILE);
 			Network.listToBuffer(msg, socket);
 			return Network.receiveFile("", socket,true);
 		} catch (IOException e) {
@@ -142,7 +142,7 @@ public class Stub {
 		try {
 			File file = new File(filePath);
 			if(file.exists()) {
-				outObj.writeObject(OpCodeDM.STORE_FILES);
+				outObj.writeObject(OpCode.STORE_FILES);
 				Network.sendFile(file, socket);
 				List<String> res = Network.bufferToList(socket);
 				return res;
@@ -156,7 +156,7 @@ public class Stub {
 		return null;
 	}
 
-	public void rpcSendList(OpCodeDM OpCodeDM, List<String> list) {
+	public void rpcSendList(OpCode OpCodeDM, List<String> list) {
 		try {
 			outObj.writeObject(OpCodeDM);
 			Network.listToBuffer(list, socket);

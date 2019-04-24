@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import communication.Network;
-import communication.OpCodeDM;
+import communication.OpCode;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
@@ -50,11 +50,11 @@ public class Skeleton {
 		boolean connected = true;
 		try {
 			Object obj = inStream.readObject();
-			OpCodeDM opcode;
-			if(obj == null || !(obj instanceof OpCodeDM)) {
-				opcode = OpCodeDM.END_CONNECTION;
+			OpCode opcode;
+			if(obj == null || !(obj instanceof OpCode)) {
+				opcode = OpCode.END_CONNECTION;
 			}else {
-				opcode = (OpCodeDM) obj;
+				opcode = (OpCode) obj;
 			}			
 
 			switch (opcode) {

@@ -16,7 +16,7 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
-import communication.OpCodeDM;
+import communication.OpCode;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
@@ -26,7 +26,7 @@ import facade.startup.MsgFileServerApp;
 import server.business.util.ConstKeyStore;
 import users.UserManagerHandler;
 
-public class MsgFileServerDM{
+public class MsgFileServer{
 
 	private MsgFileServerApp app;
 	private FileService fileService;
@@ -38,7 +38,7 @@ public class MsgFileServerDM{
 	private PrivateKey privKey;
 	private PublicKey pubKey;
 
-	public MsgFileServerDM(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+	public MsgFileServer(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		this.app = new MsgFileServerApp();
 		this.fileService = new FileService(app.getDownloadFileHandler(), 
 				app.getListFilesHandler(), app.getRemoveFilesHandler(), 
@@ -56,7 +56,7 @@ public class MsgFileServerDM{
 	public static void main(String[] args) {
 		if(args.length == 7) {
 			int port;
-			MsgFileServerDM server;
+			MsgFileServer server;
 			try {
 				/*System.setProperty("javax.net.ssl.keyStore", "keystore" + File.separator + "myServer.keyStore");
 				System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");
@@ -72,7 +72,7 @@ public class MsgFileServerDM{
 				SecretKey secKey = (SecretKey) kstore.getKey(args[3], args[4].toCharArray());
 				PrivateKey privKey = (PrivateKey) kstore.getKey(args[5], args[6].toCharArray());
 				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
-				server = new MsgFileServerDM(secKey, privKey, pubKey);
+				server = new MsgFileServer(secKey, privKey, pubKey);
 			}
 			catch (NumberFormatException e){
 				System.out.println( "Server failed: Invalid port");
@@ -151,7 +151,7 @@ public class MsgFileServerDM{
 
 				if (userManagerHandler.validLogin(user, passwd)){
 					System.out.println("Client connected: " + user + " logged in");
-					outStream.writeObject(OpCodeDM.OP_SUCCESSFUL);
+					outStream.writeObject(OpCode.OP_SUCCESSFUL);
 					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey);
 					boolean connected = true;
 					while(connected) {
