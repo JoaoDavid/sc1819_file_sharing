@@ -1,6 +1,7 @@
 package facade.services;
 
 import java.net.Socket;
+import java.security.PublicKey;
 
 import facade.exceptions.ApplicationException;
 import server.business.handlers.DownloadFileHandler;
@@ -39,8 +40,8 @@ public class FileService {
 		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket);
 	}
 	
-	public void storeFile(String userName, Socket socket) {
-		storeFilesHandler.storeFile(userName, socket);
+	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
+		storeFilesHandler.storeFile(userName, socket, pubKey);
 	}
 	
 }

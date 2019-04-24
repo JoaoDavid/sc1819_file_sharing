@@ -45,7 +45,7 @@ public class UserManagerHandler {
 	private MacManager macM;
 
 
-	public UserManagerHandler(String keyAlias, String keyPassword, String keystoreLocation, String keystorePassword) throws Exception {
+	public UserManagerHandler(String keystoreLocation, String keystorePassword, String keyAlias, String keyPassword) throws Exception {
 		KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
 		FileInputStream fis = new FileInputStream(keystoreLocation);
 		ks.load(fis,keystorePassword.toCharArray());

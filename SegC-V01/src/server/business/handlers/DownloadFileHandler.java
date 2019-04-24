@@ -1,6 +1,7 @@
 package server.business.handlers;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.Socket;
 
 import communication.Network;
@@ -19,9 +20,18 @@ public class DownloadFileHandler {
 	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket) {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
-		if(UserValidation.isTrusted(fileMan, userOwner, userName)) {
+		if(UserValidation.isTrusted(fileMan, userOwner, userName)) {	
 			File file = fileMan.acquireFile(filePath);
-			Network.sendFile(file, socket);
+			synchronized(file){
+				try {
+					Network.sendFile(file, socket);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally{
+					fileMan.releaseFile(filePath);
+				}
+			}			
 		}else {
 			Network.sendInt(-1, socket);
 		}

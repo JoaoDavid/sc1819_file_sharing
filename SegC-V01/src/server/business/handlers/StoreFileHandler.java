@@ -19,8 +19,7 @@ public class StoreFileHandler {
 		this.fileMan = fileMan;
 	}
 	
-	public void storeFile(String userName, Socket socket) {
-		PublicKey pubKey = null;
+	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator;
 		boolean stored = Network.receiveFileAndCipher(filePath, socket, false, pubKey);

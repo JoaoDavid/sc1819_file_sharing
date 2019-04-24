@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,19 +28,22 @@ public class Skeleton {
 
 	private String userName;
 	private Socket socket;
-
+	private PrivateKey privKey;
+	private PublicKey pubKey;
 
 	private FileService fileService;
 	private MessageService msgService;
 	private UserService userService;
 
 	public Skeleton(String userName, Socket socket, FileService fileService, 
-			MessageService msgService, UserService userService) {
+			MessageService msgService, UserService userService, PrivateKey privKey, PublicKey pubKey) {
 		this.userName = userName;
 		this.socket = socket;
 		this.fileService = fileService;
 		this.msgService = msgService;
 		this.userService = userService;
+		this.privKey = privKey;
+		this.pubKey = pubKey;
 	}
 
 	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream){
@@ -105,7 +110,7 @@ public class Skeleton {
 	
 
 	private void uploadFile() {
-		fileService.storeFile(userName, socket);
+		fileService.storeFile(userName, socket, pubKey);
 	}
 
 	private void downloadFile() {

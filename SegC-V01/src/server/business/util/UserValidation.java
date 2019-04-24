@@ -24,6 +24,9 @@ public class UserValidation {
 	 */
 	public static boolean isTrusted(FileManager fileMan, String userName, String userToBeChecked) {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED;
+		if(userName.equals(userToBeChecked)) {
+			return true;
+		}
 		File trustedFile = fileMan.acquireFile(filePath);
 		try (BufferedReader br = new BufferedReader(new FileReader(trustedFile))){
 			String st; 

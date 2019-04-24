@@ -1,11 +1,15 @@
 package server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
@@ -28,8 +32,11 @@ public class MsgFileServerDM{
 	private MessageService msgService;
 	private UserService userService;
 	private UserManagerHandler userManagerHandler;
+	
+	private PrivateKey privKey;
+	private PublicKey pubKey;
 
-	public MsgFileServerDM(String secKeyAlias, String keyPassword, String keystoreLocation, String keystorePassword) throws Exception {
+	public MsgFileServerDM(String keystoreLocation, String keystorePassword, String secKeyAlias, String keyPassword, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		this.app = new MsgFileServerApp();
 		this.fileService = new FileService(app.getDownloadFileHandler(), 
 				app.getListFilesHandler(), app.getRemoveFilesHandler(), 
@@ -37,18 +44,32 @@ public class MsgFileServerDM{
 		this.msgService = new MessageService(app.getCollectMessagesHandler(), 
 				app.getSendMessageHandler());
 		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler(), app.getListUsersHandler());
-		this.userManagerHandler = new UserManagerHandler(secKeyAlias, keyPassword, keystoreLocation, keystorePassword);
+		this.userManagerHandler = new UserManagerHandler(keystoreLocation, keystorePassword, secKeyAlias, keyPassword);
+		this.privKey = privKey;
+		this.pubKey = pubKey;
+		
 	}
 
+
 	public static void main(String[] args) {
-		if(args.length == 5) {
+		if(args.length == 7) {
 			int port;
 			MsgFileServerDM server;
 			try {
 				System.setProperty("javax.net.ssl.keyStore", "keystore" + File.separator + "myServer.keyStore");
+				System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");
 				System.setProperty("javax.net.ssl.keyStorePassword", "batata");
 				port = Integer.parseInt(args[0]);
-				server = new MsgFileServerDM(args[1], args[2], args[3], args[4]);
+				
+				FileInputStream kfile = new FileInputStream(args[1]);
+				KeyStore kstore = KeyStore.getInstance("JCEKS");
+				kstore.load(kfile, args[2].toCharArray());
+				PrivateKey privKey = (PrivateKey) kstore.getKey(args[5], args[6].toCharArray());
+				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
+				System.out.println(privKey == null);
+				System.out.println(pubKey == null);
+				System.out.println(pubKey.toString());
+				server = new MsgFileServerDM(args[1], args[2], args[3], args[4], privKey, pubKey);
 			}
 			catch (NumberFormatException e){
 				System.out.println( "Server failed: Invalid port");
@@ -59,14 +80,14 @@ public class MsgFileServerDM{
 				return;
 			}			
 			System.out.println("Initializing server on port: " + args[0]);
-			server.startServer(port);
+			server.startServer(port, server.privKey, server.pubKey);
 		}else {
 			System.out.println("The valid args are:");
-			System.out.println("<port> <alias> <password> <keystore location> <keystore password>");
+			System.out.println("<port> <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");
 		}
 	}
 
-	public void startServer (int port){
+	public void startServer (int port, PrivateKey privKey, PublicKey pubKey){
 		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
 		SSLServerSocket ss = null;
 		
@@ -74,10 +95,10 @@ public class MsgFileServerDM{
 
 		try { 
 			ss = (SSLServerSocket) ssf.createServerSocket(port);
-			ss.setNeedClientAuth(false);
+			ss.setNeedClientAuth(false);//COLOCAR A TRUE
 			//sSoc = new ServerSocket(port);
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 			System.exit(-1);
 		}
 
@@ -129,7 +150,7 @@ public class MsgFileServerDM{
 
 				if (userManagerHandler.validLogin(user, passwd)){
 					outStream.writeObject(OpCode.OP_SUCCESSFUL);
-					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService);
+					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey);
 					boolean connected = true;
 					while(connected) {
 						connected = skel.communicate(outStream, inStream);

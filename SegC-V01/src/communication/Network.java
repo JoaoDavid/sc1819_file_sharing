@@ -102,31 +102,29 @@ public class Network {
 		return result;
 	}
 
-	public static void sendFile(File file, Socket socket) {
+	public static void sendFile(File file, Socket socket) throws IOException {
 		int buffSize = (int)file.length();
 		byte[] buff;
 		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
-		try {
-			//First send the size of the buffer
-			//including fileNameLen in bytes, fileName and finally fileBytes
-			byte[] byteName = file.getName().getBytes();
-			buffSize += byteName.length + 4;
-			firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
-			socket.getOutputStream().write(firstArrByte.toByteArray());
-			firstArrByte.reset();
-			//sending the buffer
-			if(buffSize > MAX_SIZE_BUFFER) {
-				//cycle
-			}else {//<=
-				byte [] buffFile = Files.readAllBytes(file.toPath());
-				firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
-				firstArrByte.write(byteName);
-				firstArrByte.write(buffFile);
-				socket.getOutputStream().write(firstArrByte.toByteArray());
-			}
-		} catch(IOException e) {
 
+		//First send the size of the buffer
+		//including fileNameLen in bytes, fileName and finally fileBytes
+		byte[] byteName = file.getName().getBytes();
+		buffSize += byteName.length + 4;
+		firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
+		socket.getOutputStream().write(firstArrByte.toByteArray());
+		firstArrByte.reset();
+		//sending the buffer
+		if(buffSize > MAX_SIZE_BUFFER) {
+			//cycle
+		}else {//<=
+			byte [] buffFile = Files.readAllBytes(file.toPath());
+			firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
+			firstArrByte.write(byteName);
+			firstArrByte.write(buffFile);
+			socket.getOutputStream().write(firstArrByte.toByteArray());
 		}
+
 
 
 	}
@@ -168,7 +166,7 @@ public class Network {
 			return false;
 		}
 	}
-	
+
 	public static boolean receiveFileAndCipher(String path, Socket socket, boolean replace, PublicKey pubKey) {
 		try {
 			byte[] buffLenByte = new byte[4];
@@ -202,7 +200,7 @@ public class Network {
 			fos.write(contentCipher.encrypt(fileInBytes));
 			File fileWithKey = new File(path + fileName + ".key");
 			fileWithKey.createNewFile();
-			Cipher c = Cipher.getInstance("AES");
+			Cipher c = Cipher.getInstance(pubKey.getAlgorithm());
 			c.init(Cipher.WRAP_MODE, pubKey);
 			FileOutputStream fosK = new FileOutputStream(fileWithKey);
 			fosK.write(c.wrap(contentCipher.getKey()));
