@@ -1,6 +1,8 @@
 package facade.services;
 
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.List;
 
 import facade.exceptions.ApplicationException;
@@ -21,12 +23,12 @@ public class UserService {
 		this.listUserHandler = listUserHandler;
 	}
 	
-	public boolean trustUser(String userName, String userNameTrusted) throws ApplicationException {
-		return this.trustUserHandler.trustUser(userName, userNameTrusted);
+	public boolean trustUser(String userName, String userNameTrusted, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		return this.trustUserHandler.trustUser(userName, userNameTrusted, privKey, pubKey);
 	}
 	
-	public boolean untrustUser(String userName, String userNameUntrusted) throws ApplicationException {
-		return this.untrusUserHandler.untrustUser(userName, userNameUntrusted);
+	public boolean untrustUser(String userName, String userNameUntrusted, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		return this.untrusUserHandler.untrustUser(userName, userNameUntrusted, privKey, pubKey);
 	}
 	
 	public List<String> listUsers() throws ApplicationException {

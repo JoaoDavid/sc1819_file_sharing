@@ -1,14 +1,20 @@
 package server.business.handlers;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Arrays;
+import java.util.List;
 
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
+import security.ContentCipher;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
 import users.UserManagerHandler;
@@ -23,31 +29,44 @@ public class TrustUsersHandler {
 		this.fileMan = fileMan;
 	}
 
-	public boolean trustUser(String userName, String userNameTrusted) throws ApplicationException {
+	public boolean trustUser(String userName, String userNameTrusted, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
-		if(!UserManagerHandler.isDeactivatedUser(userNameTrusted) && UserManagerHandler.userNameRegistered(userName)) {
+		if(!UserValidation.isDeactivatedUser(userNameTrusted) && UserValidation.userNameRegistered(userName) && !userName.equals(userNameTrusted)) {
 			File trustedFile = fileMan.acquireFile(filePath);
-			try (FileWriter fileWriter = new FileWriter(trustedFile,true);
-					BufferedReader br = new BufferedReader(new FileReader(trustedFile));){
-				String currLine; 
-				while ((currLine = br.readLine()) != null) {
-					if(currLine.equals(userNameTrusted)) {
-						throw new ApplicationException(OpResult.ALREADY_EXISTS);
+			try {
+				synchronized(trustedFile){
+					File trustedFileSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
+					File trustedFileKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
+					byte[] result = ContentCipher.decryptFileAndCheckSig(trustedFile, trustedFileSig, trustedFileKey, privKey, pubKey);
+					String inFile = new String(result);
+					List<String> list = Arrays.asList(inFile.split("\n"));
+					ByteArrayOutputStream byteArr = new ByteArrayOutputStream();
+					for(String currLine : list) {
+						System.out.println("CURR TRUSTED:"+currLine+"|");
+						if(currLine.equals(userNameTrusted)) {
+							return false;
+							//throw new ApplicationException(OpResult.ALREADY_EXISTS);
+						}
 					}
+					//String newTrustedUser = userNameTrusted + System.getProperty("line.separator");
+					String newTrustedUser = userNameTrusted + "\n";
+					byteArr.write(result);
+					byteArr.write(newTrustedUser.getBytes());
+					ContentCipher.sigAndEcryptFile(trustedFile, trustedFileSig, trustedFileKey, privKey, pubKey, byteArr.toByteArray());
+					return true;
 				}
-				fileWriter.write(userNameTrusted + System.getProperty("line.separator"));
-				return true;
 			} catch (FileNotFoundException e) {
 				throw new ApplicationException("File not found at: " + filePath);
 			} catch (IOException e) {
 				throw new ApplicationException("IOException in trustUser");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			} finally {
 				fileMan.releaseFile(filePath);
 			}
-		}else {
-			return false;
 		}
-
+		return false;
 	}
 }

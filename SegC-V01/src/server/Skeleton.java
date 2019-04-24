@@ -119,7 +119,7 @@ public class Skeleton {
 			String userOwner = msg.get(0);
 			String fileName = msg.get(1);
 			System.out.println(userOwner + " " + fileName);
-			fileService.clientDownloadFile(this.userName, userOwner, fileName, socket, privKey);
+			fileService.clientDownloadFile(this.userName, userOwner, fileName, socket, privKey, pubKey);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,7 +170,7 @@ public class Skeleton {
 			List<String> users = Network.bufferToList(socket);
 			List<String> res = new ArrayList<String>();
 			for(String curr : users) {
-				boolean trusted = userService.trustUser(userName, curr);
+				boolean trusted = userService.trustUser(userName, curr, privKey, pubKey);
 				if(trusted) {
 					res.add("TRUSTED");
 				}else {
@@ -188,7 +188,7 @@ public class Skeleton {
 			List<String> users = Network.bufferToList(socket);
 			List<String> res = new ArrayList<String>();
 			for(String curr : users) {
-				boolean untrusted = userService.untrustUser(userName, curr);
+				boolean untrusted = userService.untrustUser(userName, curr, privKey, pubKey);
 				if(untrusted) {
 					res.add("UNTRUSTED");
 				}else {

@@ -62,9 +62,8 @@ public class UserManager {
 				case "create":
 					if(parsedInput.length == 3) {
 						userName = parsedInput[1];
-						password = parsedInput[2];
-						this.createUser(userName, password);
-						System.out.println("OK");
+						password = parsedInput[2];						
+						System.out.println(this.createUser(userName, password));
 					}else {
 						incompleteCommand();
 					}
@@ -72,9 +71,8 @@ public class UserManager {
 
 				case "remove":
 					if(parsedInput.length == 2) {
-						userName = parsedInput[1];
-						this.removeUser(userName);
-						System.out.println("OK");
+						userName = parsedInput[1];						
+						System.out.println(this.removeUser(userName));
 					}else {
 						incompleteCommand();
 					}
@@ -138,18 +136,18 @@ public class UserManager {
 		return this.handler.validLogin(userName, password);
 	}
 
-	private void createUser(String userName, String password) throws Exception {
-		this.handler.createUser(userName, password);
+	private boolean createUser(String userName, String password) throws Exception {
+		return this.handler.createUser(userName, password);
 
 	}
 
-	private void removeUser(String userName) throws Exception {
-		this.handler.removeUser(userName);
+	private boolean removeUser(String userName) throws Exception {
+		return this.handler.removeUser(userName);
 
 	}
 
-	private void updateUser(String userName, String password) throws Exception {
-		this.handler.updateUser(userName, password);
+	private boolean updateUser(String userName, String password) throws Exception {
+		return this.handler.updateUser(userName, password);
 	}
 	
 	public static void incompleteCommand() {

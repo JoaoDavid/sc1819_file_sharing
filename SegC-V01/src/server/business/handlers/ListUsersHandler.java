@@ -7,7 +7,7 @@ import java.util.List;
 import facade.exceptions.ApplicationException;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
-import users.UserManagerHandler;
+import server.business.util.UserValidation;
 
 public class ListUsersHandler {
 	
@@ -24,7 +24,7 @@ private FileManager fileMan;
 		List<String> result = null;
 		synchronized(user){
 			try {
-				result = UserManagerHandler.listRegisteredUsers();
+				result = UserValidation.listRegisteredUsers();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

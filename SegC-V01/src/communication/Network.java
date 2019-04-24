@@ -26,6 +26,7 @@ import javax.crypto.NoSuchPaddingException;
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 import server.business.util.ConstKeyStore;
+import server.business.util.FilePaths;
 
 public class Network {
 
@@ -172,8 +173,10 @@ public class Network {
 		}
 	}
 
-	public static boolean receiveFileAndCipher(String path, Socket socket, boolean replace, PublicKey pubKey) {
+	public static boolean receiveFileAndCipher(String userName, Socket socket, boolean replace, PublicKey pubKey) {
 		try {
+			String path = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
+					+ File.separator + FilePaths.FOLDER_FILES + File.separator;
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
@@ -183,11 +186,7 @@ public class Network {
 			}
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
-			/*int read = socket.getInputStream().read(buff);*/
 			dis.readFully(buff);
-			/*if(read != buffLen) {//information lost
-				throw new IOException("Information incomplete");
-			}*/
 
 			int i = 0;			
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
@@ -204,7 +203,8 @@ public class Network {
 			ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
 			byte[] fileInBytes = Arrays.copyOfRange(buff, i, buffLen);
 			fos.write(contentCipher.encrypt(fileInBytes));
-			File fileWithKey = new File(path + fileName + ".key");
+			File fileWithKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userName
+					+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
 			fileWithKey.createNewFile();
 			Cipher c = Cipher.getInstance(pubKey.getAlgorithm());
 			c.init(Cipher.WRAP_MODE, pubKey);
@@ -232,7 +232,7 @@ public class Network {
 		return false;
 	}
 
-	public static void sendFileFromServer(File file, Socket socket, PrivateKey privKey) 
+	public static void sendFileFromServer(File file, File fileWithKey, Socket socket, PrivateKey privKey) 
 			throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		int buffSize = 0;
 		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
@@ -243,7 +243,6 @@ public class Network {
 		buffSize += byteName.length + 4;
 
 		//File handling
-		File fileWithKey = new File(file.getAbsolutePath() + ".key");
 		Cipher c = Cipher.getInstance(privKey.getAlgorithm());
 		c.init(Cipher.UNWRAP_MODE, privKey);
 		//FileInputStream fisK = new FileInputStream(fileWithKey);

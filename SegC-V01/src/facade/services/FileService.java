@@ -37,8 +37,8 @@ public class FileService {
 		return removeFilesHandler.removeFile(userName, fileName);
 	}
 	
-	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey) {
-		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket, privKey);
+	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) {
+		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket, privKey, pubKey);
 	}
 	
 	public void storeFile(String userName, Socket socket, PublicKey pubKey) {

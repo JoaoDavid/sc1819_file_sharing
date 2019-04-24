@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
@@ -30,12 +31,17 @@ public class CollectMessagesHandler {
 			File userMsgsSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
 			File userMsgsKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
 			try {
-				List<String> result = ContentCipher.decryptFileAndCheckSig(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey);
+				byte[] result = ContentCipher.decryptFileAndCheckSig(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey);
+				//Clear inbox
 				FileWriter fileWriter = new FileWriter(userMsgs);
 				fileWriter.write("");
 				fileWriter.close();
-				//clears inbox
-				return result;
+				if(result.length > 0) {
+					String inFile = new String(result);
+					return Arrays.asList(inFile.split("/n"));
+				}else {
+					return new ArrayList<String>();
+				}				
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new ApplicationException("Impossible Colect Messages");
@@ -47,6 +53,5 @@ public class CollectMessagesHandler {
 				fileMan.releaseFile(filePath);
 			}
 		}
-		
 	}
 }

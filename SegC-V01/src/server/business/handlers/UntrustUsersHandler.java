@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 
 import facade.exceptions.ApplicationException;
@@ -20,7 +22,7 @@ public class UntrustUsersHandler {
 		this.fileMan = fileMan;
 	}
 
-	public boolean untrustUser(String userName, String userNameUntrusted) throws ApplicationException {
+	public boolean untrustUser(String userName, String userNameUntrusted, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
 		File untrustedFile = fileMan.acquireFile(filePath);

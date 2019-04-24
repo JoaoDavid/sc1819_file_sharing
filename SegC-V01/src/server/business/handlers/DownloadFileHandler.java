@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -24,15 +25,19 @@ public class DownloadFileHandler {
 		this.fileMan = fileMan;
 	}
 
-	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey) {
+	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
-		if(UserValidation.isTrusted(fileMan, userOwner, userName)) {	
+		System.out.println("ENTREI NO DOWNLOAD FILE HANDLER");
+		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey)) {
+			System.out.println("É TRUSTED");
 			File file = fileMan.acquireFile(filePath);
 			synchronized(file){
+				File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
+				+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
 				try {
 					System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
-					Network.sendFileFromServer(file, socket, privKey);
+					Network.sendFileFromServer(file, fileKey, socket, privKey);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

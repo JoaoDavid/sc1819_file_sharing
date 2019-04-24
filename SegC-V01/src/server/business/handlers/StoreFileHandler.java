@@ -20,9 +20,8 @@ public class StoreFileHandler {
 	}
 	
 	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
-		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
-				+ File.separator + FilePaths.FOLDER_FILES + File.separator;
-		boolean stored = Network.receiveFileAndCipher(filePath, socket, false, pubKey);
+		
+		boolean stored = Network.receiveFileAndCipher(userName, socket, false, pubKey);
 		List<String> res = new ArrayList<String>();
 		if(stored) {
 			res.add("STORED");

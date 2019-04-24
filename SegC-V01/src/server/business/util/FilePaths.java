@@ -12,6 +12,8 @@ public class FilePaths {
 	
 	public static final String FOLDER_FILES = "files";
 	
+	public static final String FOLDER_FILES_KEYS = "filesKeys";
+	
 	public static final String FILE_NAME_MSG = "msg.txt";
 	
 	public static final String FILE_NAME_TRUSTED = "trusted.txt";
