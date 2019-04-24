@@ -1,10 +1,15 @@
 package server;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
@@ -24,7 +29,7 @@ public class MsgFileServerDM{
 	private UserService userService;
 	private UserManagerHandler userManagerHandler;
 
-	public MsgFileServerDM(String keyAlias, String keyPassword, String keystoreLocation, String keystorePassword) throws Exception {
+	public MsgFileServerDM(String secKeyAlias, String keyPassword, String keystoreLocation, String keystorePassword) throws Exception {
 		this.app = new MsgFileServerApp();
 		this.fileService = new FileService(app.getDownloadFileHandler(), 
 				app.getListFilesHandler(), app.getRemoveFilesHandler(), 
@@ -32,7 +37,7 @@ public class MsgFileServerDM{
 		this.msgService = new MessageService(app.getCollectMessagesHandler(), 
 				app.getSendMessageHandler());
 		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler(), app.getListUsersHandler());
-		this.userManagerHandler = new UserManagerHandler(keyAlias, keyPassword, keystoreLocation, keystorePassword);
+		this.userManagerHandler = new UserManagerHandler(secKeyAlias, keyPassword, keystoreLocation, keystorePassword);
 	}
 
 	public static void main(String[] args) {
@@ -40,6 +45,8 @@ public class MsgFileServerDM{
 			int port;
 			MsgFileServerDM server;
 			try {
+				System.setProperty("javax.net.ssl.keyStore", "keystore" + File.separator + "myServer.keyStore");
+				System.setProperty("javax.net.ssl.keyStorePassword", "batata");
 				port = Integer.parseInt(args[0]);
 				server = new MsgFileServerDM(args[1], args[2], args[3], args[4]);
 			}
@@ -60,10 +67,15 @@ public class MsgFileServerDM{
 	}
 
 	public void startServer (int port){
-		ServerSocket sSoc = null;
+		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
+		SSLServerSocket ss = null;
+		
+		//ServerSocket sSoc = null;
 
-		try {
-			sSoc = new ServerSocket(port);
+		try { 
+			ss = (SSLServerSocket) ssf.createServerSocket(port);
+			ss.setNeedClientAuth(false);
+			//sSoc = new ServerSocket(port);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
@@ -71,10 +83,12 @@ public class MsgFileServerDM{
 
 		while(true) {
 			try {
-				Socket inSoc = sSoc.accept();
+				//Socket inSoc = sSoc.accept();
+				Socket inSoc = ss.accept();
 				ServerThread newServerThread = new ServerThread(inSoc);
 				newServerThread.start();
-				sSoc.close();
+				//ss.close();
+				//sSoc.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();

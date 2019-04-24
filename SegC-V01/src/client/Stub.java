@@ -7,6 +7,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 import communication.Network;
 import communication.OpCode;
 import facade.exceptions.ApplicationException;
@@ -14,7 +18,8 @@ import facade.exceptions.ApplicationException;
 public class Stub {
 
 	private String username;
-	private Socket socket;
+	//private Socket socket;
+	private SSLSocket socket;
 	private String host;
 	private int port;
 
@@ -32,7 +37,10 @@ public class Stub {
 
 	public boolean connect(String password) {
 		try {
-			socket = new Socket(host, port);
+			SocketFactory sf = SSLSocketFactory.getDefault();
+			socket = (SSLSocket) sf.createSocket(host, port);
+			//socket = new Socket(host, port);
+			//socket.startHandshake();
 			inObj = new ObjectInputStream(socket.getInputStream());
 			outObj = new ObjectOutputStream(socket.getOutputStream());
 			outObj.writeObject(username);

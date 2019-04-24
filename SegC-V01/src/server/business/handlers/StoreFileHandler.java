@@ -3,6 +3,7 @@ package server.business.handlers;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +20,10 @@ public class StoreFileHandler {
 	}
 	
 	public void storeFile(String userName, Socket socket) {
+		PublicKey pubKey = null;
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator;
-		boolean stored = Network.receiveFile(filePath, socket, false);
+		boolean stored = Network.receiveFileAndCipher(filePath, socket, false, pubKey);
 		List<String> res = new ArrayList<String>();
 		if(stored) {
 			res.add("STORED");

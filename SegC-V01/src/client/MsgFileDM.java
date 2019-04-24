@@ -38,6 +38,7 @@ public class MsgFileDM {
 	//args <serverAddress> <localUserID> [password]
 	//127.0.0.1:23456 fernando pass123
 	public static void main(String[] args) throws ApplicationException {
+		System.setProperty("javax.net.ssl.trustStore", "keystore" + File.separator + "myClient.keyStore");
 		Scanner sc = new Scanner(System.in);
 		if(args.length == 2 || args.length == 3) {
 			String[] hostPort = args[0].split(":");

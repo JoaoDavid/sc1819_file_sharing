@@ -32,7 +32,8 @@ public class Skeleton {
 	private MessageService msgService;
 	private UserService userService;
 
-	public Skeleton(String userName, Socket socket, FileService fileService, MessageService msgService, UserService userService) {
+	public Skeleton(String userName, Socket socket, FileService fileService, 
+			MessageService msgService, UserService userService) {
 		this.userName = userName;
 		this.socket = socket;
 		this.fileService = fileService;

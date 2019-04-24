@@ -51,7 +51,7 @@ public class UserManagerHandler {
 		ks.load(fis,keystorePassword.toCharArray());
 		secKey = (SecretKey) ks.getKey(keyAlias, keyPassword.toCharArray());
 		macM = new MacManager(MAC_ALGORITHM, secKey);
-		cypher = new ContentCipher("DES", "DES/CBC/PKCS5Padding");
+		//cypher = new ContentCipher("DES", "DES/CBC/PKCS5Padding");
 		md = MessageDigest.getInstance(DIGEST_ALFORITHM);
 	}
 

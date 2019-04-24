@@ -17,10 +17,15 @@ public class ContentCipher {
 	private String cipherAltorithm;
 	
 	
-	public ContentCipher(String keyGenAalgorithm, String cipherAltorithm) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		kg = KeyGenerator.getInstance(keyGenAalgorithm);
+	public ContentCipher(String cipherAltorithm, int keySize) throws NoSuchAlgorithmException {
+		kg = KeyGenerator.getInstance(cipherAltorithm);
+		kg.init(keySize);
 		key = kg.generateKey();
 		this.cipherAltorithm = cipherAltorithm;
+	}
+	
+	public Key getKey() {
+		return this.key;
 	}
 	
 	public byte[] encrypt(byte[] input) {

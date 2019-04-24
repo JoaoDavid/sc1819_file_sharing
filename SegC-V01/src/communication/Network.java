@@ -7,11 +7,20 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
 import facade.exceptions.ApplicationException;
+import security.ContentCipher;
 
 public class Network {
 
@@ -158,5 +167,64 @@ public class Network {
 			e.printStackTrace();
 			return false;
 		}
+	}
+	
+	public static boolean receiveFileAndCipher(String path, Socket socket, boolean replace, PublicKey pubKey) {
+		try {
+			byte[] buffLenByte = new byte[4];
+			socket.getInputStream().read(buffLenByte);
+			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
+			System.out.println("buffLen:" +buffLen);
+			if(buffLen < 0) {
+				return false;
+			}
+
+			byte[] buff = new byte[buffLen];
+			int read = socket.getInputStream().read(buff);
+			if(read != buffLen) {//information lost
+				throw new IOException("Information incomplete");
+			}
+
+			int i = 0;			
+			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
+			i+=4;
+			int strLen = ByteBuffer.wrap(strLenByte).getInt();
+			String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
+			i+=strLen;
+			File file = new File(path + fileName);
+			if(file.exists() && !replace) {
+				return false;
+			}
+			file.createNewFile();
+			FileOutputStream fos = new FileOutputStream(file);
+			ContentCipher contentCipher = new ContentCipher("AES",128);
+			byte[] fileInBytes = Arrays.copyOfRange(buff, i, buffLen - i);
+			fos.write(contentCipher.encrypt(fileInBytes));
+			File fileWithKey = new File(path + fileName + ".key");
+			fileWithKey.createNewFile();
+			Cipher c = Cipher.getInstance("AES");
+			c.init(Cipher.WRAP_MODE, pubKey);
+			FileOutputStream fosK = new FileOutputStream(fileWithKey);
+			fosK.write(c.wrap(contentCipher.getKey()));
+			fos.close();
+			fosK.close();
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidKeyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
