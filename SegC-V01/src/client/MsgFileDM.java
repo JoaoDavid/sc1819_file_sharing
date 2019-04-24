@@ -13,9 +13,8 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import communication.Message;
 import communication.Network;
-import communication.OpCode;
+import communication.OpCodeDM;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
 
@@ -121,7 +120,7 @@ public class MsgFileDM {
 				break;
 			case "list":
 				if(parsedInput.length == 1) {
-					List<String> result = this.stub.rpcReceiveList(OpCode.LIST_FILES);
+					List<String> result = this.stub.rpcReceiveList(OpCodeDM.LIST_FILES);
 					for(String curr : result) {
 						System.out.println(curr);
 					}
@@ -132,7 +131,7 @@ public class MsgFileDM {
 			case "remove": //remove <files>
 				if(parsedInput.length > 1) {
 					List<String> files = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCode.REMOVE_FILES, files);
+					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.REMOVE_FILES, files);
 					//files and res must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(files.size(), res.size()); i++) {
@@ -144,7 +143,7 @@ public class MsgFileDM {
 				break;
 			case "users":
 				if(parsedInput.length == 1) {
-					List<String> res = this.stub.rpcReceiveList(OpCode.USERS);
+					List<String> res = this.stub.rpcReceiveList(OpCodeDM.USERS);
 					for(String curr : res) {
 						System.out.println(curr);
 					}
@@ -155,7 +154,7 @@ public class MsgFileDM {
 			case "trusted": //trusted <trustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCode.TRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.TRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -168,7 +167,7 @@ public class MsgFileDM {
 			case "untrusted": //untrusted <untrustedUserIDs>
 				if(parsedInput.length > 1) {
 					List<String> users = Arrays.asList(Arrays.copyOfRange(parsedInput, 1, parsedInput.length));
-					List<String> res = this.stub.rpcSendReceiveList(OpCode.UNTRUST_USERS, users);
+					List<String> res = this.stub.rpcSendReceiveList(OpCodeDM.UNTRUST_USERS, users);
 					//both lists must have the same size
 					//just to avoid nullPointerException, use min
 					for(int i = 0; i < Math.min(users.size(), res.size()); i++) {
@@ -203,7 +202,7 @@ public class MsgFileDM {
 					List<String> recMsg = new ArrayList<String>();
 					recMsg.add(userReceiver);
 					recMsg.add(msg);
-					this.stub.rpcSendList(OpCode.SEND_MSG, recMsg);
+					this.stub.rpcSendList(OpCodeDM.SEND_MSG, recMsg);
 					try {
 						int resCode = this.stub.rpcReceiveInt();
 						System.out.println(OpResult.getDesig(resCode));
@@ -217,7 +216,7 @@ public class MsgFileDM {
 				break;
 			case "collect":
 				if(parsedInput.length == 1) {
-					List<String> res = this.stub.rpcReceiveList(OpCode.COLLECT_MSG);
+					List<String> res = this.stub.rpcReceiveList(OpCodeDM.COLLECT_MSG);
 					if(res.size() > 0) {
 						for(String curr : res) {
 							System.out.println(curr);

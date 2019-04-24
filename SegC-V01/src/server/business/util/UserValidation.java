@@ -38,28 +38,30 @@ public class UserValidation {
 			return true;
 		}
 		File trustedFile = fileMan.acquireFile(filePath);
-		try {
-			synchronized(trustedFile){
-				File trustedFileSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
-				File trustedFileKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
-				byte[] result = ContentCipher.decryptFileAndCheckSig(trustedFile, trustedFileSig, trustedFileKey, privKey, pubKey);
-				String inFile = new String(result);
-				List<String> list = Arrays.asList(inFile.split("\n"));
-				for(String currLine : list) {
-					if(currLine.equals(userToBeChecked)) {
-						return true;
+		if(trustedFile != null) {
+			try {
+				synchronized(trustedFile){
+					File trustedFileSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
+					File trustedFileKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
+					byte[] result = ContentCipher.decryptFileAndCheckSig(trustedFile, trustedFileSig, trustedFileKey, privKey, pubKey);
+					String inFile = new String(result);
+					List<String> list = Arrays.asList(inFile.split("\n"));
+					for(String currLine : list) {
+						if(currLine.equals(userToBeChecked)) {
+							return true;
+						}
 					}
 				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				fileMan.releaseFile(filePath);
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			fileMan.releaseFile(filePath);
 		}
 		return false;
 	}
-	
+
 	public static List<String> listRegisteredUsers() throws IOException {
 		String filePath = FilePaths.FILE_USERS_PASSWORDS;
 		File userRegistFile = new File(filePath);
@@ -113,7 +115,7 @@ public class UserValidation {
 		}
 		return false;
 	}
-	
+
 	public static boolean userNameRegisteredAndActive(String userName) {
 		String filePath = FilePaths.FILE_USERS_PASSWORDS;
 		File userRegistFile = new File(filePath);

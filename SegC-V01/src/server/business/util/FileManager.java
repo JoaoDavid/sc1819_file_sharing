@@ -5,21 +5,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 public class FileManager {
-	
+
 	private class FileCounter{
-		
+
 		private File file;
 		private int counter;
-		
+
 		private FileCounter(File file, Integer counter) {
 			this.file = file;
 			this.counter = (int) counter;
 		}
-		
+
 		private void incrementCounter() {
 			this.counter++;
 		}
-		
+
 		private void decrementCounter() {
 			this.counter--;
 		}
@@ -27,30 +27,30 @@ public class FileManager {
 		private java.io.File getFile() {
 			return this.file;
 		}
-		
+
 		private int getCounter() {
 			return this.counter;
 		}
 	}
-	
+
 	private static FileManager INSTANCE;
 	/**
 	 * Map of filePaths and files that are currently being used
 	 */
 	private ConcurrentHashMap<String, FileCounter> map;
-	
-	
+
+
 	private FileManager() {
 		map = new ConcurrentHashMap<String, FileCounter>();
 	}
-	
+
 	public static FileManager getInstance() {
 		if(INSTANCE == null) {
 			INSTANCE = new FileManager();
 		}
 		return INSTANCE;
 	}
-	
+
 	/**
 	 * Acquires the file in filePath
 	 * 
@@ -61,14 +61,18 @@ public class FileManager {
 		FileCounter fc = map.get(filePath);
 		if(fc == null) {
 			File file = new File(filePath);
-			fc = new FileCounter(file,1);
-			map.put(filePath, fc);
+			if(file.exists()) {
+				fc = new FileCounter(file,1);
+				map.put(filePath, fc);
+			}else {
+				return null;
+			}
 		}else {
 			fc.incrementCounter();
 		}
 		return fc.getFile();
 	}
-	
+
 	public void releaseFile(String filePath) {
 		FileCounter fc = map.get(filePath);
 		if(fc != null) {
@@ -87,15 +91,15 @@ public class FileManager {
 		}else { //someone is using the file
 			File file = fc.getFile();
 			synchronized(file) {
-	            boolean deleted = file.delete();
-	            if(deleted) {
-	            	map.remove(filePath);
-	            }	            
-	            return deleted;
-	        }	
+				boolean deleted = file.delete();
+				if(deleted) {
+					map.remove(filePath);
+				}	            
+				return deleted;
+			}	
 		}
-		
+
 	}
-	
+
 
 }

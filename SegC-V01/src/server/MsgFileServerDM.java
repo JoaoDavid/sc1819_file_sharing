@@ -16,7 +16,8 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
-import communication.OpCode;
+import communication.OpCodeDM;
+import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
@@ -150,7 +151,7 @@ public class MsgFileServerDM{
 
 				if (userManagerHandler.validLogin(user, passwd)){
 					System.out.println("Client connected: " + user + " logged in");
-					outStream.writeObject(OpCode.OP_SUCCESSFUL);
+					outStream.writeObject(OpCodeDM.OP_SUCCESSFUL);
 					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey);
 					boolean connected = true;
 					while(connected) {
@@ -160,7 +161,7 @@ public class MsgFileServerDM{
 				}
 				else {
 					System.out.println("Client failed: " + user + " failed to login");
-					outStream.writeObject(OpCode.OP_ERROR);
+					outStream.writeObject(OpResult.ERROR);
 				}
 
 				outStream.close();
