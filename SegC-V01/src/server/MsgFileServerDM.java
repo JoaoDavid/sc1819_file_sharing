@@ -11,6 +11,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
+import javax.crypto.SecretKey;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -23,8 +24,6 @@ import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
 import users.UserManagerHandler;
 
-//Servidor myServer
-
 public class MsgFileServerDM{
 
 	private MsgFileServerApp app;
@@ -33,10 +32,11 @@ public class MsgFileServerDM{
 	private UserService userService;
 	private UserManagerHandler userManagerHandler;
 	
+	private SecretKey secKey;
 	private PrivateKey privKey;
 	private PublicKey pubKey;
 
-	public MsgFileServerDM(String keystoreLocation, String keystorePassword, String secKeyAlias, String keyPassword, PrivateKey privKey, PublicKey pubKey) throws Exception {
+	public MsgFileServerDM(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		this.app = new MsgFileServerApp();
 		this.fileService = new FileService(app.getDownloadFileHandler(), 
 				app.getListFilesHandler(), app.getRemoveFilesHandler(), 
@@ -44,10 +44,10 @@ public class MsgFileServerDM{
 		this.msgService = new MessageService(app.getCollectMessagesHandler(), 
 				app.getSendMessageHandler());
 		this.userService = new UserService(app.getTrustUsersHandler(), app.getUntrustUsersHandler(), app.getListUsersHandler());
-		this.userManagerHandler = new UserManagerHandler(keystoreLocation, keystorePassword, secKeyAlias, keyPassword);
+		this.userManagerHandler = new UserManagerHandler(secKey, privKey, pubKey);
+		this.secKey = secKey;
 		this.privKey = privKey;
-		this.pubKey = pubKey;
-		
+		this.pubKey = pubKey;		
 	}
 
 
@@ -64,12 +64,13 @@ public class MsgFileServerDM{
 				FileInputStream kfile = new FileInputStream(args[1]);
 				KeyStore kstore = KeyStore.getInstance("JCEKS");
 				kstore.load(kfile, args[2].toCharArray());
+				SecretKey secKey = (SecretKey) kstore.getKey(args[3], args[4].toCharArray());
 				PrivateKey privKey = (PrivateKey) kstore.getKey(args[5], args[6].toCharArray());
 				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
 				System.out.println(privKey == null);
 				System.out.println(pubKey == null);
 				System.out.println(pubKey.toString());
-				server = new MsgFileServerDM(args[1], args[2], args[3], args[4], privKey, pubKey);
+				server = new MsgFileServerDM(secKey, privKey, pubKey);
 			}
 			catch (NumberFormatException e){
 				System.out.println( "Server failed: Invalid port");
@@ -127,7 +128,6 @@ public class MsgFileServerDM{
 
 		ServerThread(Socket inSoc) {
 			socket = inSoc;
-			System.out.println("thread do server para cada cliente");
 		}
 
 		public void run(){
@@ -141,14 +141,12 @@ public class MsgFileServerDM{
 				try {
 					user = (String)inStream.readObject();
 					passwd = (String)inStream.readObject();
-					System.out.println(user);
-					System.out.println(passwd);
-					System.out.println("thread: depois de receber a password e o user");
 				}catch (ClassNotFoundException e1) {
 					e1.printStackTrace();
 				}
 
 				if (userManagerHandler.validLogin(user, passwd)){
+					System.out.println("Client connected: " + user + " logged in");
 					outStream.writeObject(OpCode.OP_SUCCESSFUL);
 					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey);
 					boolean connected = true;
@@ -157,6 +155,7 @@ public class MsgFileServerDM{
 					}
 				}
 				else {
+					System.out.println("Client failed: " + user + " failed to login");
 					outStream.writeObject(OpCode.OP_ERROR);
 				}
 				System.out.println("SAIU");

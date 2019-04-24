@@ -253,26 +253,5 @@ public class MsgFileDM {
 		System.out.println("ERROR: incomplete command line");
 	}
 	
-	public static Byte[] toObjects(byte[] bytesPrim) {
-		Byte[] bytes = new Byte[bytesPrim.length];
-		int i = 0;
-		for (byte b : bytesPrim){
-			bytes[i++] = b;
-		}
-		return bytes;
-	}
-	
-	/**
-	 * Turn array of Byte[] to byte[]
-	 * @param oBytes
-	 * @return
-	 */
-	private static byte[] toPrimitives(Byte[] oBytes) {
 
-		byte[] bytes = new byte[oBytes.length];
-		for(int i = 0; i < oBytes.length; i++){
-			bytes[i] = oBytes[i];
-		}
-		return bytes;
-	}
 }

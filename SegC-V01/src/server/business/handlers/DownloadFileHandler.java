@@ -31,6 +31,7 @@ public class DownloadFileHandler {
 			File file = fileMan.acquireFile(filePath);
 			synchronized(file){
 				try {
+					System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
 					Network.sendFileFromServer(file, socket, privKey);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

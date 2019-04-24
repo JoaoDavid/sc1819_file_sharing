@@ -1,5 +1,7 @@
 package facade.services;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.List;
 
 import facade.exceptions.ApplicationException;
@@ -16,11 +18,11 @@ public class MessageService {
 		this.sendMessageHandler = sendMessageHandler;
 	}
 	
-	public List<String> collectMessages(String userName) throws ApplicationException {
-		return collectMessagesHandler.collectMessages(userName);
+	public List<String> collectMessages(String userName, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		return collectMessagesHandler.collectMessages(userName, privKey, pubKey);
 	}
 	
-	public void storeMsg(String userSender, String userReceiver, String msg) throws ApplicationException {
-		sendMessageHandler.storeMsg(userSender, userReceiver, msg);
+	public void storeMsg(String userSender, String userReceiver, String msg, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		sendMessageHandler.storeMsg(userSender, userReceiver, msg, privKey, pubKey);
 	}
 }

@@ -3,6 +3,8 @@ package server.business.handlers;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
@@ -19,7 +21,7 @@ public class SendMessageHandler {
 		this.fileMan = fileMan;
 	}
 
-	public void storeMsg(String userSender, String userReceiver, String msg) throws ApplicationException {
+	public void storeMsg(String userSender, String userReceiver, String msg, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userReceiver 
 				+ File.separator + FilePaths.FILE_NAME_MSG;
 		boolean trusted = UserValidation.isTrusted(fileMan, userReceiver, userSender);

@@ -25,12 +25,12 @@ import javax.crypto.NoSuchPaddingException;
 
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
+import server.business.util.ConstKeyStore;
 
 public class Network {
 
-	public static final int MAX_SIZE_BUFFER = 2048;
-	public static final String KEY_ALGORITHM = "AES";
-	public static final int KEY_SIZE = 128;
+	//public static final int MAX_SIZE_BUFFER = 2048;
+	
 
 
 
@@ -123,7 +123,7 @@ public class Network {
 		firstArrByte.reset();
 		//sending the buffer
 
-		
+
 		firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
 		firstArrByte.write(byteName);
 		firstArrByte.write(buffFile);
@@ -141,7 +141,7 @@ public class Network {
 			if(buffLen < 0) {
 				return false;
 			}
-			
+
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
 			/*int read = socket.getInputStream().read(buff);*/
@@ -201,7 +201,7 @@ public class Network {
 			}
 			file.createNewFile();
 			FileOutputStream fos = new FileOutputStream(file);
-			ContentCipher contentCipher = new ContentCipher(KEY_ALGORITHM,KEY_SIZE);
+			ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
 			byte[] fileInBytes = Arrays.copyOfRange(buff, i, buffLen);
 			fos.write(contentCipher.encrypt(fileInBytes));
 			File fileWithKey = new File(path + fileName + ".key");
@@ -242,29 +242,25 @@ public class Network {
 		byte[] byteName = file.getName().getBytes();
 		buffSize += byteName.length + 4;
 
-		//sending the buffer
-		if(buffSize > MAX_SIZE_BUFFER && 1==2) {
-			//cycle
-		}else {//
-			File fileWithKey = new File(file.getAbsolutePath() + ".key");
-			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
-			c.init(Cipher.UNWRAP_MODE, privKey);
-			//FileInputStream fisK = new FileInputStream(fileWithKey);
-			Key key = c.unwrap(Files.readAllBytes(fileWithKey.toPath()), KEY_ALGORITHM, Cipher.SECRET_KEY);
-			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
-			cipher.init(Cipher.DECRYPT_MODE, key);			
-			byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
-			System.out.println(new String(buffFile));
-			buffSize+=buffFile.length;
+		//File handling
+		File fileWithKey = new File(file.getAbsolutePath() + ".key");
+		Cipher c = Cipher.getInstance(privKey.getAlgorithm());
+		c.init(Cipher.UNWRAP_MODE, privKey);
+		//FileInputStream fisK = new FileInputStream(fileWithKey);
+		Key key = c.unwrap(Files.readAllBytes(fileWithKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+		Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+		cipher.init(Cipher.DECRYPT_MODE, key);			
+		byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
+		buffSize+=buffFile.length;
 
-			firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
-			socket.getOutputStream().write(firstArrByte.toByteArray());
-			firstArrByte.reset();
+		firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
+		socket.getOutputStream().write(firstArrByte.toByteArray());
+		firstArrByte.reset();
 
-			firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
-			firstArrByte.write(byteName);
-			firstArrByte.write(buffFile);
-			socket.getOutputStream().write(firstArrByte.toByteArray());
-		}
+		firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
+		firstArrByte.write(byteName);
+		firstArrByte.write(buffFile);
+		socket.getOutputStream().write(firstArrByte.toByteArray());
+
 	}
 }

@@ -1,8 +1,16 @@
 package users;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Scanner;
+
+import javax.crypto.SecretKey;
+
+import server.business.util.ConstKeyStore;
 
 
 
@@ -11,23 +19,29 @@ public class UserManager {
 	private UserManagerHandler handler;
 
 
-	public UserManager(String alias, String password, String keystoreLocation, String keystorePassword) throws Exception {
-		this.handler = new UserManagerHandler(alias, password, keystoreLocation, keystorePassword);
+	public UserManager(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+		this.handler = new UserManagerHandler(secKey, privKey, pubKey);
 	}
 
 	public static void main(String[] args) throws Exception {//eliminar
 		/*for(String curr : args) {
 			System.out.println(curr);
 		}*/
-		if(args.length == 4) {
-			UserManager userManager = new UserManager(args[0],args[1],args[2],args[3]);
+		if(args.length == 6) {
+			FileInputStream kfile = new FileInputStream(args[0]);
+			KeyStore keyStore = KeyStore.getInstance(ConstKeyStore.KEYSTORE_TYPE);
+			keyStore.load(kfile, args[1].toCharArray());
+			SecretKey secKey = (SecretKey) keyStore.getKey(args[2], args[3].toCharArray());
+			PrivateKey privKey = (PrivateKey) keyStore.getKey(args[4], args[5].toCharArray());
+			PublicKey pubKey = keyStore.getCertificate(args[4]).getPublicKey();
+			UserManager userManager = new UserManager(secKey, privKey, pubKey);
 			if(userManager.boot()) {
 				userManager.startParser();	
 			}else {
 				System.out.println("ERROR BOOTING UP : FILE CONTAINING USER LOGIN INFO WAS CORRUPTED");
 			}					
 		}else {
-			System.out.println("valid args: <alias> <password> <keystore location> <keystore password>");
+			System.out.println("valid args: <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");
 		}
 
 	}
@@ -52,7 +66,7 @@ public class UserManager {
 						this.createUser(userName, password);
 						System.out.println("OK");
 					}else {
-
+						incompleteCommand();
 					}
 					break;
 
@@ -62,7 +76,7 @@ public class UserManager {
 						this.removeUser(userName);
 						System.out.println("OK");
 					}else {
-
+						incompleteCommand();
 					}
 					break;
 
@@ -72,13 +86,15 @@ public class UserManager {
 						password = parsedInput[2];
 						this.updateUser(userName, password);
 						System.out.println("OK");
+					}else {
+						incompleteCommand();
 					}
 					break;
 				case "exit":
 					if(parsedInput.length == 1) {
 						onLoop = false;
 					}else {
-
+						incompleteCommand();
 					}
 					break;
 				case "help":
@@ -88,7 +104,7 @@ public class UserManager {
 						System.out.println("update <user> <password>");
 						System.out.println("login <user> <password>");
 					}else {
-
+						incompleteCommand();
 					}
 					break;
 				case "login":
@@ -97,7 +113,7 @@ public class UserManager {
 						password = parsedInput[2];
 						System.out.println(this.loginUser(userName, password));
 					}else {
-
+						incompleteCommand();
 					}
 					break;
 				default:
@@ -105,7 +121,8 @@ public class UserManager {
 					break;
 				}
 			}catch (Exception e) {
-				System.out.println(e.getMessage());
+				e.printStackTrace();
+				//System.out.println(e.getMessage());
 			}
 
 		}
@@ -133,6 +150,10 @@ public class UserManager {
 
 	private void updateUser(String userName, String password) throws Exception {
 		this.handler.updateUser(userName, password);
+	}
+	
+	public static void incompleteCommand() {
+		System.out.println("ERROR: incomplete command line");
 	}
 }
 

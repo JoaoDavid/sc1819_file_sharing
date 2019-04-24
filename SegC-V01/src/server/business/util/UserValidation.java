@@ -9,7 +9,7 @@ import java.io.IOException;
 
 
 /**
- * The purpouse of this class is to validate user's
+ * The purpose of this class is to validate user's
  * for example, check if they are registered, if they are trusted by other user
  *
  */

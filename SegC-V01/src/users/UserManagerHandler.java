@@ -8,10 +8,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
@@ -20,6 +24,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -27,32 +32,30 @@ import javax.crypto.spec.PBEKeySpec;
 
 import security.ContentCipher;
 import security.MacManager;
+import server.business.util.ConstKeyStore;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
 
 public class UserManagerHandler {
 
-	public static final String MAC_ALGORITHM = "HmacSHA256";
-	public static final String KEYSTORE_TYPE = "JCEKS";
-	public static final String DIGEST_ALFORITHM = "SHA-256";
-
+	
 
 	//private KeyStore ks;
 	//private FileInputStream fis;
 	private SecretKey secKey;
+	private PrivateKey privKey;
+	private PublicKey pubKey;
 	private ContentCipher cypher;
 	private MessageDigest md;
 	private MacManager macM;
 
 
-	public UserManagerHandler(String keystoreLocation, String keystorePassword, String keyAlias, String keyPassword) throws Exception {
-		KeyStore ks = KeyStore.getInstance(KEYSTORE_TYPE);
-		FileInputStream fis = new FileInputStream(keystoreLocation);
-		ks.load(fis,keystorePassword.toCharArray());
-		secKey = (SecretKey) ks.getKey(keyAlias, keyPassword.toCharArray());
-		macM = new MacManager(MAC_ALGORITHM, secKey);
-		//cypher = new ContentCipher("DES", "DES/CBC/PKCS5Padding");
-		md = MessageDigest.getInstance(DIGEST_ALFORITHM);
+	public UserManagerHandler(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+		this.secKey = secKey;
+		this.privKey = privKey;
+		this.pubKey = pubKey;
+		macM = new MacManager(ConstKeyStore.MAC_ALGORITHM, secKey);
+		md = MessageDigest.getInstance(ConstKeyStore.DIGEST_ALFORITHM);
 	}
 
 
@@ -68,13 +71,59 @@ public class UserManagerHandler {
 				usersFile.write(data.getBytes());
 				usersFile.close();
 				macM.updateMacFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
+				//Creates user directory
 				File userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator +  FilePaths.FOLDER_FILES);
 				userFiles.mkdirs();
 				userFiles.mkdir();
-				userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG);
-				userFiles.createNewFile();
-				userFiles = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED);
-				userFiles.createNewFile();
+				//Creates msg file
+				File msgFile = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG);
+				msgFile.createNewFile();
+				//Creates msg's file signature
+				File msgFileSig = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG + ".sig");
+				msgFileSig.createNewFile();
+				//Creates msg's file .key
+				File msgFileKey = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG + ".key");
+				msgFileKey.createNewFile();
+				//Cipher
+				ContentCipher.sigAndEcryptFile(msgFile, msgFileSig, msgFileKey, this.privKey, this.pubKey);
+				//Create signature
+				/*Signature s = Signature.getInstance("MD5withRSA");
+				s.initSign(this.privKey);
+				s.update(Files.readAllBytes(msgFile.toPath()));
+				FileOutputStream fos = new FileOutputStream(msgFileSig);
+				fos.write(s.sign());
+				fos.close();
+				FileOutputStream fos2 = new FileOutputStream(msgFile);
+				ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
+				byte[] fileInBytes = Files.readAllBytes(msgFile.toPath());
+				fos2.write(contentCipher.encrypt(fileInBytes));				
+				Cipher c = Cipher.getInstance(pubKey.getAlgorithm());
+				c.init(Cipher.WRAP_MODE, pubKey);
+				FileOutputStream fosK = new FileOutputStream(msgFileKey);
+				fosK.write(c.wrap(contentCipher.getKey()));*/
+				
+				//Creates trust file
+				File trustFile = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED);
+				trustFile.createNewFile();
+				FileOutputStream fosTest = new FileOutputStream(trustFile);
+				String palavra = userName + System.getProperty("line.separator");
+				fosTest.write(palavra.getBytes());
+				palavra = "batata" + System.getProperty("line.separator");
+				fosTest.write(palavra.getBytes());
+				palavra = "frita" + System.getProperty("line.separator");
+				fosTest.write(palavra.getBytes());
+				fosTest.close();
+				
+				//Creates trust's file signature
+				File trustFileSig = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED + ".sig");
+				trustFileSig.createNewFile();
+				//Creates trust's file .key
+				File trustFileKey = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED + ".key");
+				trustFileKey.createNewFile();
+				//Cipher
+				ContentCipher.sigAndEcryptFile(trustFile, trustFileSig, trustFileKey, this.privKey, this.pubKey);		
+				
+				ContentCipher.decryptFileAndCheckSig(trustFile, trustFileSig, trustFileKey, this.privKey, this.pubKey);
 			}else {
 				throw new Exception("userName is taken");
 			}
@@ -179,7 +228,6 @@ public class UserManagerHandler {
 						String[] userInfo = curr.split(":");
 						if(userInfo[0].equals(userName)) {
 							fileContent.add(userInfo[0] + ":" + getSaltAndPassword(password));
-							//System.out.println("EM COMENTARIO FAZER");
 						}else {
 							fileContent.add(curr);
 						}
@@ -190,7 +238,6 @@ public class UserManagerHandler {
 					fileWriterClean.close();
 					FileWriter fileWriter = new FileWriter(userRegistFile,true);
 					for(String currLine : fileContent) {
-						System.out.println(currLine);
 						fileWriter.write(currLine + System.getProperty("line.separator"));
 					}
 					fileWriter.close();

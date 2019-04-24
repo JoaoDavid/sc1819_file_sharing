@@ -205,7 +205,7 @@ public class Skeleton {
 	private void storeMessage() throws ApplicationException {
 		try {
 			List<String> msg = Network.bufferToList(socket);
-			msgService.storeMsg(this.userName, msg.get(0), msg.get(1));
+			msgService.storeMsg(this.userName, msg.get(0), msg.get(1), privKey, pubKey);
 			Network.sendInt(OpResult.SUCCESS, socket);
 		} catch (IOException e) {
 			Network.sendInt(OpResult.ERROR, socket);
@@ -215,7 +215,7 @@ public class Skeleton {
 	}
 	
 	private void collectMsg() throws ApplicationException {
-		List<String> msg = msgService.collectMessages(this.userName);
+		List<String> msg = msgService.collectMessages(this.userName, privKey, pubKey);
 		Network.listToBuffer(msg, socket);
 	}
 
