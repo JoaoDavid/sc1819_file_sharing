@@ -1,6 +1,7 @@
 package facade.services;
 
 import java.net.Socket;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import facade.exceptions.ApplicationException;
@@ -36,8 +37,8 @@ public class FileService {
 		return removeFilesHandler.removeFile(userName, fileName);
 	}
 	
-	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket) {
-		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket);
+	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey) {
+		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket, privKey);
 	}
 	
 	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
