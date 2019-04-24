@@ -29,7 +29,7 @@ public class DownloadFileHandler {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
 		System.out.println("ENTREI NO DOWNLOAD FILE HANDLER");
-		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey)) {
+		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
 			System.out.println("É TRUSTED");
 			File file = fileMan.acquireFile(filePath);
 			synchronized(file){

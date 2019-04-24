@@ -22,6 +22,7 @@ public class ListFilesHandler {
 		synchronized(userFiles){
 			String[] result = userFiles.list();
 			if(result == null) {
+				fileMan.releaseFile(filePath);
 				throw new ApplicationException("Path not found");
 			}
 			return result;

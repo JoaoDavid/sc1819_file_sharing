@@ -82,8 +82,7 @@ public class UserManager {
 					if(parsedInput.length == 3) {
 						userName = parsedInput[1];
 						password = parsedInput[2];
-						this.updateUser(userName, password);
-						System.out.println("OK");
+						System.out.println(this.updateUser(userName, password));
 					}else {
 						incompleteCommand();
 					}

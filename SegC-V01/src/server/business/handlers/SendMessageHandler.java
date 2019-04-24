@@ -27,7 +27,7 @@ public class SendMessageHandler {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userReceiver 
 				+ File.separator + FilePaths.FILE_NAME_MSG;
 		boolean trusted = UserValidation.isTrusted(fileMan, userReceiver, userSender, privKey, pubKey);
-		if(trusted) {
+		if(trusted && UserValidation.userNameRegisteredAndActive(userReceiver)) {
 			try {
 				File msgFile = fileMan.acquireFile(filePath);
 				synchronized(msgFile){

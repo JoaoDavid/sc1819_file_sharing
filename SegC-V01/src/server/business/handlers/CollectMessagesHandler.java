@@ -36,6 +36,7 @@ public class CollectMessagesHandler {
 				FileWriter fileWriter = new FileWriter(userMsgs);
 				fileWriter.write("");
 				fileWriter.close();
+				ContentCipher.sigAndEcryptFile(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey);
 				if(result.length > 0) {
 					String inFile = new String(result);
 					return Arrays.asList(inFile.split("/n"));

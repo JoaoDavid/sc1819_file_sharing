@@ -114,6 +114,22 @@ public class UserValidation {
 		}
 		return false;
 	}
+	
+	public static boolean userNameRegisteredAndActive(String userName) {
+		String filePath = FilePaths.FILE_USERS_PASSWORDS;
+		File userRegistFile = new File(filePath);
+		try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
+			String curr; 
+			while ((curr = br.readLine()) != null) {
+				String[] userInfo = curr.split(":");
+				if(userInfo[0].equals(userName)) {
+					return !isDeactivatedUserLine(curr);
+				}
+			}
+		} catch (IOException e) {
+		}
+		return false;
+	}
 
 
 

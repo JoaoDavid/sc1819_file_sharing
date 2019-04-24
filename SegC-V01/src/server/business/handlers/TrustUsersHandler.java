@@ -32,7 +32,8 @@ public class TrustUsersHandler {
 	public boolean trustUser(String userName, String userNameTrusted, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
-		if(!UserValidation.isDeactivatedUser(userNameTrusted) && UserValidation.userNameRegistered(userName) && !userName.equals(userNameTrusted)) {
+		if(UserValidation.userNameRegisteredAndActive(userNameTrusted) && !userName.equals(userNameTrusted)) {
+			System.out.println("ENTROU PARA FAZE TRUST");
 			File trustedFile = fileMan.acquireFile(filePath);
 			try {
 				synchronized(trustedFile){

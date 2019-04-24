@@ -180,8 +180,12 @@ public class MsgFileDM {
 					String userOwner = parsedInput[1];//users name account that has the file
 					String fileName = parsedInput[2];//name of the file
 					msg.add(userOwner);
-					msg.add(fileName);
-					this.stub.rpcDownloadFileFromServer(msg);
+					msg.add(fileName);					
+					if(this.stub.rpcDownloadFileFromServer(msg)) {
+						System.out.println("File downloaded");
+					}else {
+						System.out.println("error");
+					}
 				}else {
 					incompleteCommand();
 				}

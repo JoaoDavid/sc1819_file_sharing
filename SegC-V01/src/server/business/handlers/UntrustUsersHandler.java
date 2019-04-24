@@ -27,7 +27,7 @@ public class UntrustUsersHandler {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
 				+ File.separator + FilePaths.FILE_NAME_TRUSTED;
 		boolean untrusted = false;
-		if(!UserValidation.isDeactivatedUser(userNameUntrusted) && UserValidation.userNameRegistered(userName) && !userName.equals(userNameUntrusted)) {
+		if(UserValidation.userNameRegisteredAndActive(userNameUntrusted) && !userName.equals(userNameUntrusted)) {
 			File trustedFile = fileMan.acquireFile(filePath);
 			try {
 				synchronized(trustedFile){

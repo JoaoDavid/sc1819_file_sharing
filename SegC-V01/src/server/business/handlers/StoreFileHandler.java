@@ -20,7 +20,6 @@ public class StoreFileHandler {
 	}
 	
 	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
-		
 		boolean stored = Network.receiveFileAndCipher(userName, socket, false, pubKey);
 		List<String> res = new ArrayList<String>();
 		if(stored) {
