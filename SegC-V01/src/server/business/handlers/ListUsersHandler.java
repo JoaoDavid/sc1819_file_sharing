@@ -1,10 +1,13 @@
 package server.business.handlers;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 import facade.exceptions.ApplicationException;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
+import users.UserManagerHandler;
 
 public class ListUsersHandler {
 	
@@ -15,10 +18,21 @@ private FileManager fileMan;
 		this.fileMan = fileMan;
 	}
 	
-	public String[] listUsers() throws ApplicationException {
+	public List<String> listUsers() throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS;
-		File user = new File(filePath);
-		return user.list();
+		File user = fileMan.acquireFile(filePath);
+		List<String> result = null;
+		synchronized(user){
+			try {
+				result = UserManagerHandler.listRegisteredUsers();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+				fileMan.releaseFile(filePath);
+			}
+		}
+		return result;
 	}
 	
 

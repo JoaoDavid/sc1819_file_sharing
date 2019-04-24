@@ -253,6 +253,22 @@ public class UserManagerHandler {
 	}
 
 
+	public static List<String> listRegisteredUsers() throws IOException {
+		String filePath = FilePaths.FILE_USERS_PASSWORDS;
+		File userRegistFile = new File(filePath);
+		List<String> result = new ArrayList<String>();
+		try (BufferedReader br = new BufferedReader(new FileReader(userRegistFile))){
+			String curr; 
+			while ((curr = br.readLine()) != null) {
+				if(!isDeactivatedUserLine(curr)) {
+					result.add(curr.substring( 0, curr.indexOf(":")));
+				}
+			}
+		} catch (IOException e) {
+			throw new IOException(e);
+		}
+		return result;
+	}
 
 	public static boolean isDeactivatedUser(String userName) {
 		String filePath = FilePaths.FILE_USERS_PASSWORDS;

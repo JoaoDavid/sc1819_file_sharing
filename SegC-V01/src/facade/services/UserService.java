@@ -1,6 +1,8 @@
 package facade.services;
 
 
+import java.util.List;
+
 import facade.exceptions.ApplicationException;
 import server.business.handlers.ListUsersHandler;
 import server.business.handlers.TrustUsersHandler;
@@ -27,7 +29,7 @@ public class UserService {
 		return this.untrusUserHandler.untrustUser(userName, userNameUntrusted);
 	}
 	
-	public String[] listUsers() throws ApplicationException {
+	public List<String> listUsers() throws ApplicationException {
 		return this.listUserHandler.listUsers();
 	}
 	

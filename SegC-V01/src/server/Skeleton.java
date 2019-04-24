@@ -156,8 +156,7 @@ public class Skeleton {
 	}
 	
 	private void listUsers() throws ApplicationException {
-		String[] arr = userService.listUsers();
-		Network.listToBuffer(Arrays.asList(arr), socket);
+		Network.listToBuffer(userService.listUsers(), socket);
 	}
 
 	private void listFiles() throws ApplicationException {
