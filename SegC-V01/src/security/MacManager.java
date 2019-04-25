@@ -43,7 +43,7 @@ public class MacManager {
 		usersFileMAC.close();
 	}
 	
-	public void updateMacFile(File file, File fileMAC) {
+	/*public void updateMacFile(File file, File fileMAC) {
 		try {
 			FileOutputStream usersFileMAC = new FileOutputStream(fileMAC);
 			mac.reset();
@@ -59,7 +59,7 @@ public class MacManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	public boolean validRegistFile(String filePath, String filePathMAC) throws ApplicationException  {
 		try {

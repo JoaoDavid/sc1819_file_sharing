@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 
 import facade.exceptions.ApplicationException;
 import server.business.util.ConstKeyStore;
+import server.business.util.FilePaths;
 
 
 
@@ -37,6 +38,8 @@ public class UserManager {
 				userManager.startParser();	
 			}else {
 				System.out.println("ERROR BOOTING UP : FILE CONTAINING USER LOGIN INFO WAS CORRUPTED");
+				System.out.println("if you wish to do a fresh start, delete all files inside " + FilePaths.FOLDER_SERVER);
+				System.out.println("and wait a few seconds before starting again");
 			}					
 		}else {
 			System.out.println("valid args: <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");

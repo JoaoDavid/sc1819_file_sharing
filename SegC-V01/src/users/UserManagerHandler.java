@@ -271,7 +271,7 @@ public class UserManagerHandler {
 			try {
 				userInfo.createNewFile();
 				userInfoMac.createNewFile();
-				macM.updateMacFile(userInfo, userInfoMac);
+				macM.updateMacFile(userInfo.getPath(), userInfoMac.getPath());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
