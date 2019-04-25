@@ -99,7 +99,7 @@ public class MsgFile {
 		Scanner sc = new Scanner(System.in);
 		boolean onLoop = true;
 		while(onLoop) {
-			System.out.print(">>>");
+			System.out.print(userName + ">>>");
 			String rawInput = sc.nextLine();
 			String[] parsedInput = rawInput.split("(\\s)+");
 

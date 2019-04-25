@@ -278,7 +278,7 @@ public class Network {
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
 				IOException | IllegalBlockSizeException | BadPaddingException e) {
 			// TODO Auto-generated catch block
-			throw new ApplicationException("FILE CORRUPTED");
+			throw new ApplicationException("FILE CORRUPTED OR REMOVED FROM SERVER");
 		}
 		
 
