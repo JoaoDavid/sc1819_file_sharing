@@ -62,7 +62,7 @@ public class UserValidation {
 		return false;
 	}
 
-	public static List<String> listRegisteredUsers() throws IOException {
+	public static List<String> listRegisteredUsers() throws ApplicationException {
 		String filePath = FilePaths.FILE_USERS_PASSWORDS;
 		File userRegistFile = new File(filePath);
 		List<String> result = new ArrayList<String>();
@@ -74,7 +74,7 @@ public class UserValidation {
 				}
 			}
 		} catch (IOException e) {
-			throw new IOException(e);
+			throw new ApplicationException(e.getMessage());
 		}
 		return result;
 	}

@@ -25,7 +25,7 @@ private FileManager fileMan;
 		synchronized(user){
 			try {
 				result = UserValidation.listRegisteredUsers();
-			} catch (IOException e) {
+			} catch (ApplicationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {

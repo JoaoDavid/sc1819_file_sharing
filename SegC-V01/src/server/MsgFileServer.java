@@ -114,11 +114,12 @@ public class MsgFileServer{
 			e.printStackTrace();
 			System.exit(-1);
 		}
-
-		while(true) {
+		checkFilesIntegrity();
+		boolean serverOnline = true;
+		while(serverOnline) {
 			try {
 				Socket inSoc = ss.accept();
-				checkFilesIntegrity();
+				
 				if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
 					throw new Exception("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
 				}
@@ -132,9 +133,9 @@ public class MsgFileServer{
 		}
 	}
 
-	public void checkFilesIntegrity() throws Exception {
+	public void checkFilesIntegrity() throws ApplicationException {
 		if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
-			throw new Exception("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+			throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
 		}
 		List<String> listUser = UserValidation.listRegisteredUsers();
 		List<String> listFiles = new ArrayList<String>();
@@ -165,7 +166,7 @@ public class MsgFileServer{
 			socket = inSoc;
 		}
 
-		public void run(){
+		public void run() {
 			String user = null;
 			String passwd = null;
 			try {
@@ -180,7 +181,7 @@ public class MsgFileServer{
 					user = logInfo.get(0);
 					passwd = logInfo.get(1);
 				}else {
-					throw new Exception("Error receiving log information");
+					throw new ApplicationException("Error receiving log information");
 				}
 				/*user = (String)inStream.readObject();
 				passwd = (String)inStream.readObject();*/
@@ -188,7 +189,7 @@ public class MsgFileServer{
 				if (userManagerHandler.validLogin(user, passwd)){
 					System.out.println("Client connected: " + user + " logged in");
 					outStream.writeObject(OpCode.OP_SUCCESSFUL);
-					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey);
+					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey, macM);
 					boolean connected = true;
 					while(connected) {
 						connected = skel.communicate(outStream, inStream);
@@ -207,8 +208,9 @@ public class MsgFileServer{
 
 			} catch (IOException e) {
 				System.out.println("Client disconnected: Connection lost with " + user);
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
+			} catch (ApplicationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

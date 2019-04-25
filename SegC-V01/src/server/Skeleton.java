@@ -22,6 +22,8 @@ import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
+import security.MacManager;
+import server.business.util.FilePaths;
 
 
 public class Skeleton {
@@ -30,13 +32,14 @@ public class Skeleton {
 	private Socket socket;
 	private PrivateKey privKey;
 	private PublicKey pubKey;
+	private MacManager macM;
 
 	private FileService fileService;
 	private MessageService msgService;
 	private UserService userService;
 
 	public Skeleton(String userName, Socket socket, FileService fileService, 
-			MessageService msgService, UserService userService, PrivateKey privKey, PublicKey pubKey) {
+			MessageService msgService, UserService userService, PrivateKey privKey, PublicKey pubKey, MacManager macM) {
 		this.userName = userName;
 		this.socket = socket;
 		this.fileService = fileService;
@@ -44,9 +47,10 @@ public class Skeleton {
 		this.userService = userService;
 		this.privKey = privKey;
 		this.pubKey = pubKey;
+		this.macM = macM;
 	}
 
-	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream){
+	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException{
 		boolean connected = true;
 		try {
 			Object obj = inStream.readObject();
@@ -56,7 +60,10 @@ public class Skeleton {
 			}else {
 				opcode = (OpCode) obj;
 			}			
-
+			if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
+				throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+				//return false;
+			}
 			switch (opcode) {
 			case STORE_FILES: //store <files>
 				this.uploadFile();
@@ -96,8 +103,6 @@ public class Skeleton {
 			connected = false;
 		} catch (ClassNotFoundException e) {
 			connected = false;
-		} catch (ApplicationException e) {
-			// TODO: handle exception
 		}
 		return connected;
 	}

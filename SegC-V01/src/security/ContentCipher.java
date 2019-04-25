@@ -20,6 +20,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 
+import facade.exceptions.ApplicationException;
 import server.business.util.ConstKeyStore;
 
 public class ContentCipher {
@@ -184,7 +185,7 @@ public class ContentCipher {
 		}
 	}
 
-	public static boolean checkFileIntegrity(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+	public static boolean checkFileIntegrity(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
 		try {
 			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
 			c.init(Cipher.UNWRAP_MODE, privKey);
@@ -200,7 +201,7 @@ public class ContentCipher {
 			return s.verify(sigInFile);
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
 				IOException | IllegalBlockSizeException | BadPaddingException | SignatureException e) {
-			throw new Exception("CONTROL FILES WERE COMPROMISED - ABORTING");
+			throw new ApplicationException("CONTROL FILES WERE COMPROMISED - ABORTING");
 		}
 
 	}
