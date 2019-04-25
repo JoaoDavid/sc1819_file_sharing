@@ -40,7 +40,7 @@ import server.business.util.UserValidation;
 
 public class UserManagerHandler {
 
-	
+
 
 	//private KeyStore ks;
 	//private FileInputStream fis;
@@ -81,27 +81,11 @@ public class UserManagerHandler {
 				userFilesKeys.mkdirs();
 				userFilesKeys.mkdir();
 				//Creates msg file
-				File msgFile = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG);
-				msgFile.createNewFile();
-				//Creates msg's file signature
-				File msgFileSig = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG + ".sig");
-				msgFileSig.createNewFile();
-				//Creates msg's file .key
-				File msgFileKey = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_MSG + ".key");
-				msgFileKey.createNewFile();
-				//Cipher
-				ContentCipher.sigAndEcryptFile(msgFile, msgFileSig, msgFileKey, this.privKey, this.pubKey);				
+				createControlFile(userName, FilePaths.FILE_NAME_MSG, privKey, pubKey);
 				//Creates trust file
-				File trustFile = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED);
-				trustFile.createNewFile();
-				//Creates trust's file signature
-				File trustFileSig = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED + ".sig");
-				trustFileSig.createNewFile();
-				//Creates trust's file .key
-				File trustFileKey = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + FilePaths.FILE_NAME_TRUSTED + ".key");
-				trustFileKey.createNewFile();
-				//Cipher
-				ContentCipher.sigAndEcryptFile(trustFile, trustFileSig, trustFileKey, this.privKey, this.pubKey);
+				createControlFile(userName, FilePaths.FILE_NAME_TRUSTED, privKey, pubKey);
+				//Creates trust file
+				createControlFile(userName, FilePaths.FILE_NAME_FILES_STORED, privKey, pubKey);
 				return true;
 			}else {
 				throw new Exception("userName is taken");
@@ -109,6 +93,20 @@ public class UserManagerHandler {
 		}else {
 			throw new Exception("MAC INVALID : ABORT");
 		}
+	}
+
+	private void createControlFile(String userName, String fileName, PrivateKey privKey, PublicKey pubKey) throws Exception {
+		//Creates trust file
+		File file = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + fileName);
+		file.createNewFile();
+		//Creates trust's file signature
+		File fileSig = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + fileName + ".sig");
+		fileSig.createNewFile();
+		//Creates trust's file .key
+		File fileKey = new File (FilePaths.FOLDER_SERVER_USERS + File.separator + userName + File.separator + fileName + ".key");
+		fileKey.createNewFile();
+		//Cipher
+		ContentCipher.sigAndEcryptFile(file, fileSig, fileKey, this.privKey, this.pubKey);
 	}
 
 	private byte[] getSaltedPassword(String password, byte[] salt) {
@@ -238,7 +236,7 @@ public class UserManagerHandler {
 	}
 
 
-	
+
 
 	public boolean validLogin(String userName, String password) {
 		File userRegistFile = new File(FilePaths.FILE_USERS_PASSWORDS);
@@ -264,23 +262,27 @@ public class UserManagerHandler {
 
 	public boolean boot() throws ApplicationException {
 		File folder = new File(FilePaths.FOLDER_SERVER_USERS);
-		if(!folder.exists()) {
+		if(!folder.exists()) {//first boot
+			System.out.println("First boot, creating files ...");
 			folder.getParentFile().mkdirs();
 			folder.mkdir();
-		}
-		File userInfo = new File(FilePaths.FILE_USERS_PASSWORDS);
-		File userInfoMac = new File(FilePaths.FILE_USERS_PASSWORDS_MAC);
-		if(!userInfo.exists() || !userInfoMac.exists()) {
+			File userInfo = new File(FilePaths.FILE_USERS_PASSWORDS);
+			File userInfoMac = new File(FilePaths.FILE_USERS_PASSWORDS_MAC);
 			try {
 				userInfo.createNewFile();
 				userInfoMac.createNewFile();
+				macM.updateMacFile(userInfo, userInfoMac);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				return false;
-			}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}else {
+			return macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 		}
-		return macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
+		return false;
 	}
 
 

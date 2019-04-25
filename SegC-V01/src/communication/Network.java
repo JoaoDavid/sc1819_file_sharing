@@ -174,7 +174,15 @@ public class Network {
 		}
 	}
 
-	public static boolean receiveFileAndCipher(String userName, Socket socket, boolean replace, PublicKey pubKey) {
+	/**
+	 * @param userName
+	 * @param socket
+	 * @param replace
+	 * @param pubKey
+	 * @param fileName
+	 * @return fileName
+	 */
+	public static String receiveFileAndCipher(String userName, Socket socket, boolean replace, PublicKey pubKey, List<String> storedFiles) {
 		try {
 			
 			String path = FilePaths.FOLDER_SERVER_USERS + File.separator + userName 
@@ -184,7 +192,7 @@ public class Network {
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
 			//System.out.println("buffLen:" +buffLen);
 			if(buffLen < 0) {
-				return false;
+				return null;
 			}
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
@@ -194,12 +202,16 @@ public class Network {
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
 			i+=4;
 			int strLen = ByteBuffer.wrap(strLenByte).getInt();
+			//String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
 			String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
+			if(storedFiles.contains(fileName)) {
+				return null;
+			}
 			i+=strLen;
 			File file = new File(path + fileName);
-			if(file.exists() && !replace) {
-				return false;
-			}
+			/*if(file.exists() && !replace) {
+				return null;
+			}*/
 			file.createNewFile();
 			FileOutputStream fos = new FileOutputStream(file);
 			ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
@@ -215,7 +227,7 @@ public class Network {
 			fos.close();
 			fosK.close();
 			System.out.println(userName + " uploaded " + fileName);
-			return true;
+			return fileName;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -232,7 +244,7 @@ public class Network {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
+		return null;
 	}
 
 	public static void sendFileFromServer(File file, File fileWithKey, Socket socket, PrivateKey privKey) throws ApplicationException  {

@@ -114,7 +114,7 @@ public class MsgFileServer{
 			System.exit(-1);
 		}
 		checkFilesIntegrity();
-		Boolean serverOnline = true;
+		boolean serverOnline = true;
 		System.out.println("Initializing server on port: " + port);
 		while(serverOnline) {
 			try {

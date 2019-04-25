@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -27,31 +28,38 @@ public class DownloadFileHandler {
 		this.fileMan = fileMan;
 	}
 
-	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) {
+	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey, ListFilesHandler listFilesHandler) throws ApplicationException {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
-		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
-			File file = fileMan.acquireFile(filePath);
-			if(file != null) {
-				synchronized(file){
-					File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
-							+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
-					try {
-						System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
-						Network.sendFileFromServer(file, fileKey, socket, privKey);
-					} catch (ApplicationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} finally{
-						fileMan.releaseFile(filePath);
-					}
-				}	
+		List<String> filesStored = listFilesHandler.listFiles(userOwner, privKey, pubKey);
+		if(filesStored.contains(fileName)) {
+			if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
+				File file = fileMan.acquireFile(filePath);
+				if(file != null) {
+					synchronized(file){
+						File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
+								+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
+						try {
+							System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
+							Network.sendFileFromServer(file, fileKey, socket, privKey);
+						} catch (ApplicationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} finally{
+							fileMan.releaseFile(filePath);
+						}
+					}	
+				}else {//fileName exists in the txt, but not in the folder
+					Network.sendInt(OpResult.ERROR, socket);
+					throw new ApplicationException("FILE INTEGRITY COMPROMISED");
+				}
 			}else {
-				Network.sendInt(OpResult.NOT_FOUND, socket);
+				Network.sendInt(OpResult.ERROR, socket);
 			}
 		}else {
-			Network.sendInt(OpResult.ERROR, socket);
+			Network.sendInt(OpResult.NOT_FOUND, socket);
 		}
+
 
 	}
 

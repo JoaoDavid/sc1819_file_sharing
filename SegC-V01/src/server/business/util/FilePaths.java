@@ -18,6 +18,8 @@ public class FilePaths {
 	
 	public static final String FILE_NAME_TRUSTED = "trusted.txt";
 	
+	public static final String FILE_NAME_FILES_STORED = "fileStored.txt";
+	
 	public static final String FOLDER_SERVER_USERS = FOLDER_SERVER + File.separator + "users";
 
 	public static final String FILE_USERS_PASSWORDS = FOLDER_SERVER + File.separator + FILE_NAME_USERS_PASSWORDS;

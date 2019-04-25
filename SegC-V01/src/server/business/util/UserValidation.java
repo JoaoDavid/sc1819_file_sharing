@@ -74,7 +74,7 @@ public class UserValidation {
 				}
 			}
 		} catch (IOException e) {
-			throw new ApplicationException(e.getMessage());
+			throw new ApplicationException("ERROR READING LOGIN INFO FILE");
 		}
 		return result;
 	}

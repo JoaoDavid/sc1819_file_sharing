@@ -116,11 +116,11 @@ public class Skeleton {
 
 
 
-	private void uploadFile() {
-		fileService.storeFile(userName, socket, pubKey);
+	private void uploadFile() throws ApplicationException {
+		fileService.storeFile(userName, socket, privKey, pubKey);
 	}
 
-	private void downloadFile() {
+	private void downloadFile() throws ApplicationException {
 		try {
 			List<String> msg = Network.bufferToList(socket);
 			String userOwner = msg.get(0);
@@ -141,12 +141,12 @@ public class Skeleton {
 		}
 	}
 
-	private void removeFiles() {
+	private void removeFiles() throws ApplicationException {
 		try {
 			List<String> files = Network.bufferToList(socket);
 			List<String> res = new ArrayList<String>();
 			for(String curr : files) {
-				boolean deleted = fileService.removeFile(this.userName, curr);
+				boolean deleted = fileService.removeFile(this.userName, curr, privKey, pubKey);
 				if(deleted) {
 					res.add("DELETED");
 				}else {
@@ -166,9 +166,7 @@ public class Skeleton {
 	}
 
 	private void listFiles() throws ApplicationException {
-		String[] arr = fileService.listFiles(this.userName);
-
-		Network.listToBuffer(Arrays.asList(arr), socket);
+		Network.listToBuffer(fileService.listFiles(this.userName, privKey, pubKey), socket);
 	}
 
 	private void trustUsers() throws ApplicationException {

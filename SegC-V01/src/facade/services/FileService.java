@@ -3,6 +3,7 @@ package facade.services;
 import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.List;
 
 import facade.exceptions.ApplicationException;
 import server.business.handlers.DownloadFileHandler;
@@ -29,20 +30,20 @@ public class FileService {
 	}
 
 
-	public String[] listFiles(String username) throws ApplicationException {
-		return listFilesHandler.listFiles(username);
+	public List<String> listFiles(String username, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		return listFilesHandler.listFiles(username, privKey, pubKey);
 	}
 
-	public boolean removeFile(String userName, String fileName) {
-		return removeFilesHandler.removeFile(userName, fileName);
+	public boolean removeFile(String userName, String fileName, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		return removeFilesHandler.removeFile(userName, fileName, privKey, pubKey);
 	}
 	
-	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) {
-		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket, privKey, pubKey);
+	public void clientDownloadFile(String userName, String userOwner, String fileName, Socket socket, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		downloadFileHandler.clientDownloadFile(userName, userOwner, fileName, socket, privKey, pubKey, this.listFilesHandler);
 	}
 	
-	public void storeFile(String userName, Socket socket, PublicKey pubKey) {
-		storeFilesHandler.storeFile(userName, socket, pubKey);
+	public void storeFile(String userName, Socket socket, PrivateKey privKey, PublicKey pubKey) throws ApplicationException {
+		storeFilesHandler.storeFile(userName, socket, privKey, pubKey, this.listFilesHandler);
 	}
 	
 }
