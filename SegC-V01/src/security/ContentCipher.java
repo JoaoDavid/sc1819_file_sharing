@@ -90,7 +90,7 @@ public class ContentCipher {
 	}
 
 
-	/*public static void sigAndEcryptFile(byte[], File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+	public static void encryptFile(File file, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		FileOutputStream fos2 = new FileOutputStream(file);
 		ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
 		byte[] fileInBytes = Files.readAllBytes(file.toPath());
@@ -101,19 +101,26 @@ public class ContentCipher {
 		fosK.write(c.wrap(contentCipher.getKey()));
 		fos2.close();
 		fosK.close();
-	}*/
+	}
 
-	public static void ecryptFile(File file, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
-		FileOutputStream fos2 = new FileOutputStream(file);
-		ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
-		byte[] fileInBytes = Files.readAllBytes(file.toPath());
-		fos2.write(contentCipher.encrypt(fileInBytes));				
-		Cipher c = Cipher.getInstance(pubKey.getAlgorithm());
-		c.init(Cipher.WRAP_MODE, pubKey);
-		FileOutputStream fosK = new FileOutputStream(fileKey);
-		fosK.write(c.wrap(contentCipher.getKey()));
-		fos2.close();
-		fosK.close();
+	public static boolean decryptFile(File file, File fileKey, PrivateKey privKey, PublicKey pubKey) {
+		try {
+			//File handling
+			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
+			c.init(Cipher.UNWRAP_MODE, privKey);
+			//FileInputStream fisK = new FileInputStream(fileWithKey);
+			Key key = c.unwrap(Files.readAllBytes(fileKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+			cipher.init(Cipher.DECRYPT_MODE, key);			
+			byte[] res = cipher.doFinal(Files.readAllBytes(file.toPath()));
+			if(res != null) {
+				return true;
+			}			
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | 
+				IOException | IllegalBlockSizeException | BadPaddingException e) {
+			//e.printStackTrace();
+		}
+		return false;
 	}
 
 

@@ -141,11 +141,9 @@ public class MsgFileServer{
 		for(String currUser : listUser) {
 			FileIntegrity currFileIntegrity = new FileIntegrity(macM, privKey, pubKey, currUser);
 			currFileIntegrity.checkControlFiles();
-			
-			/*File fileDirec = new File();
-			String[] allFiles = fileDirec.list();
-			for(String currFile : allFiles) {
-			}*/
+			if(!currFileIntegrity.checkUserFiles()) {
+				throw new ApplicationException(currUser + "'s FILES WERE COMPROMISED - ABORTING");
+			}
 		}
 		System.out.println("Files OK");
 	}
