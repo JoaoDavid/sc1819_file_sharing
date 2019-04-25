@@ -12,6 +12,8 @@ import java.util.Arrays;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
+import facade.exceptions.ApplicationException;
+
 
 public class MacManager {
 	
@@ -39,7 +41,7 @@ public class MacManager {
 		usersFileMAC.close();
 	}
 	
-	public boolean validRegistFile(String filePath, String filePathMAC)  {
+	public boolean validRegistFile(String filePath, String filePathMAC) throws ApplicationException  {
 		try {
 			Mac otherMAC = Mac.getInstance(this.macAlgorithm);
 			otherMAC.init(secKey);
@@ -49,28 +51,13 @@ public class MacManager {
 				byte[] otherMACfinal = otherMAC.doFinal(Files.readAllBytes(userRegistFile.toPath())); 
 				byte[] savedMAC = Files.readAllBytes(Paths.get(filePathMAC));
 				return Arrays.equals(otherMACfinal, savedMAC);
-			}else {
+			}/*else {
 				updateMacFile(filePath, filePathMAC);
 				return true;
-			}
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return false;
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			}*/
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+		} 
 		return false;
 	}
 

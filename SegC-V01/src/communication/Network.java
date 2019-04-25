@@ -133,14 +133,15 @@ public class Network {
 
 	}
 
-	public static boolean receiveFile(String path, Socket socket, boolean replace) {
+	public static void receiveFile(String path, Socket socket, boolean replace) {
 		try {
 			byte[] buffLenByte = new byte[4];
 			socket.getInputStream().read(buffLenByte);
 			int buffLen = ByteBuffer.wrap(buffLenByte).getInt();
 			//System.out.println("buffLen:" +buffLen);
 			if(buffLen < 0) {
-				return false;
+				System.out.println(OpResult.getDesig(buffLen));
+				return;
 			}
 
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
@@ -159,18 +160,17 @@ public class Network {
 			i+=strLen;
 			File file = new File(path + fileName);
 			if(file.exists() && !replace) {
-				return false;
+				System.out.println("File already exists");
+				return;
 			}
 			file.createNewFile();
 			FileOutputStream fos = new FileOutputStream(file);
 			fos.write(buff, i, buffLen - i);
 			fos.close();
 			System.out.println("File downloaded to " + file.getCanonicalPath());
-			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return false;
 		}
 	}
 
@@ -235,34 +235,40 @@ public class Network {
 		return false;
 	}
 
-	public static void sendFileFromServer(File file, File fileWithKey, Socket socket, PrivateKey privKey) 
-			throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-		int buffSize = 0;
-		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
+	public static void sendFileFromServer(File file, File fileWithKey, Socket socket, PrivateKey privKey) throws ApplicationException  {
+		try {
+			int buffSize = 0;
+			ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
 
-		//First send the size of the buffer
-		//including fileNameLen in bytes, fileName and finally fileBytes
-		byte[] byteName = file.getName().getBytes();
-		buffSize += byteName.length + 4;
+			//First send the size of the buffer
+			//including fileNameLen in bytes, fileName and finally fileBytes
+			byte[] byteName = file.getName().getBytes();
+			buffSize += byteName.length + 4;
 
-		//File handling
-		Cipher c = Cipher.getInstance(privKey.getAlgorithm());
-		c.init(Cipher.UNWRAP_MODE, privKey);
-		//FileInputStream fisK = new FileInputStream(fileWithKey);
-		Key key = c.unwrap(Files.readAllBytes(fileWithKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
-		Cipher cipher = Cipher.getInstance(key.getAlgorithm());
-		cipher.init(Cipher.DECRYPT_MODE, key);			
-		byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
-		buffSize+=buffFile.length;
+			//File handling
+			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
+			c.init(Cipher.UNWRAP_MODE, privKey);
+			//FileInputStream fisK = new FileInputStream(fileWithKey);
+			Key key = c.unwrap(Files.readAllBytes(fileWithKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+			cipher.init(Cipher.DECRYPT_MODE, key);			
+			byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
+			buffSize+=buffFile.length;
 
-		firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
-		socket.getOutputStream().write(firstArrByte.toByteArray());
-		firstArrByte.reset();
+			firstArrByte.write(ByteBuffer.allocate(4).putInt(buffSize).array());
+			socket.getOutputStream().write(firstArrByte.toByteArray());
+			firstArrByte.reset();
 
-		firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
-		firstArrByte.write(byteName);
-		firstArrByte.write(buffFile);
-		socket.getOutputStream().write(firstArrByte.toByteArray());
+			firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
+			firstArrByte.write(byteName);
+			firstArrByte.write(buffFile);
+			socket.getOutputStream().write(firstArrByte.toByteArray());
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException |
+				IOException | IllegalBlockSizeException | BadPaddingException e) {
+			// TODO Auto-generated catch block
+			throw new ApplicationException("FILE CORRUPTED");
+		}
+		
 
 	}
 }

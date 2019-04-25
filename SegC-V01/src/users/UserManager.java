@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import javax.crypto.SecretKey;
 
+import facade.exceptions.ApplicationException;
 import server.business.util.ConstKeyStore;
 
 
@@ -123,7 +124,7 @@ public class UserManager {
 		sc.close();
 	}
 	
-	private boolean boot() {
+	private boolean boot() throws ApplicationException {
 		return handler.boot();
 	}
 

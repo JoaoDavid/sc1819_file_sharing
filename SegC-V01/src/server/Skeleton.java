@@ -2,6 +2,7 @@ package server;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,6 +23,8 @@ import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
+import security.ContentCipher;
+import security.FileIntegrity;
 import security.MacManager;
 import server.business.util.FilePaths;
 
@@ -50,7 +53,8 @@ public class Skeleton {
 		this.macM = macM;
 	}
 
-	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream) throws ApplicationException{
+	public boolean communicate(ObjectOutputStream outStream, ObjectInputStream inStream, 
+			FileIntegrity fileIntegrity) throws ApplicationException{
 		boolean connected = true;
 		try {
 			Object obj = inStream.readObject();
@@ -64,6 +68,7 @@ public class Skeleton {
 				throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
 				//return false;
 			}
+			fileIntegrity.checkControlFiles();
 			switch (opcode) {
 			case STORE_FILES: //store <files>
 				this.uploadFile();
@@ -109,7 +114,7 @@ public class Skeleton {
 
 
 
-	
+
 
 	private void uploadFile() {
 		fileService.storeFile(userName, socket, pubKey);
@@ -155,7 +160,7 @@ public class Skeleton {
 		}
 
 	}
-	
+
 	private void listUsers() throws ApplicationException {
 		Network.listToBuffer(userService.listUsers(), socket);
 	}
@@ -213,7 +218,7 @@ public class Skeleton {
 			Network.sendInt(e.getCode(), socket);
 		}
 	}
-	
+
 	private void collectMsg() throws ApplicationException {
 		List<String> msg = msgService.collectMessages(this.userName, privKey, pubKey);
 		Network.listToBuffer(msg, socket);

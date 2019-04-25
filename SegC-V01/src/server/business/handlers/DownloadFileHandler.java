@@ -13,6 +13,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import communication.Network;
+import communication.OpResult;
+import facade.exceptions.ApplicationException;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
@@ -30,36 +32,25 @@ public class DownloadFileHandler {
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
 		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
 			File file = fileMan.acquireFile(filePath);
-			synchronized(file){
-				File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
-				+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
-				try {
-					System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
-					Network.sendFileFromServer(file, fileKey, socket, privKey);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvalidKeyException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchAlgorithmException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalBlockSizeException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (BadPaddingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} finally{
-					fileMan.releaseFile(filePath);
-				}
-			}			
+			if(file != null) {
+				synchronized(file){
+					File fileKey = new File(FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
+							+ File.separator + FilePaths.FOLDER_FILES_KEYS + File.separator + fileName + FilePaths.FILE_NAME_KEY_SUFIX);
+					try {
+						System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
+						Network.sendFileFromServer(file, fileKey, socket, privKey);
+					} catch (ApplicationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} finally{
+						fileMan.releaseFile(filePath);
+					}
+				}	
+			}else {
+				Network.sendInt(OpResult.NOT_FOUND, socket);
+			}
 		}else {
-			Network.sendInt(-1, socket);
+			Network.sendInt(OpResult.ERROR, socket);
 		}
 
 	}

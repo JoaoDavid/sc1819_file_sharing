@@ -27,6 +27,7 @@ import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
 import security.ContentCipher;
+import security.FileIntegrity;
 import security.MacManager;
 import server.business.util.ConstKeyStore;
 import server.business.util.FilePaths;
@@ -83,8 +84,6 @@ public class MsgFileServer{
 				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
 
 				server = new MsgFileServer(secKey, privKey, pubKey);
-				server.checkFilesIntegrity();
-				System.out.println("Initializing server on port: " + args[0]);
 				server.startServer(port, server.privKey, server.pubKey);
 			}
 			catch (NumberFormatException e){
@@ -102,7 +101,7 @@ public class MsgFileServer{
 		}
 	}
 
-	public void startServer (int port, PrivateKey privKey, PublicKey pubKey) throws Exception{
+	public void startServer (int port, PrivateKey privKey, PublicKey pubKey) throws ApplicationException{
 		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
 		SSLServerSocket ss = null;
 		
@@ -115,13 +114,14 @@ public class MsgFileServer{
 			System.exit(-1);
 		}
 		checkFilesIntegrity();
-		boolean serverOnline = true;
+		Boolean serverOnline = true;
+		System.out.println("Initializing server on port: " + port);
 		while(serverOnline) {
 			try {
 				Socket inSoc = ss.accept();
 				
 				if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
-					throw new Exception("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+					throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
 				}
 				ServerThread newServerThread = new ServerThread(inSoc);
 				newServerThread.start();
@@ -134,26 +134,20 @@ public class MsgFileServer{
 	}
 
 	public void checkFilesIntegrity() throws ApplicationException {
-		if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
-			throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
-		}
+		System.out.println("Checking files integrity ...");
+		macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 		List<String> listUser = UserValidation.listRegisteredUsers();
-		List<String> listFiles = new ArrayList<String>();
-		listFiles.add(FilePaths.FILE_NAME_TRUSTED);
-		listFiles.add(FilePaths.FILE_NAME_MSG);
+		
 		for(String currUser : listUser) {
-			for(String currFile : listFiles) {
-				String path = FilePaths.FOLDER_SERVER_USERS + File.separator + currUser + File.separator + currFile;
-				File file = new File(path);
-				File fileSig = new File(path + FilePaths.FILE_NAME_SIG_SUFIX);
-				File fileKey = new File(path + FilePaths.FILE_NAME_KEY_SUFIX);
-				ContentCipher.checkFileIntegrity(file, fileSig, fileKey, this.privKey, this.pubKey);
-			}
+			FileIntegrity currFileIntegrity = new FileIntegrity(macM, privKey, pubKey, currUser);
+			currFileIntegrity.checkControlFiles();
+			
 			/*File fileDirec = new File();
 			String[] allFiles = fileDirec.list();
 			for(String currFile : allFiles) {
 			}*/
 		}
+		System.out.println("Files OK");
 	}
 
 
@@ -167,7 +161,7 @@ public class MsgFileServer{
 		}
 
 		public void run() {
-			String user = null;
+			String userName = null;
 			String passwd = null;
 			try {
 				ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
@@ -178,7 +172,7 @@ public class MsgFileServer{
 				//cifrar
 				List<String> logInfo = Network.bufferToList(socket) ;
 				if(logInfo != null) {
-					user = logInfo.get(0);
+					userName = logInfo.get(0);
 					passwd = logInfo.get(1);
 				}else {
 					throw new ApplicationException("Error receiving log information");
@@ -186,18 +180,19 @@ public class MsgFileServer{
 				/*user = (String)inStream.readObject();
 				passwd = (String)inStream.readObject();*/
 
-				if (userManagerHandler.validLogin(user, passwd)){
-					System.out.println("Client connected: " + user + " logged in");
+				if (userManagerHandler.validLogin(userName, passwd)){
+					System.out.println("Client connected: " + userName + " logged in");
 					outStream.writeObject(OpCode.OP_SUCCESSFUL);
-					Skeleton skel = new Skeleton(user, socket, fileService, msgService, userService, privKey, pubKey, macM);
+					Skeleton skel = new Skeleton(userName, socket, fileService, msgService, userService, privKey, pubKey, macM);
 					boolean connected = true;
+					FileIntegrity fileIntegrity = new FileIntegrity(macM, privKey, pubKey, userName);
 					while(connected) {
-						connected = skel.communicate(outStream, inStream);
+						connected = skel.communicate(outStream, inStream, fileIntegrity);
 					}
-					System.out.println("Client disconnected: " + user + " logged out");
+					System.out.println("Client disconnected: " + userName + " logged out");
 				}
 				else {
-					System.out.println("Client failed: " + user + " failed to login");
+					System.out.println("Client failed: " + userName + " failed to login");
 					outStream.writeObject(OpResult.ERROR);
 				}
 
@@ -207,7 +202,7 @@ public class MsgFileServer{
 				socket.close();
 
 			} catch (IOException e) {
-				System.out.println("Client disconnected: Connection lost with " + user);
+				System.out.println("Client disconnected: Connection lost with " + userName);
 			} catch (ApplicationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

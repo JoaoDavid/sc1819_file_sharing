@@ -30,6 +30,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 import security.MacManager;
 import server.business.util.ConstKeyStore;
@@ -261,7 +262,7 @@ public class UserManagerHandler {
 	}
 
 
-	public boolean boot() {
+	public boolean boot() throws ApplicationException {
 		File folder = new File(FilePaths.FOLDER_SERVER_USERS);
 		if(!folder.exists()) {
 			folder.getParentFile().mkdirs();

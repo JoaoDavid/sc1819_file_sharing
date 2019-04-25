@@ -34,6 +34,6 @@ public class OpResult {
 			break;
 		
 		}
-		return null;
+		return "invalid code";
 	}
 }

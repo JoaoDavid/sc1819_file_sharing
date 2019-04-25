@@ -193,11 +193,7 @@ public class MsgFile {
 					String fileName = parsedInput[2];//name of the file
 					msg.add(userOwner);
 					msg.add(fileName);					
-					if(this.stub.rpcDownloadFileFromServer(msg)) {
-						System.out.println("OK");
-					}else {
-						System.out.println("error");
-					}
+					this.stub.rpcDownloadFileFromServer(msg);
 				}else {
 					incompleteCommand();
 				}

@@ -131,16 +131,15 @@ public class Stub {
 		}
 	}
 
-	public boolean rpcDownloadFileFromServer(List<String> msg) {
+	public void rpcDownloadFileFromServer(List<String> msg) {
 		try {
 			outObj.writeObject(OpCode.DOWNLOAD_FILE);
 			Network.listToBuffer(msg, socket);
-			return Network.receiveFile("", socket,true);
+			Network.receiveFile("", socket,true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return false;
 	}
 
 	public List<String> rpcUploadFileToServer(String filePath) {
