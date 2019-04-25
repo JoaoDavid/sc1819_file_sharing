@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.SocketFactory;
@@ -43,8 +44,12 @@ public class Stub {
 			//socket.startHandshake();
 			inObj = new ObjectInputStream(socket.getInputStream());
 			outObj = new ObjectOutputStream(socket.getOutputStream());
-			outObj.writeObject(username);
-			outObj.writeObject(password);
+			List<String> logInfo = new ArrayList<String>();
+			logInfo.add(username);
+			logInfo.add(password);
+			Network.listToBuffer(logInfo, socket);
+			/*outObj.writeObject(username);
+			outObj.writeObject(password);*/
 			try {
 				Object obj = inObj.readObject();
 				if(obj != null && obj instanceof OpCode) {

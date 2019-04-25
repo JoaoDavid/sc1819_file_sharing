@@ -10,12 +10,15 @@ import java.net.Socket;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.SecretKey;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import communication.Network;
 import communication.OpCode;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
@@ -23,7 +26,11 @@ import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
+import security.ContentCipher;
+import security.MacManager;
 import server.business.util.ConstKeyStore;
+import server.business.util.FilePaths;
+import server.business.util.UserValidation;
 import users.UserManagerHandler;
 
 public class MsgFileServer{
@@ -37,6 +44,7 @@ public class MsgFileServer{
 	private SecretKey secKey;
 	private PrivateKey privKey;
 	private PublicKey pubKey;
+	private MacManager macM;
 
 	public MsgFileServer(SecretKey secKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		this.app = new MsgFileServerApp();
@@ -50,6 +58,7 @@ public class MsgFileServer{
 		this.secKey = secKey;
 		this.privKey = privKey;
 		this.pubKey = pubKey;		
+		this.macM = new MacManager(ConstKeyStore.MAC_ALGORITHM, secKey);
 	}
 
 
@@ -72,7 +81,11 @@ public class MsgFileServer{
 				SecretKey secKey = (SecretKey) kstore.getKey(args[3], args[4].toCharArray());
 				PrivateKey privKey = (PrivateKey) kstore.getKey(args[5], args[6].toCharArray());
 				PublicKey pubKey = kstore.getCertificate(args[5]).getPublicKey();
+
 				server = new MsgFileServer(secKey, privKey, pubKey);
+				server.checkFilesIntegrity();
+				System.out.println("Initializing server on port: " + args[0]);
+				server.startServer(port, server.privKey, server.pubKey);
 			}
 			catch (NumberFormatException e){
 				System.out.println( "Server failed: Invalid port");
@@ -82,24 +95,21 @@ public class MsgFileServer{
 				e.printStackTrace();
 				return;
 			}			
-			System.out.println("Initializing server on port: " + args[0]);
-			server.startServer(port, server.privKey, server.pubKey);
+
 		}else {
 			System.out.println("The valid args are:");
 			System.out.println("<port> <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");
 		}
 	}
 
-	public void startServer (int port, PrivateKey privKey, PublicKey pubKey){
+	public void startServer (int port, PrivateKey privKey, PublicKey pubKey) throws Exception{
 		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
 		SSLServerSocket ss = null;
-
-		//ServerSocket sSoc = null;
-
+		
+		
 		try { 
 			ss = (SSLServerSocket) ssf.createServerSocket(port);
-			ss.setNeedClientAuth(false);//COLOCAR A TRUE
-			//sSoc = new ServerSocket(port);
+			ss.setNeedClientAuth(false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(-1);
@@ -107,19 +117,42 @@ public class MsgFileServer{
 
 		while(true) {
 			try {
-				//Socket inSoc = sSoc.accept();
 				Socket inSoc = ss.accept();
+				checkFilesIntegrity();
+				if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
+					throw new Exception("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+				}
 				ServerThread newServerThread = new ServerThread(inSoc);
 				newServerThread.start();
-				//ss.close();
-				//sSoc.close();
 			}
 			catch (IOException e) {
 				e.printStackTrace();
 			}
 
 		}
-		//sSoc.close();
+	}
+
+	public void checkFilesIntegrity() throws Exception {
+		if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
+			throw new Exception("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
+		}
+		List<String> listUser = UserValidation.listRegisteredUsers();
+		List<String> listFiles = new ArrayList<String>();
+		listFiles.add(FilePaths.FILE_NAME_TRUSTED);
+		listFiles.add(FilePaths.FILE_NAME_MSG);
+		for(String currUser : listUser) {
+			for(String currFile : listFiles) {
+				String path = FilePaths.FOLDER_SERVER_USERS + File.separator + currUser + File.separator + currFile;
+				File file = new File(path);
+				File fileSig = new File(path + FilePaths.FILE_NAME_SIG_SUFIX);
+				File fileKey = new File(path + FilePaths.FILE_NAME_KEY_SUFIX);
+				ContentCipher.checkFileIntegrity(file, fileSig, fileKey, this.privKey, this.pubKey);
+			}
+			/*File fileDirec = new File();
+			String[] allFiles = fileDirec.list();
+			for(String currFile : allFiles) {
+			}*/
+		}
 	}
 
 
@@ -141,13 +174,16 @@ public class MsgFileServer{
 
 
 
-				try {
-					//cifrar
-					user = (String)inStream.readObject();
-					passwd = (String)inStream.readObject();
-				}catch (ClassNotFoundException e1) {
-					e1.printStackTrace();
+				//cifrar
+				List<String> logInfo = Network.bufferToList(socket) ;
+				if(logInfo != null) {
+					user = logInfo.get(0);
+					passwd = logInfo.get(1);
+				}else {
+					throw new Exception("Error receiving log information");
 				}
+				/*user = (String)inStream.readObject();
+				passwd = (String)inStream.readObject();*/
 
 				if (userManagerHandler.validLogin(user, passwd)){
 					System.out.println("Client connected: " + user + " logged in");
@@ -171,6 +207,8 @@ public class MsgFileServer{
 
 			} catch (IOException e) {
 				System.out.println("Client disconnected: Connection lost with " + user);
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
 			}
 		}
 	}

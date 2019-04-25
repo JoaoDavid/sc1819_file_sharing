@@ -2,6 +2,7 @@ package security;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -9,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,19 +27,19 @@ public class ContentCipher {
 	private KeyGenerator kg;
 	private Key key;
 	private String cipherAltorithm;
-	
-	
+
+
 	public ContentCipher(String cipherAltorithm, int keySize) throws NoSuchAlgorithmException {
 		kg = KeyGenerator.getInstance(cipherAltorithm);
 		kg.init(keySize);
 		key = kg.generateKey();
 		this.cipherAltorithm = cipherAltorithm;
 	}
-	
+
 	public Key getKey() {
 		return this.key;
 	}
-	
+
 	public byte[] encrypt(byte[] input) {
 		try {
 			Cipher c = Cipher.getInstance(cipherAltorithm);
@@ -61,7 +63,7 @@ public class ContentCipher {
 		}
 		return null;
 	}
-	
+
 	public byte[] decrypt(byte[] input) {
 		try {
 			Cipher c = Cipher.getInstance(cipherAltorithm);
@@ -85,8 +87,8 @@ public class ContentCipher {
 		}
 		return null;
 	}
-	
-	
+
+
 	/*public static void sigAndEcryptFile(byte[], File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		FileOutputStream fos2 = new FileOutputStream(file);
 		ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
@@ -99,7 +101,7 @@ public class ContentCipher {
 		fos2.close();
 		fosK.close();
 	}*/
-	
+
 	public static void ecryptFile(File file, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		FileOutputStream fos2 = new FileOutputStream(file);
 		ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
@@ -112,8 +114,8 @@ public class ContentCipher {
 		fos2.close();
 		fosK.close();
 	}
-	
-	
+
+
 	public static void sigAndEcryptFile(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey, byte[] content) throws Exception {
 		FileOutputStream fosBefore = new FileOutputStream(file);
 		fosBefore.write(content);
@@ -138,7 +140,7 @@ public class ContentCipher {
 		fosEncrypted.close();
 		fosK.close();
 	}
-	
+
 	public static void sigAndEcryptFile(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		byte[] fileInBytes = Files.readAllBytes(file.toPath());
 		//signs the content of file in the file fileSig
@@ -160,7 +162,7 @@ public class ContentCipher {
 		fosEncrypted.close();
 		fosK.close();
 	}
-	
+
 	public static byte[] decryptFileAndCheckSig(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
 		Cipher c = Cipher.getInstance(privKey.getAlgorithm());
 		c.init(Cipher.UNWRAP_MODE, privKey);
@@ -181,9 +183,30 @@ public class ContentCipher {
 			throw new Exception("FILES CORRUPTED");
 		}
 	}
-	
-	
-	
-	
-	
+
+	public static boolean checkFileIntegrity(File file, File fileSig, File fileKey, PrivateKey privKey, PublicKey pubKey) throws Exception {
+		try {
+			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
+			c.init(Cipher.UNWRAP_MODE, privKey);
+			//FileInputStream fisK = new FileInputStream(fileWithKey);
+			Key key = c.unwrap(Files.readAllBytes(fileKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
+			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
+			cipher.init(Cipher.DECRYPT_MODE, key);			
+			byte [] buffFile = cipher.doFinal(Files.readAllBytes(file.toPath()));
+			byte [] sigInFile = Files.readAllBytes(fileSig.toPath());
+			Signature s = Signature.getInstance(ConstKeyStore.SIGNATURE_ALGORITHM);
+			s.initVerify(pubKey);
+			s.update(buffFile);
+			return s.verify(sigInFile);
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException |
+				IOException | IllegalBlockSizeException | BadPaddingException | SignatureException e) {
+			throw new Exception("CONTROL FILES WERE COMPROMISED - ABORTING");
+		}
+
+	}
+
+
+
+
+
 }
