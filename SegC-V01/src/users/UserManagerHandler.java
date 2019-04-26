@@ -272,13 +272,14 @@ public class UserManagerHandler {
 				userInfo.createNewFile();
 				userInfoMac.createNewFile();
 				macM.updateMacFile(userInfo.getPath(), userInfoMac.getPath());
+				return true;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}			
+			}
 		}else {
 			return macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC);
 		}
