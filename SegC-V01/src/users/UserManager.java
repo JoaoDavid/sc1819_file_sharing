@@ -43,6 +43,7 @@ public class UserManager {
 			}					
 		}else {
 			System.out.println("valid args: <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");
+			System.out.println("example: .\\keystore\\myServer.keyStore batata secKey batata keyRSA batata");
 		}
 
 	}

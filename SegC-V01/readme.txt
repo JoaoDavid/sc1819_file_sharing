@@ -1,27 +1,44 @@
 Como executar o projecto
 
-1)Preparar os run configurations dos dois programas
+1)Preparar os run configurations dos três programas
 
---- Para o MsgFile ---
+1.1)--- Para o MsgFile ---
 Program arguments:
-127.0.0.1:23456 <username> <passwd>
-exemplo:
-127.0.0.1:23456 fernando pass123
+<serverAddress> <username> <userPassword> <truststoreLocation>
+exemplo para a truststore fornecido na pasta keystore:
+127.0.0.1:23456 fernando pass .\keystore\myClient.keyStore
 
 VM arguments:
 -Djava.security.manager -Djava.security.policy=client.policy
 
 
---- Para o MsgFileServer ---
+
+
+1.2)--- Para o MsgFileServer ---
 Program arguments:
-23456
+<port> <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>
+exemplo para a keystore fornecido na pasta keystore:
+23456 .\keystore\myServer.keyStore batata secKey batata keyRSA batata
 
 VM arguments:
 -Djava.security.manager -Djava.security.policy=server.policy
 
-2)Correr o MsgFileServer (server)
 
-3)Correr o MsgFile (client)
 
-4)Usar o MsgFile para introduzir os comandos, usar "help"
+1.3) --- Para o UserManager ---
+Program arguments:
+<keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>
+exemplo para a keystore fornecido na pasta keystore:
+.\keystore\myServer.keyStore batata secKey batata keyRSA batata
+
+
+2)Correr o UserManager (gerenciador de users, somente este programa consegue criar e remover users)
+2.1) criar os users desejados
+
+3)Correr o MsgFileServer (server)
+
+4)Correr o MsgFile (client)
+4.1)passar nos args o user e pass que foram usados no passo 2.1
+
+5)Usar o MsgFile para introduzir os comandos, usar "help"
 para ver lista de comandos existentes no programa

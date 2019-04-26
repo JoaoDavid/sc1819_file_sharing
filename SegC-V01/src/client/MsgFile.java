@@ -71,7 +71,7 @@ public class MsgFile {
 		}else {
 			System.out.println("Your args are not correct");
 			System.out.println("Valid args: <serverAddress> <username> <userPassword> <truststoreLocation>");
-			System.out.println("example: 127.0.0.1:23456 fernando pass");
+			System.out.println("example: 127.0.0.1:23456 fernando pass .\\keystore\\myClient.keyStore");
 		}		
 	}
 
@@ -204,7 +204,6 @@ public class MsgFile {
 						int resCode = this.stub.rpcReceiveInt();
 						System.out.println(OpResult.getDesig(resCode));
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}else {

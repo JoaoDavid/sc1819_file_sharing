@@ -91,6 +91,7 @@ public class MsgFileServer{
 		}else {
 			System.out.println("The valid args are:");
 			System.out.println("<port> <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>");
+			System.out.println("example: 23456 .\\keystore\\myServer.keyStore batata secKey batata keyRSA batata");
 		}
 	}
 
