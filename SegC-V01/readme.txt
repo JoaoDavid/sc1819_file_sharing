@@ -13,7 +13,6 @@ VM arguments:
 
 
 
-
 1.2)--- Para o MsgFileServer ---
 Program arguments:
 <port> <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>
@@ -30,6 +29,9 @@ Program arguments:
 <keystoreLocation> <keystorePassword> <secKeyAlias> <secKeyPassword> <privPubAlias> <privPubPassword>
 exemplo para a keystore fornecido na pasta keystore:
 .\keystore\myServer.keyStore batata secKey batata keyRSA batata
+
+VM arguments:
+-Djava.security.manager -Djava.security.policy=userManager.policy
 
 
 2)Correr o UserManager (gerenciador de users, somente este programa consegue criar e remover users)
