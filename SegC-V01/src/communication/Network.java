@@ -147,7 +147,7 @@ public class Network {
 			int strLen = ByteBuffer.wrap(strLenByte).getInt();
 			String fileName = new String(Arrays.copyOfRange(buff, i, i + strLen));
 			i+=strLen;
-			File file = new File(path + fileName);
+			File file = new File(path + File.separator + fileName);
 			if(file.exists() && !replace) {
 				System.out.println("File already exists");
 				return;

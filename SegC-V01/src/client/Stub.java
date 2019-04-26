@@ -126,7 +126,7 @@ public class Stub {
 		try {
 			outObj.writeObject(OpCode.DOWNLOAD_FILE);
 			Network.listToBuffer(msg, socket);
-			Network.receiveFile("", socket,true);
+			Network.receiveFile(ClientConst.FOLDER_CLIENT_USERS + File.separator + username, socket,true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

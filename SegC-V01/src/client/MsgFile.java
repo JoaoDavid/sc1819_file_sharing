@@ -1,5 +1,6 @@
 package client;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class MsgFile {
 	}
 	
 	//args:    127.0.0.1:23456 fernando pass .\keystore\myClient.keyStore
-	public static void main(String[] args) throws ApplicationException {		
+	public static void main(String[] args) throws ApplicationException, IOException {		
 		Scanner sc = new Scanner(System.in);
 		if(args.length == 3 || args.length == 4) {
 			//System.setProperty("javax.net.ssl.trustStore", "keystore" + File.separator + "myClient.keyStore");
@@ -58,6 +59,11 @@ public class MsgFile {
 			if(app.connect(passwd)) {
 				System.out.println("Connected to the server");
 				System.out.println("Welcome " + args[1]);
+				File userDirectory = new File(ClientConst.FOLDER_CLIENT_USERS + File.separator + args[1]);
+				if(!userDirectory.exists()) {
+					userDirectory.mkdirs();
+					userDirectory.createNewFile();
+				}
 				app.startParser();
 				app.disconnect();
 			}else{

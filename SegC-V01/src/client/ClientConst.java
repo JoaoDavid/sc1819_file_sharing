@@ -8,8 +8,6 @@ public class ClientConst {
 	
 	public static final String FOLDER_DOWNLOADS = "downloads";
 	
-	public static final String FILE_NAME_INBOX = "inbox.txt";
-	
 	public static final String FOLDER_CLIENT_USERS = FOLDER_CLIENT + File.separator + "users";
 
 
