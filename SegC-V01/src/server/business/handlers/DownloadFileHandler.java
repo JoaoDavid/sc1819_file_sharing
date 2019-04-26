@@ -25,8 +25,8 @@ public class DownloadFileHandler {
 		String filePath = FilePaths.FOLDER_SERVER_USERS + File.separator + userOwner 
 				+ File.separator + FilePaths.FOLDER_FILES + File.separator + fileName;
 		List<String> filesStored = listFilesHandler.listFiles(userOwner, privKey, pubKey);
-		if(filesStored.contains(fileName)) {
-			if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
+		if(UserValidation.isTrusted(fileMan, userOwner, userName, privKey, pubKey) && UserValidation.userNameRegisteredAndActive(userOwner)) {
+			if(filesStored.contains(fileName)) {
 				File file = fileMan.acquireFile(filePath);
 				if(file != null) {
 					synchronized(file){
@@ -46,13 +46,14 @@ public class DownloadFileHandler {
 					throw new ApplicationException("FILE INTEGRITY COMPROMISED");
 				}
 			}else {
-				Network.sendInt(OpResult.ERROR, socket);
+				Network.sendInt(OpResult.NOT_FOUND, socket);
 			}
 		}else {
-			Network.sendInt(OpResult.NOT_FOUND, socket);
+			Network.sendInt(OpResult.NOT_TRUSTED, socket);
 		}
-
-
 	}
 
+
 }
+
+

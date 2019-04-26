@@ -28,18 +28,22 @@ public class ListFilesHandler {
 				+ File.separator + FilePaths.FILE_NAME_FILES_STORED;
 		File storedFile = fileMan.acquireFile(filePath);
 		try {
-			synchronized(storedFile){
-				File storedFileSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
-				File storedFileKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
-				byte[] result = ContentCipher.decryptFileAndCheckSig(storedFile, storedFileSig, storedFileKey, privKey, pubKey);
-				List<String> list = null;
-				if(result.length > 0) {
-					String inFile = new String(result);
-					list = Arrays.asList(inFile.split("\n"));
-				}else {
-					list = new ArrayList<String>();
-				}				
-				return list;
+			if(storedFile != null) {//username exists
+				synchronized(storedFile){
+					File storedFileSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
+					File storedFileKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
+					byte[] result = ContentCipher.decryptFileAndCheckSig(storedFile, storedFileSig, storedFileKey, privKey, pubKey);
+					List<String> list = null;
+					if(result.length > 0) {
+						String inFile = new String(result);
+						list = Arrays.asList(inFile.split("\n"));
+					}else {
+						list = new ArrayList<>();
+					}				
+					return list;
+				}
+			}else {
+				//username does not exist
 			}
 		} catch (FileNotFoundException e) {
 			throw new ApplicationException("File not found at: " + filePath);
