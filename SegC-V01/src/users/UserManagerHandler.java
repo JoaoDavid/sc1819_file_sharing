@@ -2,39 +2,25 @@ package users;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Random;
 
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 import security.MacManager;
 import server.business.util.ConstKeyStore;
-import server.business.util.FileManager;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
 
@@ -214,7 +200,6 @@ public class UserManagerHandler {
 							fileContent.add(curr);
 						}
 					}
-					br.close();
 					FileWriter fileWriterClean = new FileWriter(userRegistFile,false);
 					fileWriterClean.write("");
 					fileWriterClean.close();
@@ -234,9 +219,6 @@ public class UserManagerHandler {
 		}
 		return result;
 	}
-
-
-
 
 	public boolean validLogin(String userName, String password) {
 		File userRegistFile = new File(FilePaths.FILE_USERS_PASSWORDS);
@@ -274,10 +256,8 @@ public class UserManagerHandler {
 				macM.updateMacFile(userInfo.getPath(), userInfoMac.getPath());
 				return true;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}else {

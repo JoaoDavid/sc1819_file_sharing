@@ -1,16 +1,13 @@
 package server;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.crypto.SecretKey;
@@ -26,7 +23,6 @@ import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
 import facade.startup.MsgFileServerApp;
-import security.ContentCipher;
 import security.FileIntegrity;
 import security.MacManager;
 import server.business.util.ConstKeyStore;
@@ -62,7 +58,7 @@ public class MsgFileServer{
 		this.macM = new MacManager(ConstKeyStore.MAC_ALGORITHM, secKey);
 	}
 
-
+	//args:   23456 .\keystore\myServer.keyStore batata secKey batata keyRSA batata
 	public static void main(String[] args) {
 		if(args.length == 7) {
 			int port;
@@ -88,11 +84,8 @@ public class MsgFileServer{
 			}
 			catch (NumberFormatException e){
 				System.out.println( "Server failed: Invalid port");
-				return;
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
-				return;
 			}			
 
 		}else {

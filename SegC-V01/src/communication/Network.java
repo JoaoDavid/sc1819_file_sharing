@@ -3,7 +3,6 @@ package communication;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
@@ -40,7 +39,6 @@ public class Network {
 		try {
 			socket.getOutputStream().write(byeNum);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -70,7 +68,6 @@ public class Network {
 			//Then sends those bytes
 			socket.getOutputStream().write(result);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -112,7 +109,7 @@ public class Network {
 	public static void sendFile(File file, Socket socket) throws IOException {
 		byte [] buffFile = Files.readAllBytes(file.toPath());
 		int buffSize = buffFile.length;
-		byte[] buff;
+
 		ByteArrayOutputStream firstArrByte = new ByteArrayOutputStream();
 
 		//First send the size of the buffer
@@ -123,14 +120,10 @@ public class Network {
 		socket.getOutputStream().write(firstArrByte.toByteArray());
 		firstArrByte.reset();
 		//sending the buffer
-
-
 		firstArrByte.write(ByteBuffer.allocate(4).putInt(byteName.length).array());
 		firstArrByte.write(byteName);
 		firstArrByte.write(buffFile);
 		socket.getOutputStream().write(firstArrByte.toByteArray());
-
-
 	}
 
 	public static void receiveFile(String path, Socket socket, boolean replace) {
@@ -146,11 +139,7 @@ public class Network {
 
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			byte[] buff = new byte[buffLen];
-			/*int read = socket.getInputStream().read(buff);*/
 			dis.readFully(buff);
-			/*if(read != buffLen) {//information lost
-				throw new IOException("Information incomplete");
-			}*/
 
 			int i = 0;			
 			byte[] strLenByte = Arrays.copyOfRange(buff, i, i + 4);
@@ -169,7 +158,6 @@ public class Network {
 			fos.close();
 			System.out.println("File downloaded to " + file.getCanonicalPath());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -209,9 +197,7 @@ public class Network {
 			}
 			i+=strLen;
 			File file = new File(path + fileName);
-			/*if(file.exists() && !replace) {
-				return null;
-			}*/
+
 			file.createNewFile();
 			FileOutputStream fos = new FileOutputStream(file);
 			ContentCipher contentCipher = new ContentCipher(ConstKeyStore.SYMMETRIC_KEY_ALGORITHM,ConstKeyStore.SYMMETRIC_KEY_SIZE);
@@ -229,19 +215,14 @@ public class Network {
 			System.out.println(userName + " uploaded " + fileName);
 			return fileName;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

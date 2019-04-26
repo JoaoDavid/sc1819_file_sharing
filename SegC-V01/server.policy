@@ -12,5 +12,13 @@ grant codeBase "file:bin${/}-" {
   	
   	permission java.util.PropertyPermission "user.home", "read";
   	permission java.util.PropertyPermission "line.separator", "read";
+  	
+  	permission java.util.PropertyPermission "javax.net.ssl.keyStore", "write";
+  	permission java.util.PropertyPermission "javax.net.ssl.keyStoreType", "write";
+  	permission java.util.PropertyPermission "javax.net.ssl.keyStorePassword", "write";
+  	
+  	//permission java.io.FilePermission "\keystore\myServer.keyStored", "read";
+  	permission java.io.FilePermission "<<ALL FILES>>", "read";
+  	
 
 };

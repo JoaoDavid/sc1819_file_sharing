@@ -54,7 +54,6 @@ public class UntrustUsersHandler {
 			} catch (IOException e) {
 				throw new ApplicationException("IOException in untrustUser");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				fileMan.releaseFile(filePath);

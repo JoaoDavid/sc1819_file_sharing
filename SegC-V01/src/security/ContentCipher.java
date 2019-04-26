@@ -11,8 +11,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -47,19 +45,14 @@ public class ContentCipher {
 			c.init(Cipher.ENCRYPT_MODE, key);
 			return c.doFinal(input);
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -71,19 +64,14 @@ public class ContentCipher {
 			c.init(Cipher.DECRYPT_MODE, key);
 			return c.doFinal(input);
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -108,7 +96,6 @@ public class ContentCipher {
 			//File handling
 			Cipher c = Cipher.getInstance(privKey.getAlgorithm());
 			c.init(Cipher.UNWRAP_MODE, privKey);
-			//FileInputStream fisK = new FileInputStream(fileWithKey);
 			Key key = c.unwrap(Files.readAllBytes(fileKey.toPath()), ConstKeyStore.SYMMETRIC_KEY_ALGORITHM, Cipher.SECRET_KEY);
 			Cipher cipher = Cipher.getInstance(key.getAlgorithm());
 			cipher.init(Cipher.DECRYPT_MODE, key);			
@@ -118,7 +105,6 @@ public class ContentCipher {
 			}			
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | 
 				IOException | IllegalBlockSizeException | BadPaddingException e) {
-			//e.printStackTrace();
 		}
 		return false;
 	}
@@ -185,8 +171,6 @@ public class ContentCipher {
 		s.update(buffFile);
 		if (s.verify(sigInFile)) {
 			return buffFile;
-			/*String inFile = new String(buffFile);
-			return Arrays.asList(inFile.split("/n"));*/
 		}else {
 			throw new Exception("FILES CORRUPTED");
 		}

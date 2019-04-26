@@ -1,8 +1,6 @@
 package users;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -25,7 +23,9 @@ public class UserManager {
 		this.handler = new UserManagerHandler(secKey, privKey, pubKey);
 	}
 
-	public static void main(String[] args) throws Exception {//eliminar
+	//args example
+	//      .\keystore\myServer.keyStore batata secKey batata keyRSA batata
+	public static void main(String[] args) throws Exception {
 		if(args.length == 6) {
 			FileInputStream kfile = new FileInputStream(args[0]);
 			KeyStore keyStore = KeyStore.getInstance(ConstKeyStore.KEYSTORE_TYPE);
@@ -120,7 +120,6 @@ public class UserManager {
 				}
 			}catch (Exception e) {
 				e.printStackTrace();
-				//System.out.println(e.getMessage());
 			}
 
 		}

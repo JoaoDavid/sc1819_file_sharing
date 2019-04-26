@@ -46,7 +46,6 @@ public class ListFilesHandler {
 		} catch (IOException e) {
 			throw new ApplicationException("IOException in trustUser");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			fileMan.releaseFile(filePath);

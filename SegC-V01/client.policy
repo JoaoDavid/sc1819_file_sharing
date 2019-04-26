@@ -15,5 +15,7 @@ grant codeBase "file:bin${/}-" {
 	permission java.io.FilePermission "${user.home}/MsgFileG51/client/-", "read,write,delete";
 	//é dada a permissao de delete porque ao existir um ficheiro com aquele nome apagamos o antigo substituindo pelo novo
 	//poderiamos tambem ter modificado o nome mas optamos por esta solução
+	
+	permission java.util.PropertyPermission "javax.net.ssl.trustStore", "write";
 
 };

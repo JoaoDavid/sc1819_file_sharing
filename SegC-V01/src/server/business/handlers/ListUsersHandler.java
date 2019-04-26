@@ -1,7 +1,6 @@
 package server.business.handlers;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import facade.exceptions.ApplicationException;
@@ -26,7 +25,6 @@ private FileManager fileMan;
 			try {
 				result = UserValidation.listRegisteredUsers();
 			} catch (ApplicationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				fileMan.releaseFile(filePath);

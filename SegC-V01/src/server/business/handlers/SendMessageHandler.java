@@ -2,7 +2,6 @@ package server.business.handlers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -10,9 +9,9 @@ import java.security.PublicKey;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
+import server.business.util.FileManager;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
-import server.business.util.FileManager;
 
 public class SendMessageHandler {
 
@@ -45,7 +44,6 @@ public class SendMessageHandler {
 			} catch (IOException e) {
 				throw new ApplicationException(OpResult.ERROR);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new ApplicationException(OpResult.ERROR);
 			} finally {

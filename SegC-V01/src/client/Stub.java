@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +13,10 @@ import javax.net.ssl.SSLSocketFactory;
 
 import communication.Network;
 import communication.OpCode;
-import facade.exceptions.ApplicationException;
 
 public class Stub {
 
 	private String username;
-	//private Socket socket;
 	private SSLSocket socket;
 	private String host;
 	private int port;
@@ -40,28 +37,23 @@ public class Stub {
 		try {
 			SocketFactory sf = SSLSocketFactory.getDefault();
 			socket = (SSLSocket) sf.createSocket(host, port);
-			//socket = new Socket(host, port);
-			//socket.startHandshake();
 			inObj = new ObjectInputStream(socket.getInputStream());
 			outObj = new ObjectOutputStream(socket.getOutputStream());
 			List<String> logInfo = new ArrayList<String>();
 			logInfo.add(username);
 			logInfo.add(password);
 			Network.listToBuffer(logInfo, socket);
-			/*outObj.writeObject(username);
-			outObj.writeObject(password);*/
 			try {
 				Object obj = inObj.readObject();
-				if(obj != null && obj instanceof OpCode) {
-					OpCode OpCodeDM = (OpCode) obj;
-					if(OpCodeDM == OpCodeDM.OP_SUCCESSFUL) {
+				if(obj instanceof OpCode) {
+					OpCode opcode = (OpCode) obj;
+					if(opcode == OpCode.OP_SUCCESSFUL) {
 						this.isConnected = true;
 						return this.isConnected;
 					}
 				}
 				return false;
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} catch ( IOException e) {
@@ -99,9 +91,9 @@ public class Stub {
 	}
 
 
-	public List<String> rpcSendReceiveList(OpCode OpCodeDM, List<String> list) {
+	public List<String> rpcSendReceiveList(OpCode opcode, List<String> list) {
 		try {
-			outObj.writeObject(OpCodeDM);
+			outObj.writeObject(opcode);
 			Network.listToBuffer(list, socket);
 			return Network.bufferToList(socket);
 		} catch (IOException e) {
@@ -111,12 +103,11 @@ public class Stub {
 		return null;
 	}
 
-	public List<String> rpcReceiveList(OpCode OpCodeDM) {
+	public List<String> rpcReceiveList(OpCode opcode) {
 		try {
-			outObj.writeObject(OpCodeDM);
+			outObj.writeObject(opcode);
 			return Network.bufferToList(socket);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -160,9 +151,9 @@ public class Stub {
 		return null;
 	}
 
-	public void rpcSendList(OpCode OpCodeDM, List<String> list) {
+	public void rpcSendList(OpCode opcode, List<String> list) {
 		try {
-			outObj.writeObject(OpCodeDM);
+			outObj.writeObject(opcode);
 			Network.listToBuffer(list, socket);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

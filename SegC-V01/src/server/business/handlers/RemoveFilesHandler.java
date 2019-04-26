@@ -13,7 +13,6 @@ import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
-import server.business.util.UserValidation;
 
 public class RemoveFilesHandler {
 

@@ -1,11 +1,6 @@
 package client;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.rmi.server.RemoteRef;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +8,6 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import communication.Network;
 import communication.OpCode;
 import communication.OpResult;
 import facade.exceptions.ApplicationException;
@@ -33,9 +27,8 @@ public class MsgFile {
 		this.userName = userName;
 		this.stub = new Stub(userName, host, port);
 	}
-
-	//args <serverAddress> <localUserID> [password]
-	//127.0.0.1:23456 fernando pass123
+	
+	//args:    127.0.0.1:23456 fernando pass .\keystore\myClient.keyStore
 	public static void main(String[] args) throws ApplicationException {		
 		Scanner sc = new Scanner(System.in);
 		if(args.length == 3 || args.length == 4) {
@@ -121,7 +114,7 @@ public class MsgFile {
 			case "list":
 				if(parsedInput.length == 1) {
 					List<String> res = this.stub.rpcReceiveList(OpCode.LIST_FILES);
-					if(res.size() > 0) {
+					if(!res.isEmpty()) {
 						for(String curr : res) {
 							System.out.println(curr);
 						}
@@ -148,7 +141,7 @@ public class MsgFile {
 			case "users":
 				if(parsedInput.length == 1) {
 					List<String> res = this.stub.rpcReceiveList(OpCode.USERS);
-					if(res.size() > 0) {
+					if(!res.isEmpty()) {
 						for(String curr : res) {
 							System.out.println(curr);
 						}
@@ -188,7 +181,7 @@ public class MsgFile {
 			case "download": //download <userID> <file>
 				logger.log(Level.CONFIG, "download");
 				if(parsedInput.length == 3) {
-					List<String> msg = new ArrayList<String>();
+					List<String> msg = new ArrayList<>();
 					String userOwner = parsedInput[1];//users name account that has the file
 					String fileName = parsedInput[2];//name of the file
 					msg.add(userOwner);
@@ -203,7 +196,7 @@ public class MsgFile {
 				if(parsedInput.length >= 3) {
 					String userReceiver = parsedInput[1];
 					String msg = rawInput.substring(rawInput.indexOf(userReceiver) + userReceiver.length());
-					List<String> recMsg = new ArrayList<String>();
+					List<String> recMsg = new ArrayList<>();
 					recMsg.add(userReceiver);
 					recMsg.add(msg);
 					this.stub.rpcSendList(OpCode.SEND_MSG, recMsg);
@@ -221,7 +214,7 @@ public class MsgFile {
 			case "collect":
 				if(parsedInput.length == 1) {
 					List<String> res = this.stub.rpcReceiveList(OpCode.COLLECT_MSG);
-					if(res.size() > 0) {
+					if(!res.isEmpty()) {
 						for(String curr : res) {
 							System.out.println(curr);
 						}

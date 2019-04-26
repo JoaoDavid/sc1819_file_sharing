@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import communication.Network;
@@ -16,7 +15,6 @@ import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 import server.business.util.FileManager;
 import server.business.util.FilePaths;
-import server.business.util.UserValidation;
 
 public class StoreFileHandler {
 
@@ -29,7 +27,7 @@ public class StoreFileHandler {
 	public void storeFile(String userName, Socket socket, PrivateKey privKey, PublicKey pubKey, ListFilesHandler listFilesHandler) throws ApplicationException {
 		List<String> storedFiles = listFilesHandler.listFiles(userName, privKey, pubKey);
 		String fileName = Network.receiveFileAndCipher(userName, socket, false, pubKey, storedFiles);		
-		List<String> res = new ArrayList<String>();
+		List<String> res = new ArrayList<>();
 		if(fileName != null) {
 			res.add("STORED");
 			addFileName(userName, fileName, privKey, pubKey);
@@ -60,7 +58,6 @@ public class StoreFileHandler {
 		} catch (IOException e) {
 			throw new ApplicationException("IOException in trustUser");
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			fileMan.releaseFile(filePath);

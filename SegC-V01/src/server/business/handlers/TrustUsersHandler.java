@@ -1,24 +1,19 @@
 package server.business.handlers;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.List;
 
-import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
+import server.business.util.FileManager;
 import server.business.util.FilePaths;
 import server.business.util.UserValidation;
-import users.UserManagerHandler;
-import server.business.util.FileManager;
 
 public class TrustUsersHandler {
 
@@ -45,10 +40,8 @@ public class TrustUsersHandler {
 					for(String currLine : list) {
 						if(currLine.equals(userNameTrusted)) {
 							return false;
-							//throw new ApplicationException(OpResult.ALREADY_EXISTS);
 						}
 					}
-					//String newTrustedUser = userNameTrusted + System.getProperty("line.separator");
 					String newTrustedUser = userNameTrusted + "\n";
 					byteArr.write(result);
 					byteArr.write(newTrustedUser.getBytes());
@@ -60,7 +53,6 @@ public class TrustUsersHandler {
 			} catch (IOException e) {
 				throw new ApplicationException("IOException in trustUser");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				fileMan.releaseFile(filePath);

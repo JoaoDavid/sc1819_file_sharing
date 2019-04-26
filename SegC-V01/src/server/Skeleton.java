@@ -1,19 +1,13 @@
 package server;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import communication.Network;
 import communication.OpCode;
@@ -22,8 +16,6 @@ import facade.exceptions.ApplicationException;
 import facade.services.FileService;
 import facade.services.MessageService;
 import facade.services.UserService;
-import facade.startup.MsgFileServerApp;
-import security.ContentCipher;
 import security.FileIntegrity;
 import security.MacManager;
 import server.business.util.FilePaths;
@@ -59,14 +51,13 @@ public class Skeleton {
 		try {
 			Object obj = inStream.readObject();
 			OpCode opcode;
-			if(obj == null || !(obj instanceof OpCode)) {
+			if(!(obj instanceof OpCode)) {
 				opcode = OpCode.END_CONNECTION;
 			}else {
 				opcode = (OpCode) obj;
 			}			
 			if(!macM.validRegistFile(FilePaths.FILE_USERS_PASSWORDS, FilePaths.FILE_USERS_PASSWORDS_MAC)) {
 				throw new ApplicationException("FILE WITH USER LOGIN INFO WAS COMPROMISED - ABORTING");
-				//return false;
 			}
 			fileIntegrity.checkControlFiles();
 			switch (opcode) {
@@ -127,19 +118,10 @@ public class Skeleton {
 			String fileName = msg.get(1);
 			fileService.clientDownloadFile(this.userName, userOwner, fileName, socket, privKey, pubKey);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
 
-	private void endConnection() {
-		try {
-			socket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	private void removeFiles() throws ApplicationException {
 		try {

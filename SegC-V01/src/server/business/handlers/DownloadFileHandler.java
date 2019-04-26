@@ -1,17 +1,10 @@
 package server.business.handlers;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.Socket;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.List;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 import communication.Network;
 import communication.OpResult;
@@ -43,7 +36,6 @@ public class DownloadFileHandler {
 							System.out.println("Sending " + file.getName() + " to " + userName + "  ...");
 							Network.sendFileFromServer(file, fileKey, socket, privKey);
 						} catch (ApplicationException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} finally{
 							fileMan.releaseFile(filePath);

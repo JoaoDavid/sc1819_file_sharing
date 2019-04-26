@@ -1,9 +1,7 @@
 package server.business.util;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.security.PrivateKey;
@@ -12,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import communication.OpResult;
 import facade.exceptions.ApplicationException;
 import security.ContentCipher;
 
@@ -53,7 +50,6 @@ public class UserValidation {
 					}
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
 				fileMan.releaseFile(filePath);
