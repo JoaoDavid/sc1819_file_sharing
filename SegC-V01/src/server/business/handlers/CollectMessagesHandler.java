@@ -30,11 +30,9 @@ public class CollectMessagesHandler {
 		synchronized(userMsgs){
 			File userMsgsSig = new File(filePath + FilePaths.FILE_NAME_SIG_SUFIX);
 			File userMsgsKey = new File(filePath + FilePaths.FILE_NAME_KEY_SUFIX);
-			try (FileWriter fileWriter = new FileWriter(userMsgs)){
+			try {
 				byte[] result = ContentCipher.decryptFileAndCheckSig(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey);
-				//Clear inbox
-				fileWriter.write("");
-				ContentCipher.sigAndEcryptFile(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey);
+				ContentCipher.sigAndEcryptFile(userMsgs, userMsgsSig, userMsgsKey, privKey, pubKey, "".getBytes());
 				if(result.length > 0) {
 					String inFile = new String(result);
 					return Arrays.asList(inFile.split("/n"));
