@@ -13,9 +13,6 @@ sudo /sbin/iptables -A OUTPUT -o lo -j ACCEPT
 sudo /sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 sudo /sbin/iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-#Ping - para as maquinas locais max.2 por segundo
-sudo /sbin/iptables -A INPUT -p icmp -m icmp --icmp-type 8 -s 10.101.148.0/23 -d 10.101.148.0/23 -m limit --limit 2/s --limit-burst 1 -j ACCEPT
-sudo /sbin/iptables -A OUTPUT -p icmp -m icmp --icmp-type 8 -d 10.101.148.0/23 -s 10.101.148.0/23 -m limit --limit 2/s --limit-burst 1 -j ACCEPT
 
 #DCs
 sudo /sbin/iptables -A INPUT -s 10.121.52.14 -d $LOCAL_IP -j ACCEPT
@@ -56,8 +53,11 @@ sudo /sbin/iptables -A OUTPUT -d 10.101.151.5 -p icmp -s $LOCAL_IP -j ACCEPT
 
 #Mask 255.255.254.0
 
+#Ping - para as maquinas locais max.2 por segundo
+sudo /sbin/iptables -A INPUT -p icmp -m icmp --icmp-type 8 -s 10.101.148.0/23 -j ACCEPT
+sudo /sbin/iptables -A OUTPUT -p icmp -m icmp --icmp-type 8 -d 10.101.148.0/23 -m limit --limit 2/s -j ACCEPT
+
 #SSH - maquinas
 sudo /sbin/iptables -A INPUT -s 10.101.148.0/23 -p tcp -d $LOCAL_IP --dport 22 -j ACCEPT
 sudo /sbin/iptables -A OUTPUT -d 10.101.148.0/23 -p tcp -s $LOCAL_IP --dport 22 -j ACCEPT
 
-#sudo /sbin/iptables -P OUTPUT DROP
