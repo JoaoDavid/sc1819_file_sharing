@@ -1,6 +1,8 @@
 #!/bin/bash
 
-LOCAL_IP="10.101.149.51"
+#Listar todas as regras com mais informação: sudo iptables --list -v
+
+LOCAL_IP="10.101.148.209"
 
 #clean Chains
 sudo /sbin/iptables -F
@@ -12,7 +14,6 @@ sudo /sbin/iptables -A OUTPUT -o lo -j ACCEPT
 #ligacao estabelecida continua sendo aceite
 sudo /sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 sudo /sbin/iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
 
 #DCs
 sudo /sbin/iptables -A INPUT -s 10.121.52.14 -d $LOCAL_IP -j ACCEPT
